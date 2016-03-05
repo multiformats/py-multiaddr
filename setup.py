@@ -35,11 +35,12 @@ with open('HISTORY.rst') as history_file:
 
 
 requirements = [
-    # TODO: put package requirements here
+    'varint',
+    'six',
 ]
 
 test_requirements = [
-    # TODO: put package test requirements here
+    'pytest',
 ]
 
 version = load_version()
