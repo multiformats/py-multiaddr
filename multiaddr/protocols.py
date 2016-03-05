@@ -102,8 +102,8 @@ PROTOCOLS = [
 
 NULL_PROTOCOL = Protocol(0, 0, "", b'')
 
-_names_to_protocols = {proto.name: proto for proto in PROTOCOLS}
-_codes_to_protocols = {proto.code: proto for proto in PROTOCOLS}
+_names_to_protocols = dict((proto.name, proto) for proto in PROTOCOLS)
+_codes_to_protocols = dict((proto.code, proto) for proto in PROTOCOLS)
 
 
 def add_protocol(proto):
