@@ -52,7 +52,7 @@ def test_invalid_name(valid_params, invalid_name):
         protocols.Protocol(**valid_params)
 
 
-@pytest.mark.parametrize("name", ["foo-str", b"foo-b", u"foo-u"])
+@pytest.mark.parametrize("name", ["foo-str", u"foo-u"])
 def test_valid_names(valid_params, name):
     valid_params['name'] = name
     test_valid(valid_params)
