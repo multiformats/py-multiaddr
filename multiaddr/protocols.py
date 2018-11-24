@@ -85,9 +85,6 @@ class Protocol(object):
         if not isinstance(vcode, six.binary_type):
             raise ValueError("vcode must be binary")
 
-        if code not in _CODES and code != 0:
-            raise ValueError("Invalid code '%d'" % code)
-
         if size < -1 or size > 128:
             raise ValueError("Invalid size")
         self.code = code
