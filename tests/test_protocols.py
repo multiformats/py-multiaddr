@@ -30,7 +30,7 @@ def test_valid(valid_params):
         assert getattr(proto, key) == valid_params[key]
 
 
-@pytest.mark.parametrize("invalid_code", [123, 'abc'])
+@pytest.mark.parametrize("invalid_code", [0.5, 'abc'])
 def test_invalid_code(valid_params, invalid_code):
     assert invalid_code not in protocols._CODES
     valid_params['code'] = invalid_code
