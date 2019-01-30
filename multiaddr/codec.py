@@ -51,14 +51,18 @@ def bytes_to_string(buf):
     st = ['']  # start with empty string so we get a leading slash on join()
     buf = binascii.unhexlify(buf)
     while buf:
+        maddr_component = ""
         code, num_bytes_read = read_varint_code(buf)
         buf = buf[num_bytes_read:]
         proto = protocol_with_code(code)
-        st.append(proto.name)
+        maddr_component += proto.name
         size = size_for_addr(proto, buf)
         if size > 0:
             addr = address_bytes_to_string(proto, binascii.hexlify(buf[:size]))
-            st.append(addr)
+            if not (proto.path and addr[0] == '/'):
+                maddr_component += '/'
+            maddr_component += addr
+        st.append(maddr_component)
         buf = buf[size:]
     return '/'.join(st)
 
@@ -187,7 +191,9 @@ def address_bytes_to_string(proto, buf):
             raise ValueError("inconsistent lengths")
         return base58.b58encode(buf).decode()
     elif proto.code == P_UNIX:
-        return binascii.unhexlify(buf).decode('ascii')
+        buf = binascii.unhexlify(buf)
+        size, num_bytes_read = read_varint_code(buf)
+        return buf[num_bytes_read:].decode('ascii')
     raise ValueError("unknown protocol")
 
 
