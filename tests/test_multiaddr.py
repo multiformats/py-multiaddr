@@ -12,6 +12,7 @@ from multiaddr.protocols import P_P2P
 from multiaddr.protocols import P_UTP
 from multiaddr.protocols import P_TCP
 from multiaddr.protocols import P_UDP
+from multiaddr.protocols import P_UNIX
 from multiaddr.util import split
 from multiaddr.util import join
 
@@ -41,7 +42,10 @@ from multiaddr.util import join
      "/ip4/127.0.0.1/tcp/jfodsajfidosajfoidsa",
      "/ip4/127.0.0.1/tcp",
      "/ip4/127.0.0.1/p2p",
-     "/ip4/127.0.0.1/p2p/tcp"])
+     "/ip4/127.0.0.1/p2p/tcp",
+     "/unix",
+     "/ip4/1.2.3.4/tcp/80/unix",
+     "/ip4/127.0.0.1/tcp/9090/http/p2p-webcrt-direct",])
 def test_invalid(addr_str):
     with pytest.raises(ValueError):
         Multiaddr(addr_str)
@@ -71,11 +75,12 @@ def test_invalid(addr_str):
      "/tcp/1234/https",
      "/p2p/QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC/tcp/1234",
      "/ip4/127.0.0.1/udp/1234",
-     "/ip4/127.0.0.1/udp/0",
-     "/ip4/127.0.0.1/tcp/1234",
-     "/ip4/127.0.0.1/tcp/1234/",
-     "/ip4/127.0.0.1/p2p/QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC",
-     "/ip4/127.0.0.1/p2p/QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC/tcp/1234"])  # nopep8
+     "/ip4/127.0.0.1/p2p/QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC/tcp/1234",
+     "/unix/a/b/c/d/e",
+     "/unix/stdio",
+     "/ip4/1.2.3.4/tcp/80/unix/a/b/c/d/e/f",
+     "/ip4/127.0.0.1/p2p/QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC/tcp/1234/unix/stdio",
+     "/ip4/127.0.0.1/tcp/9090/http/p2p-webrtc-direct",])  # nopep8
 def test_valid(addr_str):
     ma = Multiaddr(addr_str)
     assert str(ma) == addr_str.rstrip("/")
@@ -207,6 +212,10 @@ def test_get_value():
     assert_value_for_proto(a, P_UDP, "12345")
     assert_value_for_proto(a, P_UTP, "")
 
+    a = Multiaddr("/ip4/0.0.0.0/unix/a/b/c/d")  # ending in a path one.
+    assert_value_for_proto(a, P_IP4, "0.0.0.0")
+    assert_value_for_proto(a, P_UNIX, "/a/b/c/d")
+
 
 def test_bad_initialization_no_params():
     with pytest.raises(TypeError):
@@ -236,6 +245,12 @@ def test_get_value_too_many_fields_protocol(monkeypatch):
     a = Multiaddr("/ip4/127.0.0.1/udp/1234")
     with pytest.raises(ValueError):
         a.value_for_protocol(P_UDP)
+
+
+def test_value_for_protocol_argument_wrong_type():
+    a = Multiaddr("/ip4/127.0.0.1/udp/1234")
+    with pytest.raises(ValueError):
+        a.value_for_protocol('str123')
 
 
 def test_multi_addr_str_corruption():

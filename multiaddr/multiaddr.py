@@ -2,6 +2,7 @@
 import binascii
 from copy import copy
 
+from .codec import address_bytes_to_string
 from .codec import size_for_addr
 from .codec import string_to_bytes
 from .codec import bytes_to_string
@@ -117,14 +118,17 @@ class Multiaddr(object):
         """Return the value (if any) following the specified protocol."""
         from .util import split
 
-        if isinstance(code, str):
-            protocol = protocol_with_name(code)
-            code = protocol.code
+        if not isinstance(code, int):
+            raise ValueError("code type should be `int`, code={}".format(code))
 
         for sub_addr in split(self):
-            if sub_addr.protocols()[0].code == code:
+            protocol = sub_addr.protocols()[0]
+            if protocol.code == code:
+                # e.g. if `sub_addr=/unix/123`, then `addr_parts=['', 'unix', '123']`
                 addr_parts = str(sub_addr).split("/")
                 if len(addr_parts) > 3:
+                    if protocol.path:
+                        return "/" + "/".join(addr_parts[2:])
                     raise ValueError("Unknown Protocol format")
                 elif len(addr_parts) == 3:
                     # If we have an address, return it
