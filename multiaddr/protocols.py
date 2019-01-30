@@ -73,9 +73,10 @@ class Protocol(object):
         "size",   # int (-1 indicates a length-prefixed variable size)
         "name",   # string
         "vcode",  # bytes
+        "path",   # bool (True indicates a path protocol (eg unix, http))
     ]
 
-    def __init__(self, code, size, name, vcode):
+    def __init__(self, code, size, name, vcode, path=False):
         if not isinstance(code, six.integer_types):
             raise ValueError("code must be an integer")
         if not isinstance(size, six.integer_types):
@@ -84,6 +85,8 @@ class Protocol(object):
             raise ValueError("name must be a string")
         if not isinstance(vcode, six.binary_type):
             raise ValueError("vcode must be binary")
+        if not isinstance(path, bool):
+            raise ValueError("path must be binary")
 
         if code not in _CODES and code != 0:
             raise ValueError("Invalid code '%d'" % code)
@@ -94,21 +97,25 @@ class Protocol(object):
         self.size = size
         self.name = name
         self.vcode = vcode
+        self.path = path
 
     def __eq__(self, other):
         return all((self.code == other.code,
                     self.size == other.size,
                     self.name == other.name,
-                    self.vcode == other.vcode))
+                    self.vcode == other.vcode,
+                    self.path == other.path))
 
     def __ne__(self, other):
         return not self == other
 
     def __repr__(self):
-        return "Protocol(code={code}, name='{name}', size={size})".format(
+        return "Protocol(code={code}, name='{name}', size={size}, path={path})".format(
             code=self.code,
             size=self.size,
-            name=self.name)
+            name=self.name,
+            path=self.path,
+        )
 
 
 def code_to_varint(num):
@@ -144,6 +151,7 @@ def read_varint_code(buf):
 
 
 # Protocols is the list of multiaddr protocols supported by this module.
+# TODO: might change it to more readable?
 PROTOCOLS = [
     Protocol(P_IP4, 32, 'ip4', code_to_varint(P_IP4)),
     Protocol(P_TCP, 16, 'tcp', code_to_varint(P_TCP)),
@@ -169,7 +177,7 @@ PROTOCOLS = [
     Protocol(P_P2P_WEBRTC_STAR, 0, 'p2p-webrtc-star', code_to_varint(P_P2P_WEBRTC_STAR)),
     Protocol(P_P2P_WEBRTC_DIRECT, 0, 'p2p-webrtc-direct', code_to_varint(P_P2P_WEBRTC_DIRECT)),
     Protocol(P_P2P_CIRCUIT, 0, 'p2p-circuit', code_to_varint(P_P2P_CIRCUIT)),
-    Protocol(P_UNIX, LENGTH_PREFIXED_VAR_SIZE, 'unix', code_to_varint(P_UNIX)),
+    Protocol(P_UNIX, LENGTH_PREFIXED_VAR_SIZE, 'unix', code_to_varint(P_UNIX), path=True),
 ]
 
 _names_to_protocols = dict((proto.name, proto) for proto in PROTOCOLS)

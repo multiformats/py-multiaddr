@@ -51,7 +51,7 @@ def test_size_for_addr(proto, buf, expected):
       b'\x06\x10\xe1']),
 ])
 def test_bytes_split(buf, expected):
-    assert  bytes_split(buf) == expected
+    assert bytes_split(buf) == expected
 
 
 @pytest.mark.parametrize("proto, buf, expected", ADDR_BYTES_MAP_STR_TEST_DATA)
@@ -85,11 +85,12 @@ def test_string_to_bytes_value_error(string):
 
 
 class DummyProtocol(Protocol):
-    def __init__(self, code, size, name, vcode):
+    def __init__(self, code, size, name, vcode, path=False):
         self.code = code
         self.size = size
         self.name = name
         self.vcode = vcode
+        self.path = path
 
 
 @pytest.mark.parametrize("proto, address", [
