@@ -2,11 +2,9 @@
 import binascii
 from copy import copy
 
-from .codec import address_bytes_to_string
 from .codec import size_for_addr
 from .codec import string_to_bytes
 from .codec import bytes_to_string
-from .codec import protocol_with_name
 from .protocols import protocol_with_code
 from .protocols import read_varint_code
 

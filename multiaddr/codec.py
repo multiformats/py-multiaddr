@@ -1,7 +1,6 @@
 import base58
 import base64
 import binascii
-import six
 
 from netaddr import IPAddress
 

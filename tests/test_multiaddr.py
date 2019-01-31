@@ -45,7 +45,7 @@ from multiaddr.util import join
      "/ip4/127.0.0.1/p2p/tcp",
      "/unix",
      "/ip4/1.2.3.4/tcp/80/unix",
-     "/ip4/127.0.0.1/tcp/9090/http/p2p-webcrt-direct",])
+     "/ip4/127.0.0.1/tcp/9090/http/p2p-webcrt-direct"])
 def test_invalid(addr_str):
     with pytest.raises(ValueError):
         Multiaddr(addr_str)
@@ -80,7 +80,7 @@ def test_invalid(addr_str):
      "/unix/stdio",
      "/ip4/1.2.3.4/tcp/80/unix/a/b/c/d/e/f",
      "/ip4/127.0.0.1/p2p/QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC/tcp/1234/unix/stdio",
-     "/ip4/127.0.0.1/tcp/9090/http/p2p-webrtc-direct",])  # nopep8
+     "/ip4/127.0.0.1/tcp/9090/http/p2p-webrtc-direct"])  # nopep8
 def test_valid(addr_str):
     ma = Multiaddr(addr_str)
     assert str(ma) == addr_str.rstrip("/")
