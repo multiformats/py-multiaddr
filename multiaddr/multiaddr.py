@@ -124,9 +124,9 @@ class Multiaddr(object):
             if protocol.code == code:
                 # e.g. if `sub_addr=/unix/123`, then `addr_parts=['', 'unix', '123']`
                 addr_parts = str(sub_addr).split("/")
+                if protocol.path:
+                    return "/" + "/".join(addr_parts[2:])
                 if len(addr_parts) > 3:
-                    if protocol.path:
-                        return "/" + "/".join(addr_parts[2:])
                     raise ValueError("Unknown Protocol format")
                 elif len(addr_parts) == 3:
                     # If we have an address, return it

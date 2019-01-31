@@ -216,6 +216,9 @@ def test_get_value():
     assert_value_for_proto(a, P_IP4, "0.0.0.0")
     assert_value_for_proto(a, P_UNIX, "/a/b/c/d")
 
+    a = Multiaddr("/unix/studio")
+    assert_value_for_proto(a, P_UNIX, "/studio")  # only a path.
+
 
 def test_bad_initialization_no_params():
     with pytest.raises(TypeError):
