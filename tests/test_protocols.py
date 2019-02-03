@@ -53,7 +53,7 @@ def test_invalid_name(valid_params, invalid_name):
         protocols.Protocol(**valid_params)
 
 
-@pytest.mark.parametrize("invalid_vcode", [3, u'a3'])
+@pytest.mark.parametrize("invalid_vcode", [3, 'a3'])
 def test_invalid_vcode(valid_params, invalid_vcode):
     valid_params['vcode'] = invalid_vcode
     with pytest.raises(ValueError):
@@ -67,7 +67,7 @@ def test_invalid_path(valid_params, invalid_path):
         protocols.Protocol(**valid_params)
 
 
-@pytest.mark.parametrize("name", ["foo-str", u"foo-u"])
+@pytest.mark.parametrize("name", ["foo-str", "foo-u"])
 def test_valid_names(valid_params, name):
     valid_params['name'] = name
     test_valid(valid_params)

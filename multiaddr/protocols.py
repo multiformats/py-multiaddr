@@ -67,7 +67,7 @@ _CODES = [
 LENGTH_PREFIXED_VAR_SIZE = -1
 
 
-class Protocol(object):
+class Protocol:
     __slots__ = [
         "code",   # int
         "size",   # int (-1 indicates a length-prefixed variable size)
@@ -77,13 +77,13 @@ class Protocol(object):
     ]
 
     def __init__(self, code, size, name, vcode, path=False):
-        if not isinstance(code, six.integer_types):
+        if not isinstance(code, int):
             raise ValueError("code must be an integer")
-        if not isinstance(size, six.integer_types):
+        if not isinstance(size, int):
             raise ValueError("size must be an integer")
-        if not isinstance(name, six.string_types):
+        if not isinstance(name, str):
             raise ValueError("name must be a string")
-        if not isinstance(vcode, six.binary_type):
+        if not isinstance(vcode, bytes):
             raise ValueError("vcode must be binary")
         if not isinstance(path, bool):
             raise ValueError("path must be a boolean")
@@ -179,8 +179,8 @@ PROTOCOLS = [
     Protocol(P_UNIX, LENGTH_PREFIXED_VAR_SIZE, 'unix', code_to_varint(P_UNIX), path=True),
 ]
 
-_names_to_protocols = dict((proto.name, proto) for proto in PROTOCOLS)
-_codes_to_protocols = dict((proto.code, proto) for proto in PROTOCOLS)
+_names_to_protocols = {proto.name: proto for proto in PROTOCOLS}
+_codes_to_protocols = {proto.code: proto for proto in PROTOCOLS}
 
 
 def add_protocol(proto):
