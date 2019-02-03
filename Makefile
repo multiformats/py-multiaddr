@@ -52,7 +52,7 @@ lint:
 	flake8 multiaddr/* tests/*
 
 test:
-	TOXENV=py27 tox
+	TOXENV=py36 tox
 
 test-all:
 	tox
