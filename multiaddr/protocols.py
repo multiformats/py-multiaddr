@@ -86,7 +86,7 @@ class Protocol(object):
         if not isinstance(vcode, six.binary_type):
             raise ValueError("vcode must be binary")
         if not isinstance(path, bool):
-            raise ValueError("path must be binary")
+            raise ValueError("path must be a boolean")
 
         if code not in _CODES and code != 0:
             raise ValueError("Invalid code '%d'" % code)
@@ -151,7 +151,6 @@ def read_varint_code(buf):
 
 
 # Protocols is the list of multiaddr protocols supported by this module.
-# TODO: might change it to more readable?
 PROTOCOLS = [
     Protocol(P_IP4, 32, 'ip4', code_to_varint(P_IP4)),
     Protocol(P_TCP, 16, 'tcp', code_to_varint(P_TCP)),

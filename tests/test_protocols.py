@@ -21,7 +21,8 @@ def valid_params():
     return {'code': protocols.P_IP4,
             'size': 32,
             'name': 'ipb4',
-            'vcode': protocols.code_to_varint(protocols.P_IP4)}
+            'vcode': protocols.code_to_varint(protocols.P_IP4),
+            'path': False}
 
 
 def test_valid(valid_params):
@@ -55,6 +56,13 @@ def test_invalid_name(valid_params, invalid_name):
 @pytest.mark.parametrize("invalid_vcode", [3, u'a3'])
 def test_invalid_vcode(valid_params, invalid_vcode):
     valid_params['vcode'] = invalid_vcode
+    with pytest.raises(ValueError):
+        protocols.Protocol(**valid_params)
+
+
+@pytest.mark.parametrize("invalid_path", [123, '123', 0.123])
+def test_invalid_path(valid_params, invalid_path):
+    valid_params['path'] = invalid_path
     with pytest.raises(ValueError):
         protocols.Protocol(**valid_params)
 
