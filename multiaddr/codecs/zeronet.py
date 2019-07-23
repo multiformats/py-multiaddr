@@ -15,7 +15,7 @@ def to_bytes(proto, string):
     if six.PY2 and isinstance(string, unicode):  # pragma: no cover (PY2)  # noqa: F821
         string = string.encode('ascii')
 
-    if 25 <= len(string) <= 35:
+    if not 25 <= len(string) <= 35:
         raise ValueError('ZeroNet site address must have 25-35 chars')
 
     mm = base58.b58decode(string)
