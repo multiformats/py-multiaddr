@@ -37,6 +37,7 @@ P_P2P_WEBSOCKET_STAR = 0x01DF
 P_P2P_WEBRTC_STAR = 0x0113
 P_P2P_WEBRTC_DIRECT = 0x0114
 P_UNIX = 0x0190
+P_ZERONET = 0x1000
 
 _CODES = [
     P_IP4,
@@ -65,6 +66,7 @@ _CODES = [
     P_P2P_WEBRTC_STAR,
     P_P2P_WEBRTC_DIRECT,
     P_UNIX,
+    P_ZERONET,
 ]
 
 
@@ -147,6 +149,7 @@ PROTOCOLS = [
     Protocol(P_P2P_WEBRTC_DIRECT, 'p2p-webrtc-direct', None),
     Protocol(P_P2P_CIRCUIT, 'p2p-circuit', None),
     Protocol(P_UNIX, 'unix', 'fspath'),
+    Protocol(P_ZERONET, 'zeronet', 'zeronet'),
 ]
 
 _names_to_protocols = dict((proto.name, proto) for proto in PROTOCOLS)
