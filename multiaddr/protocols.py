@@ -9,10 +9,7 @@ __all__ = ("PROTOCOLS", "REGISTRY", "Protocol")
 
 
 # source of protocols https://github.com/multiformats/multicodec/blob/master/table.csv#L382
-# replicating table here to:
-# 1. avoid parsing the csv
-# 2. ensuring errors in the csv don't screw up code.
-# 3. changing a number has to happen in two places.
+
 P_IP4 = 0x04
 P_IP6 = 0x29
 P_IP6ZONE = 0x2A
@@ -41,7 +38,10 @@ P_P2P_WEBSOCKET_STAR = 0x01DF
 P_P2P_WEBRTC_STAR = 0x0113
 P_P2P_WEBRTC_DIRECT = 0x0114
 P_UNIX = 0x0190
-
+P_HTTP_PATH = 0x01E1
+P_SNI = 0x01C1
+P_NOISE = 0x01C6
+P_WEBTRANSPORT = 0x01D1
 
 class Protocol:
     __slots__ = [
@@ -84,7 +84,7 @@ class Protocol:
                     self.path == other.path))
 
     def __hash__(self) -> int:
-        return self.code
+        return hash((self.code, self.name))
 
     def __repr__(self) -> str:
         return (

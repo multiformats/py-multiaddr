@@ -133,3 +133,27 @@ class ProtocolNotFoundError(ProtocolRegistryError):
         super().__init__(
             "No protocol with {0} {1!r} found".format(kind, value)
         )
+
+
+class MultiaddrError(Exception):
+    """Base exception for multiaddr errors."""
+
+    def __init__(self, message: str = "Multiaddr error"):
+        super().__init__(message)
+        self.name = "MultiaddrError"
+
+
+class ResolutionError(MultiaddrError):
+    """Raised when resolution fails."""
+
+    def __init__(self, message: str = "Resolution failed"):
+        super().__init__(message)
+        self.name = "ResolutionError"
+
+
+class RecursionLimitError(ResolutionError):
+    """Raised when the maximum recursive depth is reached."""
+
+    def __init__(self, message: str = "Max recursive depth reached"):
+        super().__init__(message)
+        self.name = "RecursionLimitError"

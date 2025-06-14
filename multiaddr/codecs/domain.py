@@ -1,9 +1,8 @@
 import idna
-
-from ..codecs import CodecBase
+from . import CodecBase, LENGTH_PREFIXED_VAR_SIZE
 from ..exceptions import BinaryParseError
 
-SIZE = -1
+SIZE = LENGTH_PREFIXED_VAR_SIZE  # Variable size for length-prefixed values
 IS_PATH = False
 
 
@@ -11,25 +10,38 @@ class Codec(CodecBase):
     SIZE = SIZE
     IS_PATH = IS_PATH
 
-    def to_bytes(self, proto, string):
-        return string.encode('utf-8')
-
-    def to_string(self, proto, buf):
+    def to_bytes(self, proto, value: str) -> bytes:
+        """Convert a domain name string to its binary representation (UTF-8), validating with IDNA."""
+        if not value:
+            raise ValueError("Domain name cannot be empty")
         try:
-            string = buf.decode("utf-8")
-            for label in string.split("."):
-                idna.check_label(label)
-            return string
-        except (ValueError, UnicodeDecodeError) as e:
-            raise BinaryParseError(str(e), buf, proto)
+            # Validate using IDNA, but store as UTF-8
+            idna.encode(value, uts46=True)
+            return value.encode("utf-8")
+        except idna.IDNAError as e:
+            raise ValueError(f"Invalid domain name: {str(e)}")
+
+    def to_string(self, proto, buf: bytes) -> str:
+        """Convert a binary domain name to its string representation (UTF-8), validating with IDNA."""
+        if not buf:
+            raise ValueError("Domain name buffer cannot be empty")
+        try:
+            value = buf.decode("utf-8")
+            # Validate using IDNA
+            idna.encode(value, uts46=True)
+            return value
+        except (UnicodeDecodeError, idna.IDNAError) as e:
+            raise BinaryParseError(f"Invalid domain name encoding: {str(e)}", buf, proto.name, e)
 
 
 def to_bytes(proto, string):
-    return idna.uts46_remap(string).encode("utf-8")
+    # Validate using IDNA, but store as UTF-8
+    idna.encode(string, uts46=True)
+    return string.encode("utf-8")
 
 
 def to_string(proto, buf):
     string = buf.decode("utf-8")
-    for label in string.split("."):
-        idna.check_label(label)
+    # Validate using IDNA
+    idna.encode(string, uts46=True)
     return string

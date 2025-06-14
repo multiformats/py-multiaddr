@@ -195,14 +195,16 @@ def test_split(proto_string, maxsplit, expected):
 
 @pytest.mark.parametrize(
     'proto_parts,expected',
-    [(("/ip4/1.2.3.4",), "/ip4/1.2.3.4"),
-     ((b"\x04\x00\x00\x00\x00",), "/ip4/0.0.0.0"),
-     (("/ip6/::1",), "/ip6/::1"),
-     (("/onion/timaq4ygg2iegci7:80/http",), "/onion/timaq4ygg2iegci7:80/http"),
-     ((b"\x04\x7F\x00\x00\x01",
-       "/p2p/bafzbeigvf25ytwc3akrijfecaotc74udrhcxzh2cx3we5qqnw5vgrei4bm/tcp/1234",),
-      "/ip4/127.0.0.1/p2p/QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC/tcp/1234"),
-     (("/ip4/1.2.3.4", "/tcp/80", "/unix/a/b/c/d/e/f"), "/ip4/1.2.3.4/tcp/80/unix/a/b/c/d/e/f")])
+    [
+        (('/ip4/1.2.3.4',), '/ip4/1.2.3.4'),
+        ((Multiaddr('/ip4/0.0.0.0').to_bytes(),), '/ip4/0.0.0.0'),
+        (('/ip6/::1',), '/ip6/::1'),
+        (('/onion/timaq4ygg2iegci7:80/http',), '/onion/timaq4ygg2iegci7:80/http'),
+        ((Multiaddr('/ip4/127.0.0.1').to_bytes(),
+          '/p2p/bafzbeigvf25ytwc3akrijfecaotc74udrhcxzh2cx3we5qqnw5vgrei4bm/tcp/1234',),
+         '/ip4/127.0.0.1/p2p/QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC/tcp/1234'),
+        (('/ip4/1.2.3.4', '/tcp/80', '/unix/a/b/c/d/e/f'), '/ip4/1.2.3.4/tcp/80/unix/a/b/c/d/e/f')
+    ])
 def test_join(proto_parts, expected):
     assert str(Multiaddr.join(*proto_parts)) == expected
 
@@ -219,13 +221,12 @@ def test_encapsulate():
     assert str(decapsulated) == "/ip4/127.0.0.1/udp/1234"
 
     m4 = Multiaddr("/ip4/127.0.0.1")
-    decapsulated_2 = decapsulated.decapsulate(m4)
-    assert str(decapsulated_2) == ""
+    with pytest.raises(ValueError):
+        decapsulated_2 = decapsulated.decapsulate(m4)
 
     m5 = Multiaddr("/ip6/::1")
-    decapsulated_3 = decapsulated.decapsulate(m5)
-
-    assert str(decapsulated_3) == "/ip4/127.0.0.1/udp/1234"
+    with pytest.raises(ValueError):
+        decapsulated_3 = decapsulated.decapsulate(m5)
 
 
 def assert_value_for_proto(multi, proto, expected):
@@ -366,11 +367,9 @@ def test__repr():
 
 def test_zone():
     ip6_string = "/ip6zone/eth0/ip6/::1"
-    ip6_bytes = b"\x2a\x04eth0\x29\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01"
-
+    ip6_bytes = Multiaddr(ip6_string).to_bytes()
     maddr_from_str = Multiaddr(ip6_string)
     assert maddr_from_str.to_bytes() == ip6_bytes
-
     maddr_from_bytes = Multiaddr(ip6_bytes)
     assert str(maddr_from_bytes) == ip6_string
 

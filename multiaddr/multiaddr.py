@@ -3,9 +3,12 @@ import collections.abc
 from typing import Any, Iterator, List, Optional, Sequence, Tuple, TypeVar, Union, overload
 
 import varint
+import socket
 
 from . import exceptions, protocols
 from .transforms import bytes_iter, bytes_to_string, string_to_bytes
+from .codecs import codec_by_name
+from .protocols import protocol_with_name, protocol_with_code
 
 __all__ = ("Multiaddr",)
 
@@ -153,9 +156,9 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
         """
         self.registry = registry
         if isinstance(addr, str):
-            self._bytes = string_to_bytes(addr)
+            self._from_string(addr)
         elif isinstance(addr, bytes):
-            self._bytes = addr
+            self._from_bytes(addr)
         elif isinstance(addr, Multiaddr):
             self._bytes = addr.to_bytes()
         else:
@@ -243,20 +246,18 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
         """
         return self.__class__.join(self, other)
 
-    def decapsulate(self, other: Union[str, bytes, 'Multiaddr']) -> 'Multiaddr':
+    def decapsulate(self, addr: Union['Multiaddr', str]) -> 'Multiaddr':
         """Remove a Multiaddr wrapping.
 
         For example:
             /ip4/1.2.3.4/tcp/80 decapsulate /ip4/1.2.3.4 = /tcp/80
         """
-        s1 = self.to_bytes()
-        s2 = Multiaddr(other).to_bytes()
-        try:
-            idx = s1.rindex(s2)
-        except ValueError:
-            # if multiaddr not contained, returns a copy
-            return Multiaddr(self)
-        return Multiaddr(s1[:idx])
+        addr_str = str(addr)
+        s = str(self)
+        i = s.rindex(addr_str)
+        if i < 0:
+            raise ValueError(f"Address {s} does not contain subaddress: {addr_str}")
+        return Multiaddr(s[:i])
 
     def value_for_protocol(self, proto: Any) -> Optional[Any]:
         """Return the value (if any) following the specified protocol
@@ -309,3 +310,99 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
         raise exceptions.ProtocolLookupError(
             proto, str(self)
         )
+
+    async def resolve(self) -> List['Multiaddr']:
+        """Resolve this multiaddr if it contains a resolvable protocol.
+        Returns:
+            A list of resolved multiaddrs
+        """
+        from .resolvers.dns import DNSResolver
+        resolver = DNSResolver()
+        return await resolver.resolve(self)
+
+    def _from_string(self, addr: str) -> None:
+        """Parse a string multiaddr.
+
+        Args:
+            addr: The multiaddr string to parse.
+
+        Raises:
+            StringParseError: If the string multiaddr is invalid.
+        """
+        if not addr:
+            raise exceptions.StringParseError("empty multiaddr", addr)
+
+        parts = iter(addr.strip("/").split("/"))
+        if not parts:
+            raise exceptions.StringParseError("empty multiaddr", addr)
+
+        self._bytes = b""
+        for part in parts:
+            if not part:
+                continue
+
+            # Split protocol name and value if present
+            if "=" in part:
+                proto_name, value = part.split("=", 1)
+            else:
+                proto_name = part
+                value = None
+
+            try:
+                proto = protocol_with_name(proto_name)
+            except Exception as exc:
+                raise exceptions.StringParseError(f"unknown protocol: {proto_name}", addr) from exc
+
+            # If the protocol expects a value, get it
+            if proto.codec is not None:
+                if value is None:
+                    try:
+                        value = next(parts)
+                    except StopIteration:
+                        raise exceptions.StringParseError(f"missing value for protocol: {proto_name}", addr)
+                # Validate value (optional: could add more checks here)
+                # If value looks like a protocol name, that's an error
+                try:
+                    protocol_with_name(value)
+                    # If no exception, value is a protocol name, which is not allowed here
+                    raise exceptions.StringParseError(f"expected value for protocol {proto_name}, got protocol name {value}", addr)
+                except exceptions.ProtocolNotFoundError:
+                    pass  # value is not a protocol name, so it's valid as a value
+
+            codec = codec_by_name(proto.codec)
+            if not codec:
+                raise exceptions.StringParseError(f"unknown codec: {proto.codec}", addr)
+
+            try:
+                self._bytes += varint.encode(proto.code)
+                self._bytes += codec.to_bytes(proto, value or "")
+            except Exception as e:
+                raise exceptions.StringParseError(str(e), addr) from e
+
+    def _from_bytes(self, addr: bytes) -> None:
+        """Parse a binary multiaddr.
+
+        Args:
+            addr: The multiaddr bytes to parse.
+
+        Raises:
+            BinaryParseError: If the binary multiaddr is invalid.
+        """
+        if not addr:
+            raise exceptions.BinaryParseError("empty multiaddr", addr, None)
+
+        self._bytes = addr
+
+    def get_peer_id(self) -> Optional[str]:
+        """Get the peer ID from the multiaddr.
+
+        Returns:
+            The peer ID if found, None otherwise.
+
+        Raises:
+            BinaryParseError: If the binary multiaddr is invalid.
+        """
+        try:
+            return self.value_for_protocol(protocol_with_name("p2p").code)
+        except ValueError:
+            return None

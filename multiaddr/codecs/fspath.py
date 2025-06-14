@@ -1,6 +1,9 @@
-from ..codecs import CodecBase
+import os
+import urllib.parse
+from . import CodecBase, LENGTH_PREFIXED_VAR_SIZE
+from ..exceptions import BinaryParseError
 
-SIZE = -1
+SIZE = LENGTH_PREFIXED_VAR_SIZE
 IS_PATH = True
 
 
@@ -8,19 +11,47 @@ class Codec(CodecBase):
     SIZE = SIZE
     IS_PATH = IS_PATH
 
-    def to_bytes(self, proto, string):
-        if len(string) == 0:
-            raise ValueError("{0} value must not be empty".format(proto.name))
-        # Remove leading slash unless the path is just '/'
-        if string != '/' and string.startswith('/'):
-            string = string[1:]
-        return string.encode('utf-8')
+    def to_bytes(self, proto, value: str) -> bytes:
+        """Convert a filesystem path to its binary representation."""
+        if not value:
+            raise ValueError("Path cannot be empty")
 
-    def to_string(self, proto, buf):
-        if len(buf) == 0:
-            raise ValueError("invalid length (should be > 0)")
-        string = buf.decode('utf-8')
-        # Always add a single leading slash
-        if not string.startswith('/'):
-            string = '/' + string
-        return string
+        # Normalize path separators
+        value = value.replace("\\", "/")
+        
+        # Remove leading/trailing slashes
+        value = value.strip("/")
+        
+        # Handle empty path after normalization
+        if not value:
+            raise ValueError("Path cannot be empty after normalization")
+            
+        # URL decode to handle special characters
+        value = urllib.parse.unquote(value)
+        
+        # Encode as UTF-8
+        return value.encode("utf-8")
+
+    def to_string(self, proto, buf: bytes) -> str:
+        """Convert a binary filesystem path to its string representation."""
+        if not buf:
+            raise ValueError("Path buffer cannot be empty")
+
+        try:
+            # Decode from UTF-8
+            value = buf.decode("utf-8")
+            
+            # Normalize path separators
+            value = value.replace("\\", "/")
+            
+            # Remove leading/trailing slashes
+            value = value.strip("/")
+            
+            # Handle empty path after normalization
+            if not value:
+                raise ValueError("Path cannot be empty after normalization")
+                
+            # URL encode special characters
+            return urllib.parse.quote(value)
+        except UnicodeDecodeError as e:
+            raise BinaryParseError(f"Invalid UTF-8 encoding: {str(e)}", buf, proto.name, e)
