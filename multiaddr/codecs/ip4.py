@@ -1,6 +1,7 @@
 import netaddr
 
 from ..codecs import CodecBase
+from ..exceptions import BinaryParseError
 
 SIZE = 32
 IS_PATH = False
@@ -14,4 +15,7 @@ class Codec(CodecBase):
         return netaddr.IPAddress(string, version=4).packed
 
     def to_string(self, proto, buf):
-        return str(netaddr.IPAddress(int.from_bytes(buf, byteorder='big'), version=4))
+        try:
+            return str(netaddr.IPAddress(int.from_bytes(buf, byteorder='big'), version=4))
+        except (ValueError, netaddr.AddrFormatError):
+            raise BinaryParseError("Invalid IPv4 address bytes", buf, "ip4")

@@ -70,7 +70,6 @@ def test_protocol_with_name():
     assert proto.code == protocols.P_IP4
     assert proto.size == 32
     assert proto.vcode == varint.encode(protocols.P_IP4)
-    assert hash(proto) == protocols.P_IP4
     assert protocols.protocol_with_any('ip4') == proto
     assert protocols.protocol_with_any(proto) == proto
 
@@ -84,7 +83,6 @@ def test_protocol_with_code():
     assert proto.code == protocols.P_IP4
     assert proto.size == 32
     assert proto.vcode == varint.encode(protocols.P_IP4)
-    assert hash(proto) == protocols.P_IP4
     assert protocols.protocol_with_any(protocols.P_IP4) == proto
     assert protocols.protocol_with_any(proto) == proto
 

@@ -1,5 +1,3 @@
-**This project is no longer maintained and has been archived.**
-
 py-multiaddr
 ==========================
 
@@ -97,6 +95,37 @@ Multiaddr allows expressing tunnels very nicely.
     proxyAgain = printerOverProxy.decapsulate(printer)
     print(proxyAgain)
     # /ip4/10.20.30.40/tcp/443
+
+DNS Resolution
+-------------
+
+Multiaddr supports DNS-based address resolution using the DNSADDR protocol.
+
+
+.. code-block:: python
+
+    from multiaddr import Multiaddr
+
+    # Create a DNSADDR multiaddr
+    ma = Multiaddr("/dnsaddr/example.com")
+    
+    # Resolve to actual IP addresses
+    resolved = await ma.resolve()
+    print(resolved)
+    # [Multiaddr("/ip4/93.184.216.34"), Multiaddr("/ip6/2606:2800:220:1:248:1893:25c8:1946")]
+
+    # DNSADDR with peer ID
+    ma_with_peer = Multiaddr("/dnsaddr/example.com/p2p/QmYyQSo1c1Ym7orWxLYvCrM2EmxFTANf8wXmmE7wjh53Qk")
+    resolved_with_peer = await ma_with_peer.resolve()
+    print(resolved_with_peer)
+    # [Multiaddr("/ip4/93.184.216.34/p2p/QmYyQSo1c1Ym7orWxLYvCrM2EmxFTANf8wXmmE7wjh53Qk")]
+
+    # Using the DNS resolver directly
+    from multiaddr.resolvers import DNSResolver
+    resolver = DNSResolver()
+    resolved = await resolver.resolve(ma)
+    print(resolved)
+    # [Multiaddr("/ip4/93.184.216.34"), Multiaddr("/ip6/2606:2800:220:1:248:1893:25c8:1946")]
 
 Maintainers
 ===========

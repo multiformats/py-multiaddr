@@ -30,6 +30,9 @@ dependencies = [
     "idna",
     "py-cid",
     "py-multicodec >= 0.2.0",
+    "aiodns>=3.0.0",
+    "trio>=0.26.0",
+    "trio-typing>=0.0.4",
 ]
 
 [project.urls]
@@ -51,7 +54,11 @@ dev = [
     "pyright",
     "pre-commit",
 ]
-test = ["pytest"]
+test = [
+    "pytest>=7.0.0",
+    "pytest-trio>=0.5.2",
+    "pytest-cov>=4.0.0",
+]
 
 [tool.setuptools]
 packages = ["multiaddr"]

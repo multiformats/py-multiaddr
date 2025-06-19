@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import varint
 
@@ -9,10 +9,7 @@ __all__ = ("PROTOCOLS", "REGISTRY", "Protocol")
 
 
 # source of protocols https://github.com/multiformats/multicodec/blob/master/table.csv#L382
-# replicating table here to:
-# 1. avoid parsing the csv
-# 2. ensuring errors in the csv don't screw up code.
-# 3. changing a number has to happen in two places.
+
 P_IP4 = 0x04
 P_IP6 = 0x29
 P_IP6ZONE = 0x2A
@@ -41,13 +38,17 @@ P_P2P_WEBSOCKET_STAR = 0x01DF
 P_P2P_WEBRTC_STAR = 0x0113
 P_P2P_WEBRTC_DIRECT = 0x0114
 P_UNIX = 0x0190
+P_HTTP_PATH = 0x01E1
+P_SNI = 0x01C1
+P_NOISE = 0x01C6
+P_WEBTRANSPORT = 0x01D1
 
 
 class Protocol:
     __slots__ = [
-        "code",   # int
+        "code",  # int
         "codec",  # string
-        "name",   # string
+        "name",  # string
     ]
 
     def __init__(self, code: int, name: str, codec: Optional[str]) -> None:
@@ -78,71 +79,72 @@ class Protocol:
         if not isinstance(other, Protocol):
             return NotImplemented
 
-        return all((self.code == other.code,
-                    self.name == other.name,
-                    self.codec == other.codec,
-                    self.path == other.path))
+        return all(
+            (
+                self.code == other.code,
+                self.name == other.name,
+                self.codec == other.codec,
+                self.path == other.path,
+            )
+        )
 
     def __hash__(self) -> int:
-        return self.code
+        return hash((self.code, self.name))
 
     def __repr__(self) -> str:
-        return (
-            "Protocol(code={code!r}, name={name!r}, codec={codec!r})".format(
-                code=self.code,
-                name=self.name,
-                codec=self.codec,
-            )
+        return "Protocol(code={code!r}, name={name!r}, codec={codec!r})".format(
+            code=self.code,
+            name=self.name,
+            codec=self.codec,
         )
 
 
 # List of multiaddr protocols supported by this module by default
 PROTOCOLS = [
-    Protocol(P_IP4, 'ip4', 'ip4'),
-    Protocol(P_TCP, 'tcp', 'uint16be'),
-    Protocol(P_UDP, 'udp', 'uint16be'),
-    Protocol(P_DCCP, 'dccp', 'uint16be'),
-    Protocol(P_IP6, 'ip6', 'ip6'),
-    Protocol(P_IP6ZONE, 'ip6zone', 'utf8'),
-    Protocol(P_DNS, 'dns', 'domain'),
-    Protocol(P_DNS4, 'dns4', 'domain'),
-    Protocol(P_DNS6, 'dns6', 'domain'),
-    Protocol(P_DNSADDR, 'dnsaddr', 'domain'),
-    Protocol(P_SCTP, 'sctp', 'uint16be'),
-    Protocol(P_UDT, 'udt', None),
-    Protocol(P_UTP, 'utp', None),
-    Protocol(P_P2P, 'p2p', 'cid'),
-    Protocol(P_ONION, 'onion', 'onion'),
-    Protocol(P_ONION3, 'onion3', 'onion3'),
-    Protocol(P_QUIC, 'quic', None),
-    Protocol(P_QUIC1, 'quic-v1', None),
-    Protocol(P_HTTP, 'http', None),
-    Protocol(P_HTTPS, 'https', None),
-    Protocol(P_TLS, 'tls', None),
-    Protocol(P_WS, 'ws', None),
-    Protocol(P_WSS, 'wss', None),
-    Protocol(P_P2P_WEBSOCKET_STAR, 'p2p-websocket-star', None),
-    Protocol(P_P2P_WEBRTC_STAR, 'p2p-webrtc-star', None),
-    Protocol(P_P2P_WEBRTC_DIRECT, 'p2p-webrtc-direct', None),
-    Protocol(P_P2P_CIRCUIT, 'p2p-circuit', None),
-    Protocol(P_UNIX, 'unix', 'fspath'),
+    Protocol(P_IP4, "ip4", "ip4"),
+    Protocol(P_TCP, "tcp", "uint16be"),
+    Protocol(P_UDP, "udp", "uint16be"),
+    Protocol(P_DCCP, "dccp", "uint16be"),
+    Protocol(P_IP6, "ip6", "ip6"),
+    Protocol(P_IP6ZONE, "ip6zone", "utf8"),
+    Protocol(P_DNS, "dns", "domain"),
+    Protocol(P_DNS4, "dns4", "domain"),
+    Protocol(P_DNS6, "dns6", "domain"),
+    Protocol(P_DNSADDR, "dnsaddr", "domain"),
+    Protocol(P_SCTP, "sctp", "uint16be"),
+    Protocol(P_UDT, "udt", None),
+    Protocol(P_UTP, "utp", None),
+    Protocol(P_P2P, "p2p", "cid"),
+    Protocol(P_ONION, "onion", "onion"),
+    Protocol(P_ONION3, "onion3", "onion3"),
+    Protocol(P_QUIC, "quic", None),
+    Protocol(P_QUIC1, "quic-v1", None),
+    Protocol(P_HTTP, "http", None),
+    Protocol(P_HTTPS, "https", None),
+    Protocol(P_TLS, "tls", None),
+    Protocol(P_WS, "ws", None),
+    Protocol(P_WSS, "wss", None),
+    Protocol(P_P2P_WEBSOCKET_STAR, "p2p-websocket-star", None),
+    Protocol(P_P2P_WEBRTC_STAR, "p2p-webrtc-star", None),
+    Protocol(P_P2P_WEBRTC_DIRECT, "p2p-webrtc-direct", None),
+    Protocol(P_P2P_CIRCUIT, "p2p-circuit", None),
+    Protocol(P_UNIX, "unix", "fspath"),
 ]
 
 
 class ProtocolRegistry:
     """A collection of individual Multiaddr protocols indexed for fast lookup"""
+
     __slots__ = ("_codes_to_protocols", "_locked", "_names_to_protocols")
 
-    def __init__(self, protocols: Union[List[Protocol], Tuple[Protocol, ...]] = ()) -> None:
+    def __init__(self, protocols: Union[list[Protocol], tuple[Protocol, ...]] = ()) -> None:
         self._locked = False
         protocols_tuple = tuple(protocols) if isinstance(protocols, list) else protocols
-        self._codes_to_protocols: Dict[int, Protocol] = {
-            proto.code: proto
-            for proto in protocols_tuple
+        self._codes_to_protocols: dict[int, Protocol] = {
+            proto.code: proto for proto in protocols_tuple
         }
-        self._names_to_protocols: Dict[str, Protocol] = {
-            proto.name: proto
-            for proto in protocols_tuple
+        self._names_to_protocols: dict[str, Protocol] = {
+            proto.name: proto for proto in protocols_tuple
         }
 
     def add(self, proto: Protocol) -> Protocol:
@@ -190,8 +192,9 @@ class ProtocolRegistry:
             raise exceptions.ProtocolRegistryLocked()
 
         proto = self.find(proto)
-        assert self._names_to_protocols.get(proto.name) is proto, \
+        assert self._names_to_protocols.get(proto.name) is proto, (
             "Protocol to alias must have already been added to the registry"
+        )
 
         if alias_name in self._names_to_protocols:
             raise exceptions.ProtocolExistsError(self._names_to_protocols[alias_name], "name")
@@ -217,8 +220,9 @@ class ProtocolRegistry:
             raise exceptions.ProtocolRegistryLocked()
 
         proto = self.find(proto)
-        assert self._codes_to_protocols.get(proto.code) is proto, \
+        assert self._codes_to_protocols.get(proto.code) is proto, (
             "Protocol to alias must have already been added to the registry"
+        )
 
         if alias_code in self._codes_to_protocols:
             raise exceptions.ProtocolExistsError(self._codes_to_protocols[alias_code], "name")
@@ -233,7 +237,7 @@ class ProtocolRegistry:
     def locked(self) -> bool:
         return self._locked
 
-    def copy(self, *, unlock: bool = False) -> 'ProtocolRegistry':
+    def copy(self, *, unlock: bool = False) -> "ProtocolRegistry":
         """Create a copy of this protocol registry
 
         Arguments
@@ -331,7 +335,7 @@ def protocol_with_any(proto: Union[Protocol, str, int]) -> Protocol:
     return REGISTRY.find(proto)
 
 
-def protocols_with_string(string: str) -> List[Protocol]:
+def protocols_with_string(string: str) -> list[Protocol]:
     """Find all protocols that are part of the given string
 
     Raises
@@ -343,11 +347,11 @@ def protocols_with_string(string: str) -> List[Protocol]:
     """
     if not string:
         return []
-    if not string.startswith('/'):
-        string = '/' + string
+    if not string.startswith("/"):
+        string = "/" + string
     # consume trailing slashes
-    string = string.rstrip('/')
-    sp = string.split('/')
+    string = string.rstrip("/")
+    sp = string.split("/")
 
     # skip the first element, since it starts with /
     sp.pop(0)
@@ -361,10 +365,10 @@ def protocols_with_string(string: str) -> List[Protocol]:
             protocols.append(proto)
             if proto.codec is not None:
                 codec = codec_by_name(proto.codec)
-                if proto.name == 'unix':
+                if proto.name == "unix":
                     # For unix, consume all remaining elements as part of the path
                     if sp:
-                        path_value = '/'.join(sp)
+                        path_value = "/".join(sp)
                         try:
                             codec.to_bytes(proto, path_value)
                             sp.clear()
@@ -374,14 +378,14 @@ def protocols_with_string(string: str) -> List[Protocol]:
                                 f"Invalid path value for protocol {proto.name}",
                                 string,
                                 proto.name,
-                                exc
+                                exc,
                             ) from exc
                     else:
                         raise exceptions.StringParseError(
                             f"Protocol {proto.name} requires a path value",
                             string,
                             proto.name,
-                            ValueError("Missing required path value")
+                            ValueError("Missing required path value"),
                         )
                 elif sp:
                     # Find next non-empty element
@@ -403,13 +407,13 @@ def protocols_with_string(string: str) -> List[Protocol]:
                             if next_elem.isalnum():
                                 try:
                                     protocol_with_name(next_elem)
-                                    if proto.name in ['ip6zone']:
+                                    if proto.name in ["ip6zone"]:
                                         if not any(codec.to_bytes(proto, val) for val in sp if val):
                                             raise exceptions.StringParseError(
                                                 f"Protocol {proto.name} requires a value",
                                                 string,
                                                 proto.name,
-                                                ValueError("Missing required value")
+                                                ValueError("Missing required value"),
                                             )
                                     continue
                                 except exceptions.ProtocolNotFoundError:
@@ -417,30 +421,30 @@ def protocols_with_string(string: str) -> List[Protocol]:
                                         f"Invalid value for protocol {proto.name}",
                                         string,
                                         proto.name,
-                                        exc
+                                        exc,
                                     ) from exc
                             else:
                                 raise exceptions.StringParseError(
                                     f"Invalid value for protocol {proto.name}",
                                     string,
                                     proto.name,
-                                    exc
+                                    exc,
                                 ) from exc
                     else:
-                        if proto.name in ['ip6zone']:
+                        if proto.name in ["ip6zone"]:
                             raise exceptions.StringParseError(
                                 f"Protocol {proto.name} requires a value",
                                 string,
                                 proto.name,
-                                ValueError("Missing required value")
+                                ValueError("Missing required value"),
                             )
                 else:
-                    if proto.name in ['ip6zone']:
+                    if proto.name in ["ip6zone"]:
                         raise exceptions.StringParseError(
                             f"Protocol {proto.name} requires a value",
                             string,
                             proto.name,
-                            ValueError("Missing required value")
+                            ValueError("Missing required value"),
                         )
         except exceptions.ProtocolNotFoundError as exc:
             raise exc

@@ -1,13 +1,21 @@
 multiaddr package
 =================
 
+Subpackages
+-----------
+
+.. toctree::
+
+    multiaddr.codecs
+    multiaddr.resolvers
+
 Submodules
 ----------
 
-multiaddr.codec module
-----------------------
+multiaddr.exceptions module
+---------------------------
 
-.. automodule:: multiaddr.codec
+.. automodule:: multiaddr.exceptions
     :members:
     :undoc-members:
     :show-inheritance:
@@ -28,10 +36,10 @@ multiaddr.protocols module
     :undoc-members:
     :show-inheritance:
 
-multiaddr.util module
----------------------
+multiaddr.transforms module
+---------------------------
 
-.. automodule:: multiaddr.util
+.. automodule:: multiaddr.transforms
     :members:
     :undoc-members:
     :show-inheritance:

@@ -63,3 +63,6 @@ readme.html
 
 # PyBuilder
 target/
+
+# Editor vscode
+.vscode/

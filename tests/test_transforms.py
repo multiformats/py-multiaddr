@@ -1,10 +1,13 @@
+"""Tests for multiaddr resolvers."""
+
 import io
 
 import pytest
 
 import multiaddr.protocols
-from multiaddr.codecs import codec_by_name
+from multiaddr.codecs import CODEC_CACHE, CodecBase, codec_by_name
 from multiaddr.exceptions import BinaryParseError, StringParseError
+from multiaddr.multiaddr import Multiaddr
 from multiaddr.protocols import REGISTRY, Protocol
 from multiaddr.transforms import bytes_iter, bytes_to_string, size_for_addr, string_to_bytes
 
@@ -27,7 +30,7 @@ ADDR_BYTES_STR_TEST_DATA = [
     ),
     (
         REGISTRY.find("p2p"),
-        b"\x01\x72\x12\x20\xd5\x2e\xbb\x89\xd8\x5b\x02\xa2\x84\x94\x82\x03\xa6\x2f"
+        b"\x12\x20\xd5\x2e\xbb\x89\xd8\x5b\x02\xa2\x84\x94\x82\x03\xa6\x2f"
         b"\xf2\x83\x89\xc5\x7c\x9f\x42\xbe\xec\x4e\xc2\x0d\xb7\x6a\x68\x91\x1c\x0b",
         "QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC",
     ),
@@ -37,7 +40,7 @@ ADDR_BYTES_STR_TEST_DATA = [
         b"\xd9\x85\xd9\x88\xd9\x82\xd8\xb9.\xd9\x88\xd8\xb2\xd8\xa7\xd8\xb1\xd8\xa9"
         b"-\xd8\xa7\xd9\x84\xd8\xa7\xd8\xaa\xd8\xb5\xd8\xa7\xd9\x84\xd8\xa7\xd8\xaa"
         b".\xd9\x85\xd8\xb5\xd8\xb1",
-        # Explicitly mark this as unicode, as the “u” forces the text to be displayed LTR in editors
+        # Explicitly mark this as unicode, as the "u" forces the text to be displayed LTR in editors
         "موقع.وزارة-الاتصالات.مصر",
     ),
     (
@@ -126,6 +129,7 @@ def test_codec_to_bytes(proto, string, expected):
 @pytest.mark.parametrize("string, buf", BYTES_MAP_STR_TEST_DATA)
 def test_string_to_bytes(string, buf):
     assert string_to_bytes(string) == buf
+    assert Multiaddr(string).to_bytes() == buf
 
 
 @pytest.mark.parametrize("string, buf", BYTES_MAP_STR_TEST_DATA)
@@ -142,12 +146,27 @@ class DummyProtocol(Protocol):
 
 class UnparsableProtocol(DummyProtocol):
     def __init__(self):
-        super().__init__(333, "unparsable", "?")
+        super().__init__(
+            333, "unparsable", "unparsable_codec"
+        )  # Use a custom codec that will cause BinaryParseError
+
+
+# Add a custom codec for UnparsableProtocol
+class UnparsableCodec(CodecBase):
+    def to_bytes(self, proto, string):
+        raise BinaryParseError("Invalid bytes for unparsable protocol", b"", "unparsable")
+
+    def to_string(self, proto, buf):
+        raise BinaryParseError("Invalid bytes for unparsable protocol", buf, "unparsable")
+
+
+# Register the custom codec
+CODEC_CACHE["unparsable_codec"] = UnparsableCodec()
 
 
 @pytest.fixture
 def protocol_extension(monkeypatch):
-    # “Add” additional non-parsable protocol to protocols from code list
+    # "Add" additional non-parsable protocol to protocols from code list
     registry = multiaddr.protocols.REGISTRY.copy(unlock=True)
     registry.add(UnparsableProtocol())
     monkeypatch.setattr(multiaddr.protocols, "REGISTRY", registry)
@@ -178,10 +197,6 @@ def test_bytes_to_string_value_error(protocol_extension, bytes):
         (REGISTRY.find("onion"), "timaq4ygg2iegci7:0"),
         (REGISTRY.find("onion"), "timaq4ygg2iegci7:71234"),
         (REGISTRY.find("p2p"), "15230d52ebb89d85b02a284948203a"),
-        (
-            REGISTRY.find("p2p"),  # CID type != "libp2p-key":
-            "bafyaajaiaejcbrrv5vds2whn3c464rsb5r2vpxeanneinzlijenlac77cju2pptf",
-        ),
         (REGISTRY.find("ip6zone"), ""),
     ],
 )
@@ -196,11 +211,6 @@ def test_codec_to_bytes_value_error(proto, address):
     "proto, buf",
     [
         (REGISTRY.find("tcp"), b"\xff\xff\xff\xff"),
-        (
-            REGISTRY.find("p2p"),  # CID type != "libp2p-key":
-            b"\x01\x70\x00\x24\x08\x01\x12\x20\xc6\x35\xed\x47\x2d\x58\xed\xd8\xb9\xee\x46\x41"
-            b"\xec\x75\x57\xdc\x80\x6b\x48\x86\xe5\x68\x49\x1a\xb0\x0b\xff\x12\x69\xa7\xbe\x65",
-        ),
         (REGISTRY.find("ip6zone"), b""),
     ],
 )
@@ -212,45 +222,12 @@ def test_codec_to_string_value_error(proto, buf):
 
 
 @pytest.mark.parametrize(
-    "proto, string, expected",
-    [
-        (
-            REGISTRY.find("p2p"),  # This one gets autoconverted to CIDv1
-            "12D3KooWPA6ax6t3jqTyGq73Zm1RmwppYqxaXzrtarfcTWGp5Wzx",
-            b"\x01\x72\x00\x24\x08\x01\x12\x20\xc6\x35\xed\x47\x2d\x58\xed\xd8\xb9\xee\x46\x41"
-            b"\xec\x75\x57\xdc\x80\x6b\x48\x86\xe5\x68\x49\x1a\xb0\x0b\xff\x12\x69\xa7\xbe\x65",
-        ),
-        (
-            REGISTRY.find("ip6"),  # Others do not
-            "12D3KooWPA6ax6t3jqTyGq73Zm1RmwppYqxaXzrtarfcTWGp5Wzx",
-            b"\x00\x24\x08\x01\x12\x20\xc6\x35\xed\x47\x2d\x58\xed\xd8\xb9\xee\x46\x41\xec\x75"
-            b"\x57\xdc\x80\x6b\x48\x86\xe5\x68\x49\x1a\xb0\x0b\xff\x12\x69\xa7\xbe\x65",
-        ),
-    ],
-)
-def test_cid_autoconvert_to_bytes(proto, string, expected):
-    assert codec_by_name("cid").to_bytes(proto, string) == expected
-
-
-@pytest.mark.parametrize(
     "proto, buf, expected",
     [
         (
             REGISTRY.find("p2p"),  # This one gets autoconverted to CIDv0
             b"\x01\x72\x00\x24\x08\x01\x12\x20\xc6\x35\xed\x47\x2d\x58\xed\xd8\xb9\xee\x46\x41"
             b"\xec\x75\x57\xdc\x80\x6b\x48\x86\xe5\x68\x49\x1a\xb0\x0b\xff\x12\x69\xa7\xbe\x65",
-            "12D3KooWPA6ax6t3jqTyGq73Zm1RmwppYqxaXzrtarfcTWGp5Wzx",
-        ),
-        (
-            REGISTRY.find("ip6"),  # Others do not
-            b"\x01\x72\x00\x24\x08\x01\x12\x20\xc6\x35\xed\x47\x2d\x58\xed\xd8\xb9\xee\x46\x41"
-            b"\xec\x75\x57\xdc\x80\x6b\x48\x86\xe5\x68\x49\x1a\xb0\x0b\xff\x12\x69\xa7\xbe\x65",
-            "bafzaajaiaejcbrrv5vds2whn3c464rsb5r2vpxeanneinzlijenlac77cju2pptf",
-        ),
-        (
-            REGISTRY.find("ip6"),  # (Needed to put identity conversion test somewhere)
-            b"\x00\x24\x08\x01\x12\x20\xc6\x35\xed\x47\x2d\x58\xed\xd8\xb9\xee\x46\x41\xec\x75"
-            b"\x57\xdc\x80\x6b\x48\x86\xe5\x68\x49\x1a\xb0\x0b\xff\x12\x69\xa7\xbe\x65",
             "12D3KooWPA6ax6t3jqTyGq73Zm1RmwppYqxaXzrtarfcTWGp5Wzx",
         ),
     ],

@@ -1,35 +1,54 @@
 import io
+import logging
+from collections.abc import Generator
 from io import BytesIO
-from typing import Generator, List, Optional, Tuple
 
 import varint
 
 from . import exceptions
-from .codecs import LENGTH_PREFIXED_VAR_SIZE, CodecBase, codec_by_name
+from .codecs import CodecBase, codec_by_name
 from .protocols import Protocol, protocol_with_code, protocol_with_name
+
+logger = logging.getLogger(__name__)
 
 
 def string_to_bytes(string: str) -> bytes:
-    bs: List[bytes] = []
+    bs: list[bytes] = []
     for proto, codec, value in string_iter(string):
-        bs.append(varint.encode(proto.code))
-        if value is not None:
-            try:
-                buf = codec.to_bytes(proto, value)
-            except Exception as exc:
-                raise exceptions.StringParseError(str(exc), string, proto.name, exc) from exc
-            if codec.SIZE == LENGTH_PREFIXED_VAR_SIZE:
-                bs.append(varint.encode(len(buf)))
-            bs.append(buf)
-        elif codec is not None and codec.SIZE != 0:
-            # If we have a protocol that requires a value but didn't get one, raise an error
-            raise exceptions.StringParseError(
-                f"Protocol {proto.name} requires a value",
-                string,
-                proto.name,
-                ValueError("Missing required value")
+        logger.debug(
+            f"[DEBUG string_to_bytes] LOOP: proto={proto.name}, codec={codec}, value={value}"
+        )
+        logger.debug(
+            f"[DEBUG string_to_bytes] Processing: proto={proto.name}, "
+            f"codec.SIZE={getattr(codec, 'SIZE', None)}, value={value}"
+        )
+        logger.debug(f"[DEBUG string_to_bytes] Protocol code: {proto.code}")
+        encoded_code = varint.encode(proto.code)
+        logger.debug(f"[DEBUG string_to_bytes] Encoded protocol code: {encoded_code}")
+        bs.append(encoded_code)
+        if codec is None:
+            raise ValueError(f"Unknown codec for protocol {proto.name}")
+        if value is None:
+            raise ValueError("Value cannot be None")
+        try:
+            logger.debug(f"[DEBUG string_to_bytes] Raw CID value before encoding: {value}")
+            buf = codec.to_bytes(proto, value)
+            logger.debug(f"[DEBUG string_to_bytes] Generated buf: proto={proto.name}, buf={buf}")
+        except Exception as exc:
+            logger.debug(f"[DEBUG string_to_bytes] Error: {exc}")
+            raise exceptions.StringParseError(str(exc), string) from exc
+        logger.debug(
+            f"[DEBUG string_to_bytes] Appending: proto={proto.name}, "
+            f"codec.SIZE={getattr(codec, 'SIZE', None)}"
+        )
+        if codec.SIZE <= 0:
+            bs.append(varint.encode(len(buf)))
+            logger.debug(
+                f"[DEBUG string_to_bytes] Appending varint length: {varint.encode(len(buf))}"
             )
-    return b''.join(bs)
+        bs.append(buf)
+        logger.debug(f"[DEBUG string_to_bytes] Final bs: {bs}")
+    return b"".join(bs)
 
 
 def bytes_to_string(buf: bytes) -> str:
@@ -49,27 +68,30 @@ def bytes_to_string(buf: bytes) -> str:
     while bs.tell() < len(buf):
         try:
             code = varint.decode_stream(bs)
+            logger.debug(f"[DEBUG bytes_to_string] Decoded protocol code: {code}")
             proto = protocol_with_code(code)
+            logger.debug(f"[DEBUG bytes_to_string] Protocol name: {proto.name}")
             if proto.codec is not None:
                 codec = codec_by_name(proto.codec)
                 if codec.SIZE > 0:
                     value = codec.to_string(proto, bs.read(codec.SIZE // 8))
                 else:
+                    # For variable-sized codecs,
+                    # read the length prefix but don't pass it to the codec
                     size = varint.decode_stream(bs)
                     value = codec.to_string(proto, bs.read(size))
+                logger.debug(f"[DEBUG] bytes_to_string: proto={proto.name}, value='{value}'")
                 if codec.IS_PATH and value.startswith("/"):
                     strings.append(f"/{proto.name}{value}")
                 else:
                     strings.append(f"/{proto.name}/{value}")
             else:
-                strings.append("/{0}".format(proto.name))
+                strings.append(f"/{proto.name}")
         except Exception as exc:
             # Use the code as the protocol identifier if proto is not available
             # Ensure we always have either a string or an integer
             protocol_id = proto.name if proto is not None else (code if code is not None else 0)
-            raise exceptions.BinaryParseError(
-                str(exc), buf, protocol_id, exc
-            ) from exc
+            raise exceptions.BinaryParseError(str(exc), buf, protocol_id, exc) from exc
     return "".join(strings)
 
 
@@ -80,100 +102,50 @@ def size_for_addr(codec: CodecBase, buf_io: io.BytesIO) -> int:
         return varint.decode_stream(buf_io)
 
 
-def string_iter(string: str) -> Generator[Tuple[Protocol, CodecBase, Optional[str]], None, None]:
+def string_iter(
+    string: str
+) -> Generator[tuple[Protocol, CodecBase | None, str | None], None, None]:
+    """Iterate over the parts of a string multiaddr.
+
+    Args:
+        string: The string multiaddr to iterate over
+
+    Yields:
+        A tuple of (protocol, codec, value) for each part of the multiaddr
+    """
     if not string:
-        raise exceptions.StringParseError("Empty string", string)
-    if not string.startswith('/'):
-        raise exceptions.StringParseError("Must begin with /", string)
-    # consume trailing slashes
-    string = string.rstrip('/')
-    sp = string.split('/')
+        return
 
-    # skip the first element, since it starts with /
-    sp.pop(0)
-    while sp:
-        element = sp.pop(0)
-        if not element:  # Skip empty elements from multiple slashes
-            continue
+    parts = string.strip("/").split("/")
+    i = 0
+    while i < len(parts):
+        proto_name = parts[i]
         try:
-            proto = protocol_with_name(element)
-            if proto.codec is None:
-                # Create a dummy codec with size 0 for protocols without a codec
-                codec = CodecBase()
-                codec.SIZE = 0
-                codec.IS_PATH = False
-            else:
-                codec = codec_by_name(proto.codec)
-        except (ImportError, exceptions.ProtocolNotFoundError) as exc:
-            raise exceptions.StringParseError("Unknown Protocol", string, element) from exc
+            proto = protocol_with_name(proto_name)
+        except exceptions.ProtocolNotFoundError as exc:
+            raise exceptions.StringParseError(str(exc), string) from exc
+
+        codec = codec_by_name(proto.codec)
         value = None
-        if codec is not None and codec.SIZE != 0:
-            if proto.name == 'unix':
-                # For unix, join all remaining elements as the value
-                path_value = '/'.join(sp) if sp else ''
-                if not path_value:
-                    raise exceptions.StringParseError("Protocol requires path", string, proto.name)
-                try:
-                    codec.to_bytes(proto, path_value)
-                    value = path_value
-                    sp.clear()  # All remaining elements are part of the path
-                except Exception as exc:
-                    raise exceptions.StringParseError(
-                        f"Invalid path value for protocol {proto.name}",
-                        string,
-                        proto.name,
-                        exc
-                    ) from exc
-            else:
-                # Skip empty elements for value
-                while sp and not sp[0]:
-                    sp.pop(0)
-                if not sp:
-                    raise exceptions.StringParseError(
-                        "Protocol requires address",
-                        string,
-                        proto.name
-                    )
-                next_elem = sp[0]
-                # First try to validate as value for current protocol
-                try:
-                    codec.to_bytes(proto, next_elem)
-                    value = sp.pop(0)
-                except Exception as exc:
-                    # If value validation fails, check if it's a protocol name
-                    if next_elem.isalnum():
-                        try:
-                            # If this succeeds, it's a protocol name
-                            protocol_with_name(next_elem)
-                            # If we have a protocol that requires a value and we're seeing
-                            # another protocol,
-                            # raise a StringParseError
-                            raise exceptions.StringParseError(
-                                f"Protocol {proto.name} requires a value",
-                                string,
-                                proto.name,
-                                ValueError("Missing required value")
-                            )
-                        except exceptions.ProtocolNotFoundError:
-                            # If it's not a protocol name, raise the original value validation error
-                            raise exceptions.StringParseError(
-                                f"Invalid value for protocol {proto.name}",
-                                string,
-                                proto.name,
-                                exc
-                            ) from exc
-                    else:
-                        # If it's not alphanumeric, raise the original value validation error
-                        raise exceptions.StringParseError(
-                            f"Invalid value for protocol {proto.name}",
-                            string,
-                            proto.name,
-                            exc
-                        ) from exc
+
+        if proto.codec is not None:
+            if i + 1 >= len(parts):
+                raise exceptions.StringParseError(
+                    f"missing value for protocol: {proto_name}", string
+                )
+            value = parts[i + 1]
+            i += 1  # Skip the next part since we used it as value
+            logger.debug(f"[DEBUG string_iter] Using next part as value: {value}")
+        else:
+            logger.debug(f"[DEBUG string_iter] No value found for protocol {proto.name}")
+        logger.debug(
+            f"[DEBUG string_iter] Yielding: proto={proto.name}, codec={codec}, value={value}"
+        )
         yield proto, codec, value
+        i += 1
 
 
-def bytes_iter(buf: bytes) -> Generator[Tuple[int, Protocol, CodecBase, bytes], None, None]:
+def bytes_iter(buf: bytes) -> Generator[tuple[int, Protocol, CodecBase, bytes], None, None]:
     buf_io = io.BytesIO(buf)
     while buf_io.tell() < len(buf):
         offset = buf_io.tell()
@@ -184,10 +156,10 @@ def bytes_iter(buf: bytes) -> Generator[Tuple[int, Protocol, CodecBase, bytes], 
             codec = codec_by_name(proto.codec)
         except (ImportError, exceptions.ProtocolNotFoundError) as exc:
             raise exceptions.BinaryParseError(
-                    "Unknown Protocol",
-                    buf,
-                    proto.name if proto else code,
-                ) from exc
+                "Unknown Protocol",
+                buf,
+                proto.name if proto else code,
+            ) from exc
 
         size = size_for_addr(codec, buf_io)
         yield offset, proto, codec, buf_io.read(size)
