@@ -458,11 +458,12 @@ def test_circuit_peer_id_extraction():
     )
     assert ma.get_peer_id() is None
 
-    # CIDv1 Base32 peer IDs (will be converted to canonical CIDv0 format)
+    # Input: bafzbeigweq4zr4x4ky2dvv7nanbkw6egutvrrvzw6g3h2rftp7gidyhtt4 (CIDv1 Base32)
+    # Expected: QmckZzdVd72h9QUFuJJpQqhsZqGLwjhh81qSvZ9BhB2FQi (CIDv0 Base58btc)
     ma = Multiaddr("/p2p-circuit/p2p/bafzbeigweq4zr4x4ky2dvv7nanbkw6egutvrrvzw6g3h2rftp7gidyhtt4")
     assert ma.get_peer_id() == "QmckZzdVd72h9QUFuJJpQqhsZqGLwjhh81qSvZ9BhB2FQi"
 
-    # Base58btc encoded identity multihash
+    # Base58btc encoded identity multihash (no conversion needed)
     ma = Multiaddr("/p2p-circuit/p2p/12D3KooWNvSZnPi3RrhrTwEY4LuuBeB6K6facKUCJcyWG1aoDd2p")
     assert ma.get_peer_id() == "12D3KooWNvSZnPi3RrhrTwEY4LuuBeB6K6facKUCJcyWG1aoDd2p"
 
@@ -471,12 +472,16 @@ def test_circuit_peer_id_edge_cases():
     """Test edge cases for circuit peer ID extraction."""
 
     # Multiple circuits - should return the target peer ID after the last circuit
+    # Input: bafzbeigweq4zr4x4ky2dvv7nanbkw6egutvrrvzw6g3h2rftp7gidyhtt4 (CIDv1 Base32)
+    # Expected: QmckZzdVd72h9QUFuJJpQqhsZqGLwjhh81qSvZ9BhB2FQi (CIDv0 Base58btc)
     ma = Multiaddr(
         "/ip4/1.2.3.4/tcp/1234/p2p/QmZR5a9AAXGqQF2ADqoDdGS8zvqv8n3Pag6TDDnTNMcFW6/p2p-circuit/p2p/QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC/p2p-circuit/p2p/bafzbeigweq4zr4x4ky2dvv7nanbkw6egutvrrvzw6g3h2rftp7gidyhtt4"
     )
     assert ma.get_peer_id() == "QmckZzdVd72h9QUFuJJpQqhsZqGLwjhh81qSvZ9BhB2FQi"
 
     # Circuit with multiple p2p components after it
+    # Input: bafzbeigweq4zr4x4ky2dvv7nanbkw6egutvrrvzw6g3h2rftp7gidyhtt4 (CIDv1 Base32)
+    # Expected: QmckZzdVd72h9QUFuJJpQqhsZqGLwjhh81qSvZ9BhB2FQi (CIDv0 Base58btc)
     ma = Multiaddr(
         "/ip4/1.2.3.4/tcp/1234/p2p/QmZR5a9AAXGqQF2ADqoDdGS8zvqv8n3Pag6TDDnTNMcFW6/p2p-circuit/p2p/QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC/p2p/bafzbeigweq4zr4x4ky2dvv7nanbkw6egutvrrvzw6g3h2rftp7gidyhtt4"
     )
@@ -511,7 +516,8 @@ def test_circuit_address_parsing():
     assert "p2p-circuit" in str(ma)
     assert "QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC" in str(ma)
 
-    # Circuit address with multiple protocols
+    # Input: bafzbeigweq4zr4x4ky2dvv7nanbkw6egutvrrvzw6g3h2rftp7gidyhtt4 (CIDv1 Base32)
+    # Expected: QmckZzdVd72h9QUFuJJpQqhsZqGLwjhh81qSvZ9BhB2FQi (CIDv0 Base58btc)
     ma = Multiaddr(
         "/ip4/127.0.0.1/tcp/1234/tls/p2p/QmZR5a9AAXGqQF2ADqoDdGS8zvqv8n3Pag6TDDnTNMcFW6/p2p-circuit/p2p/bafzbeigweq4zr4x4ky2dvv7nanbkw6egutvrrvzw6g3h2rftp7gidyhtt4"
     )
@@ -524,7 +530,8 @@ def test_circuit_address_parsing():
 def test_circuit_address_manipulation():
     """Test circuit address manipulation (encapsulate/decapsulate)."""
 
-    # Encapsulate circuit
+    # Input: bafzbeigweq4zr4x4ky2dvv7nanbkw6egutvrrvzw6g3h2rftp7gidyhtt4 (CIDv1 Base32)
+    # Expected: QmckZzdVd72h9QUFuJJpQqhsZqGLwjhh81qSvZ9BhB2FQi (CIDv0 Base58btc)
     relay = Multiaddr("/ip4/127.0.0.1/tcp/1234/p2p/QmZR5a9AAXGqQF2ADqoDdGS8zvqv8n3Pag6TDDnTNMcFW6")
     circuit = Multiaddr(
         "/p2p-circuit/p2p/bafzbeigweq4zr4x4ky2dvv7nanbkw6egutvrrvzw6g3h2rftp7gidyhtt4"
@@ -543,3 +550,40 @@ def test_circuit_address_manipulation():
         == "/ip4/127.0.0.1/tcp/1234/p2p/QmZR5a9AAXGqQF2ADqoDdGS8zvqv8n3Pag6TDDnTNMcFW6"
     )
     assert decapsulated.get_peer_id() == "QmZR5a9AAXGqQF2ADqoDdGS8zvqv8n3Pag6TDDnTNMcFW6"
+
+
+def test_circuit_with_consistent_cid_format():
+    """Test circuit functionality using consistent CIDv0 format for easier comparison."""
+
+    # All peer IDs in CIDv0 Base58btc format for easy visual comparison
+    relay_peer_id = "QmZR5a9AAXGqQF2ADqoDdGS8zvqv8n3Pag6TDDnTNMcFW6"
+    target_peer_id = "QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC"
+
+    # Basic circuit with consistent format
+    ma = Multiaddr(f"/p2p-circuit/p2p/{target_peer_id}")
+    assert ma.get_peer_id() == target_peer_id
+
+    # Circuit with relay using consistent format
+    ma = Multiaddr(f"/ip4/127.0.0.1/tcp/1234/p2p/{relay_peer_id}/p2p-circuit/p2p/{target_peer_id}")
+    assert ma.get_peer_id() == target_peer_id
+
+    # Test string representation preserves format
+    assert (
+        str(ma) == f"/ip4/127.0.0.1/tcp/1234/p2p/{relay_peer_id}/p2p-circuit/p2p/{target_peer_id}"
+    )
+
+    # Test encapsulate/decapsulate with consistent format
+    relay = Multiaddr(f"/ip4/127.0.0.1/tcp/1234/p2p/{relay_peer_id}")
+    circuit = Multiaddr(f"/p2p-circuit/p2p/{target_peer_id}")
+    combined = relay.encapsulate(circuit)
+
+    assert (
+        str(combined)
+        == f"/ip4/127.0.0.1/tcp/1234/p2p/{relay_peer_id}/p2p-circuit/p2p/{target_peer_id}"
+    )
+    assert combined.get_peer_id() == target_peer_id
+
+    # Decapsulate should return relay address
+    decapsulated = combined.decapsulate("/p2p-circuit")
+    assert str(decapsulated) == f"/ip4/127.0.0.1/tcp/1234/p2p/{relay_peer_id}"
+    assert decapsulated.get_peer_id() == relay_peer_id
