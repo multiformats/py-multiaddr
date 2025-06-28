@@ -360,9 +360,11 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
                     try:
                         self._bytes += varint.encode(proto.code)
                         buf = codec.to_bytes(proto, value)
+                        # Add length prefix for variable-sized or zero-sized codecs
                         if codec.SIZE <= 0:
                             self._bytes += varint.encode(len(buf))
-                        self._bytes += buf
+                        if buf:  # Only append buffer if it's not empty
+                            self._bytes += buf
                     except Exception as e:
                         raise exceptions.StringParseError(str(e), addr) from e
                     continue
@@ -408,10 +410,17 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
 
             try:
                 self._bytes += varint.encode(proto.code)
+
+                # Special case: protocols with codec=None are flag protocols
+                # (no value, no length prefix, no buffer)
+                if proto.codec is None:
+                    continue
+
                 buf = codec.to_bytes(proto, value or "")
-                if codec.SIZE <= 0:
+                if codec.SIZE <= 0:  # Add length prefix for variable-sized or zero-sized codecs
                     self._bytes += varint.encode(len(buf))
-                self._bytes += buf
+                if buf:  # Only append buffer if it's not empty
+                    self._bytes += buf
             except Exception as e:
                 raise exceptions.StringParseError(str(e), addr) from e
 
@@ -432,6 +441,8 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
     def get_peer_id(self) -> Optional[str]:
         """Get the peer ID from the multiaddr.
 
+        For circuit addresses, returns the target peer ID, not the relay peer ID.
+
         Returns:
             The peer ID if found, None otherwise.
 
@@ -439,6 +450,27 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
             BinaryParseError: If the binary multiaddr is invalid.
         """
         try:
-            return self.value_for_protocol(protocol_with_name("p2p").code)
-        except ValueError:
+            tuples = []
+
+            for _, proto, codec, part in bytes_iter(self._bytes):
+                if proto.name == "p2p":
+                    tuples.append((proto, part))
+
+                # If this is a p2p-circuit address, reset tuples to get target peer id
+                # not the peer id of the relay
+                if proto.name == "p2p-circuit":
+                    tuples = []
+
+            # Get the last p2p tuple (target peer ID for circuits)
+            if tuples:
+                last_tuple = tuples[-1]
+                proto, part = last_tuple
+                # Get the codec for this specific protocol
+                codec = codec_by_name(proto.codec)
+                # Handle both fixed-size and variable-sized codecs
+                if codec is not None and codec.SIZE != 0:
+                    return codec.to_string(proto, part)
+
+            return None
+        except Exception:
             return None

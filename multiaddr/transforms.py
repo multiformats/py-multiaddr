@@ -20,14 +20,22 @@ def string_to_bytes(string: str) -> bytes:
         )
         logger.debug(
             f"[DEBUG string_to_bytes] Processing: proto={proto.name}, "
-            f"codec.SIZE={getattr(codec, 'SIZE', None)}, value={value}"
+            f"codec.SIZE={getattr(codec, 'SIZE', None) if codec else None}, value={value}"
         )
         logger.debug(f"[DEBUG string_to_bytes] Protocol code: {proto.code}")
         encoded_code = varint.encode(proto.code)
         logger.debug(f"[DEBUG string_to_bytes] Encoded protocol code: {encoded_code}")
         bs.append(encoded_code)
+
+        # Special case: protocols with codec=None are flag protocols
+        # (no value, no length prefix, no buffer)
         if codec is None:
-            raise ValueError(f"Unknown codec for protocol {proto.name}")
+            logger.debug(
+                f"[DEBUG string_to_bytes] Protocol {proto.name} has no data, "
+                "skipping value encoding"
+            )
+            continue
+
         if value is None:
             raise ValueError("Value cannot be None")
         try:
@@ -41,12 +49,15 @@ def string_to_bytes(string: str) -> bytes:
             f"[DEBUG string_to_bytes] Appending: proto={proto.name}, "
             f"codec.SIZE={getattr(codec, 'SIZE', None)}"
         )
+        # Only add length prefix for variable-sized codecs (SIZE <= 0)
         if codec.SIZE <= 0:
             bs.append(varint.encode(len(buf)))
             logger.debug(
                 f"[DEBUG string_to_bytes] Appending varint length: {varint.encode(len(buf))}"
             )
-        bs.append(buf)
+        # Only append the buffer if it's not empty
+        if buf:
+            bs.append(buf)
         logger.debug(f"[DEBUG string_to_bytes] Final bs: {bs}")
     return b"".join(bs)
 
@@ -103,7 +114,7 @@ def size_for_addr(codec: CodecBase, buf_io: io.BytesIO) -> int:
 
 
 def string_iter(
-    string: str
+    string: str,
 ) -> Generator[tuple[Protocol, CodecBase | None, str | None], None, None]:
     """Iterate over the parts of a string multiaddr.
 
@@ -136,12 +147,10 @@ def string_iter(
             value = parts[i + 1]
             i += 1  # Skip the next part since we used it as value
             logger.debug(f"[DEBUG string_iter] Using next part as value: {value}")
+            yield proto, codec, value
         else:
             logger.debug(f"[DEBUG string_iter] No value found for protocol {proto.name}")
-        logger.debug(
-            f"[DEBUG string_iter] Yielding: proto={proto.name}, codec={codec}, value={value}"
-        )
-        yield proto, codec, value
+            yield proto, codec, None
         i += 1
 
 

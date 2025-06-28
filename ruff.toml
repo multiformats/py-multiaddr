@@ -21,3 +21,6 @@ quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "lf"
+
+[lint.per-file-ignores]
+"tests/test_multiaddr.py" = ["E501"]
