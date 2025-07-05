@@ -72,15 +72,13 @@ authors:
 	git shortlog --numbered --summary --email | cut -f 2 > AUTHORS
 
 dist: clean
-	python setup.py sdist
-	python setup.py bdist_wheel
+	python -m build
+	ls -l dist
 
 install: clean
 	python setup.py install
 
-bump:
-	bumpversion --tag-name "{new_version}" patch
-
+# build newsfragments into release notes and verify docs build correctly
 notes: check-bump validate-newsfragments
 	# Let UPCOMING_VERSION be the version that is used for the current bump
 	$(eval UPCOMING_VERSION=$(shell bump-my-version bump --dry-run $(bump) -v | awk -F"'" '/New version will be / {print $$2}'))
