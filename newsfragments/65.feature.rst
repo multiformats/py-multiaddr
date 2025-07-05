@@ -1,0 +1,1 @@
+Added support for CIDv1 format and improved sequence protocol handling with enhanced indexing and slicing operations.
