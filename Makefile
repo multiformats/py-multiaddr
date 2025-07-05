@@ -67,9 +67,6 @@ docs:
 servedocs: docs
 	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
 
-readme.html: README.rst
-	rst2html.py README.rst > readme.html
-
 .PHONY: authors
 authors:
 	git shortlog --numbered --summary --email | cut -f 2 > AUTHORS
@@ -93,7 +90,7 @@ notes: check-bump validate-newsfragments
 	make docs
 	git commit -m "Compile release notes for v$(UPCOMING_VERSION)"
 
-deploy-prep: clean authors readme.html docs dist
+deploy-prep: clean authors docs dist
 	@echo "Did you remember to bump the version?"
 	@echo "If not, run 'bumpversion {patch, minor, major}' and run this target again"
 	@echo "Don't forget to update HISTORY.rst"
