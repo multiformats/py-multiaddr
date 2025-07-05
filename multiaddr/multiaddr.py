@@ -1,4 +1,3 @@
-# flake8: noqa: F811
 import collections.abc
 from collections.abc import Iterator, Sequence
 from typing import Any, Optional, TypeVar, Union, overload

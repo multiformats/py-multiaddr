@@ -24,15 +24,15 @@ classifiers = [
 ]
 requires-python = ">=3.9, <4.0"
 dependencies = [
-    "varint",
     "base58",
-    "netaddr",
+    "dnspython>=2.7.0",
     "idna",
+    "netaddr",
     "py-cid",
     "py-multicodec >= 0.2.0",
-    "aiodns>=3.0.0",
-    "trio>=0.26.0",
     "trio-typing>=0.0.4",
+    "trio>=0.26.0",
+    "varint",
 ]
 
 [project.urls]
@@ -41,23 +41,21 @@ Download = "https://github.com/multiformats/py-multiaddr/tarball/0.0.9"
 
 [project.optional-dependencies]
 dev = [
-    "bumpversion==0.5.3",
-    "wheel>=0.31.0",
-    "watchdog>=3.0.0",
-    "tox==3.6.1",
-    "coverage==4.5.2",
-    "Sphinx==1.3.6",
+    "Sphinx>=5.0.0",
+    "build>=0.9.0",
+    "bump_my_version>=1.2.0",
+    "coverage>=6.5.0",
+    "pre-commit",
+    "pyright",
     "pytest",
     "pytest-cov",
     "pytest-runner",
-    "ruff",
-    "pyright",
-    "pre-commit",
-]
-test = [
-    "pytest>=7.0.0",
     "pytest-trio>=0.5.2",
-    "pytest-cov>=4.0.0",
+    "ruff",
+    "towncrier>=24,<25",
+    "tox>=4.10.0",
+    "watchdog>=3.0.0",
+    "wheel>=0.31.0",
 ]
 
 [tool.setuptools]
@@ -67,3 +65,110 @@ zip-safe = false
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.towncrier]
+# Read https://github.com/multiformats/py-multiaddr/blob/master/newsfragments/README.md for instructions
+directory = "newsfragments"
+filename = "HISTORY.rst"
+issue_format = "`#{issue} <https://github.com/multiformats/py-multiaddr/issues/{issue}>`__"
+package = "multiaddr"
+title_format = "py-multiaddr v{version} ({project_date})"
+underlines = ["-", "~", "^"]
+
+[[tool.towncrier.type]]
+directory = "breaking"
+name = "Breaking Changes"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "bugfix"
+name = "Bugfixes"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "deprecation"
+name = "Deprecations"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "docs"
+name = "Improved Documentation"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "feature"
+name = "Features"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "internal"
+name = "Internal Changes - for py-libp2p Contributors"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "misc"
+name = "Miscellaneous Changes"
+showcontent = false
+
+[[tool.towncrier.type]]
+directory = "performance"
+name = "Performance Improvements"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "removal"
+name = "Removals"
+showcontent = true
+
+[tool.bumpversion]
+current_version = "0.0.9"
+parse = """
+    (?P<major>\\d+)
+    \\.(?P<minor>\\d+)
+    \\.(?P<patch>\\d+)
+		(-
+			(?P<stage>[^.]*)
+			\\.(?P<devnum>\\d+)
+		)?
+"""
+serialize = [
+	"{major}.{minor}.{patch}-{stage}.{devnum}",
+	"{major}.{minor}.{patch}",
+]
+search = "{current_version}"
+replace = "{new_version}"
+regex = false
+ignore_missing_version = false
+tag = true
+sign_tags = true
+tag_name = "v{new_version}"
+tag_message = "Bump version: {current_version} → {new_version}"
+allow_dirty = false
+commit = true
+message = "Bump version: {current_version} → {new_version}"
+
+[tool.bumpversion.parts.stage]
+optional_value = "stable"
+first_value = "stable"
+values = [
+	"alpha",
+	"beta",
+	"stable",
+]
+
+[tool.bumpversion.part.devnum]
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = "version = \"{current_version}\""
+replace = "version = \"{new_version}\""
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = "current_version = \"{current_version}\""
+replace = "current_version = \"{new_version}\""
+
+[[tool.bumpversion.files]]
+filename = "multiaddr/__init__.py"
+search = "__version__ = \"{current_version}\""
+replace = "__version__ = \"{new_version}\""
