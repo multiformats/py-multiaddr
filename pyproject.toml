@@ -76,7 +76,7 @@ filename = "HISTORY.rst"
 issue_format = "`#{issue} <https://github.com/multiformats/py-multiaddr/issues/{issue}>`__"
 package = "multiaddr"
 title_format = "py-multiaddr v{version} ({project_date})"
-underlines = ["-", "~", "^"]
+underlines = ["=", "-"]
 
 [[tool.towncrier.type]]
 directory = "breaking"
