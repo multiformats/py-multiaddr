@@ -1,5 +1,5 @@
-Changelog
-=========
+History
+=======
 
 .. towncrier release notes start
 
