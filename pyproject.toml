@@ -24,15 +24,15 @@ classifiers = [
 ]
 requires-python = ">=3.9, <4.0"
 dependencies = [
-    "varint",
     "base58",
-    "netaddr",
+    "dnspython>=2.7.0",
     "idna",
+    "netaddr",
     "py-cid",
     "py-multicodec >= 0.2.0",
-    "aiodns>=3.0.0",
-    "trio>=0.26.0",
     "trio-typing>=0.0.4",
+    "trio>=0.26.0",
+    "varint",
 ]
 
 [project.urls]
@@ -50,16 +50,12 @@ dev = [
     "pytest",
     "pytest-cov",
     "pytest-runner",
+    "pytest-trio>=0.5.2",
     "ruff",
     "towncrier>=24,<25",
     "tox>=4.10.0",
     "watchdog>=3.0.0",
     "wheel>=0.31.0",
-]
-test = [
-    "pytest>=7.0.0",
-    "pytest-trio>=0.5.2",
-    "pytest-cov>=4.0.0",
 ]
 
 [tool.setuptools]
