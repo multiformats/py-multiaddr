@@ -45,6 +45,14 @@ multiaddr.transforms module
    :show-inheritance:
    :undoc-members:
 
+multiaddr.utils module
+----------------------
+
+.. automodule:: multiaddr.utils
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 Module contents
 ---------------
 
