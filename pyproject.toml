@@ -28,6 +28,7 @@ dependencies = [
     "dnspython>=2.7.0",
     "idna",
     "netaddr",
+    "psutil",
     "py-cid",
     "py-multicodec >= 0.2.0",
     "trio-typing>=0.0.4",

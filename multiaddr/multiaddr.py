@@ -299,6 +299,7 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
 
     async def resolve(self) -> list["Multiaddr"]:
         """Resolve this multiaddr if it contains a resolvable protocol.
+
         Returns:
             A list of resolved multiaddrs
         """
