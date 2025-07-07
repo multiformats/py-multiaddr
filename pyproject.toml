@@ -60,9 +60,13 @@ dev = [
 ]
 
 [tool.setuptools]
-packages = ["multiaddr"]
+# packages = ["multiaddr"]
 include-package-data = true
 zip-safe = false
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["multiaddr*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -122,7 +126,7 @@ name = "Removals"
 showcontent = true
 
 [tool.bumpversion]
-current_version = "0.0.9"
+current_version = "0.0.10"
 parse = """
     (?P<major>\\d+)
     \\.(?P<minor>\\d+)
