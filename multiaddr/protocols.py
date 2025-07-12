@@ -1,3 +1,39 @@
+"""
+Multiaddr Protocol Codes and Registry
+
+This module defines all supported multiaddr protocol codes, their names, and their encodings.
+
+Key features:
+- Protocol code constants (e.g., P_IP4, P_TCP, P_DNSADDR)
+- Protocol class for protocol metadata
+- ProtocolRegistry for fast lookup and aliasing
+- Reference to the multicodec table for protocol codes
+
+Common protocol codes:
+    P_IP4 = 0x04      # IPv4
+    P_IP6 = 0x29      # IPv6
+    P_TCP = 0x06      # TCP
+    P_UDP = 0x0111    # UDP
+    P_DNS = 0x35      # DNS (any)
+    P_DNS4 = 0x36     # DNS (IPv4)
+    P_DNS6 = 0x37     # DNS (IPv6)
+    P_DNSADDR = 0x38  # DNSADDR (libp2p)
+    P_P2P = 0x01A5    # Peer ID
+    P_TLS = 0x01C0    # TLS
+    P_HTTP = 0x01E0   # HTTP
+    P_HTTPS = 0x01BB  # HTTPS
+    ...
+
+For a full list, see the PROTOCOLS list and the multicodec table:
+https://github.com/multiformats/multicodec/blob/master/table.csv
+
+Example usage:
+    from multiaddr.protocols import P_TCP, protocol_with_code
+    print(P_TCP)  # 6
+    proto = protocol_with_code(P_TCP)
+    print(proto.name)  # 'tcp'
+"""
+
 from typing import Any, Optional, Union
 
 import varint

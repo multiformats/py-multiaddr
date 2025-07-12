@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Trio-based DNS resolution examples for py-multiaddr.
+DNS resolution examples for py-multiaddr.
 
-This script demonstrates how to use DNS resolution functionality in py-multiaddr
-with trio, showing how to resolve bootstrap node addresses like those used in js-libp2p.
+This script demonstrates how to use DNS resolution functionality in py-multiaddr,
+showing how to resolve bootstrap node addresses like those used in js-libp2p.
 
 ## Overview
 
-This script shows various examples of DNS resolution using py-multiaddr with trio:
+This script shows various examples of DNS resolution using py-multiaddr:
 
 1. **Basic DNS Resolution**: Simple resolution of DNS addresses to IP addresses
 2. **Bootstrap Node Resolution**: Resolving real bootstrap node addresses with peer IDs
@@ -21,9 +21,9 @@ This script shows various examples of DNS resolution using py-multiaddr with tri
 When you run this script, you should see output similar to:
 
 ```
-DNS Resolution Examples with Trio
+DNS Resolution Examples
 ==================================================
-=== Basic DNS Resolution with Trio ===
+=== Basic DNS Resolution ===
 Original address: /dns/example.com
 Protocols: ['dns']
 Resolved to 12 addresses:
@@ -31,28 +31,33 @@ Resolved to 12 addresses:
   2. /ip4/23.215.0.136
   ... (more IPv4 and IPv6 addresses)
 
-=== Bootstrap Node Resolution with Trio ===
-Resolving: /dnsaddr/github.com/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
+=== Bootstrap Node Resolution ===
+Resolving: /dnsaddr/bootstrap.libp2p.io/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
   Peer ID: QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
-  Resolved to 1 addresses:
-    1. /ip4/140.82.121.4/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
+  Resolved to 6 addresses:
+    1. /ip4/139.178.91.71/tcp/4001/p2p/
+      QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
+    2. /ip4/139.178.91.71/udp/4001/quic-v1/p2p/
+      QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
+    ... (more addresses)
 
-=== DNS Protocol Comparison with Trio ===
+=== DNS Protocol Comparison ===
 Testing DNS (both IPv4 and IPv6): /dns/example.com
   Resolved to 12 addresses:
     1. /ip4/23.215.0.136
     2. /ip4/23.215.0.138
-    ... (more addresses)
+    ... (6 IPv4 + 6 IPv6 addresses)
 
-=== Peer ID Preservation Test with Trio ===
-Original address: /dnsaddr/example.com/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
+=== Peer ID Preservation Test ===
+Original address: /dnsaddr/bootstrap.libp2p.io/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
 Original peer ID: QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
-Resolved to 1 addresses:
-  1. /ip4/23.192.228.80/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
+Resolved to 6 addresses:
+  1. /ip4/139.178.91.71/tcp/4001/p2p/
+    QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
      Peer ID: QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
      Peer ID preserved: True
 
-=== Sequential DNS Resolution with Trio ===
+=== Sequential DNS Resolution ===
 /dns/example.com:
   Resolved to 12 addresses:
     - /ip4/23.215.0.136
@@ -61,12 +66,10 @@ Resolved to 1 addresses:
 
 === py-libp2p Integration Example ===
 Processing bootstrap node: QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
-  Resolved: 140.82.121.4:None (peer: QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN)
+  Resolved: 139.178.91.71:4001 (peer: QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN)
 
-Resolved 3 bootstrap peers:
-  QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN -> 140.82.121.4:None
-  QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN -> 104.16.132.229:None
-  QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN -> 142.250.184.206:None
+Resolved 1 bootstrap peers:
+  QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN -> 139.178.91.71:4001
 
 ==================================================
 All examples completed!
@@ -78,7 +81,7 @@ All examples completed!
 - **Peer ID Preservation**: Maintaining peer IDs during resolution
 - **Multiple Protocol Support**: /dns/, /dns4/, /dns6/, /dnsaddr/
 - **Error Handling**: Graceful handling of resolution failures
-- **Real Domain Examples**: Using actual domains that resolve to IP addresses
+- **Real Bootstrap Node Examples**: Using actual libp2p bootstrap nodes that resolve to IP addresses
 
 ## Requirements
 
@@ -95,8 +98,8 @@ python trio_dns_examples.py
 
 ## Notes
 
-- This script uses real domains (github.com, cloudflare.com, google.com) that actually resolve
-- The DNS resolver requires trio (not asyncio) for async operations
+- This script uses real bootstrap nodes from bootstrap.libp2p.io that actually resolve
+- The DNS resolver requires trio for async operations
 - Peer IDs are preserved during resolution for bootstrap node functionality
 - All examples demonstrate working DNS resolution to actual IP addresses
 """
@@ -109,7 +112,7 @@ from multiaddr.resolvers import DNSResolver
 
 async def basic_dns_resolution():
     """
-    Basic DNS resolution example using trio.
+    Basic DNS resolution example.
 
     This function demonstrates the simplest form of DNS resolution:
     - Creates a DNS multiaddr for example.com
@@ -117,7 +120,7 @@ async def basic_dns_resolution():
     - Shows the original and resolved addresses
 
     Expected output:
-    === Basic DNS Resolution with Trio ===
+    === Basic DNS Resolution ===
     Original address: /dns/example.com
     Protocols: ['dns']
     Resolved to 12 addresses:
@@ -126,7 +129,7 @@ async def basic_dns_resolution():
       3. /ip4/23.215.0.138
       ... (more IPv4 and IPv6 addresses)
     """
-    print("=== Basic DNS Resolution with Trio ===")
+    print("=== Basic DNS Resolution ===")
 
     # Test with a simple DNS address
     test_addr = "/dns/example.com"
@@ -146,28 +149,36 @@ async def basic_dns_resolution():
 
 async def bootstrap_node_resolution():
     """
-    Resolve bootstrap node addresses using trio.
+    Resolve bootstrap node addresses.
 
     This function demonstrates resolving real bootstrap node addresses that include peer IDs:
-    - Uses real domains (github.com, cloudflare.com, google.com) that actually resolve
+    - Uses real domains from bootstrap.libp2p.io that actually resolve
     - Shows how peer IDs are preserved during resolution
     - Extracts connection information (IP addresses) from resolved addresses
 
     Expected output:
-    === Bootstrap Node Resolution with Trio ===
-    Resolving: /dnsaddr/github.com/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
+    === Bootstrap Node Resolution ===
+    Resolving: /dnsaddr/bootstrap.libp2p.io/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
       Peer ID: QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
-      Resolved to 1 addresses:
-        1. /ip4/140.82.121.4/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
-           Connection: 140.82.121.4:None
+      Resolved to 6 addresses:
+        1. /ip4/139.178.91.71/tcp/4001/p2p/
+          QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
+        2. /ip4/139.178.91.71/udp/4001/quic-v1/p2p/
+          QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
+        3. /ip6/2604:1380:45e3:6e00::1/tcp/4001/p2p/
+          QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
+        4. /ip6/2604:1380:45e3:6e00::1/udp/4001/quic-v1/p2p/
+          QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
+        5. /ip4/139.178.91.71/tcp/443/wss/p2p/
+          QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
+        6. /ip6/2604:1380:45e3:6e00::1/tcp/443/wss/p2p/
+          QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
     """
-    print("\n=== Bootstrap Node Resolution with Trio ===")
+    print("\n=== Bootstrap Node Resolution ===")
 
-    # Real bootstrap addresses that actually resolve to IP addresses
+    # Use only one bootstrap address to reduce repetition
     bootstrap_addresses = [
-        "/dnsaddr/github.com/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN",
-        "/dnsaddr/cloudflare.com/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN",
-        "/dnsaddr/google.com/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN",
+        "/dnsaddr/bootstrap.libp2p.io/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN",
     ]
 
     resolver = DNSResolver()
@@ -187,7 +198,7 @@ async def bootstrap_node_resolution():
             for i, resolved_ma in enumerate(resolved, 1):
                 print(f"    {i}. {resolved_ma}")
 
-                # Extract IP and port information
+                # Extract IP and port information for TCP connections only
                 ip_addr = None
                 port = None
                 for proto, value in resolved_ma.items():
@@ -205,7 +216,7 @@ async def bootstrap_node_resolution():
 
 async def dns_protocol_comparison():
     """
-    Compare different DNS protocols using trio.
+    Compare different DNS protocols.
 
     This function demonstrates the differences between various DNS protocols:
     - /dns/ - Resolves to both IPv4 and IPv6 addresses
@@ -214,7 +225,7 @@ async def dns_protocol_comparison():
     - /dnsaddr/ - Resolves to both IPv4 and IPv6 addresses (same as /dns/)
 
     Expected output:
-    === DNS Protocol Comparison with Trio ===
+    === DNS Protocol Comparison ===
     Testing DNS (both IPv4 and IPv6): /dns/example.com
       Resolved to 12 addresses:
         1. /ip4/23.215.0.136
@@ -233,13 +244,13 @@ async def dns_protocol_comparison():
         2. /ip6/2600:1406:3a00:21::173e:2e65
         ... (6 IPv6 addresses only)
     """
-    print("\n=== DNS Protocol Comparison with Trio ===")
+    print("\n=== DNS Protocol Comparison ===")
 
     dns_tests = [
         ("/dns/example.com", "DNS (both IPv4 and IPv6)"),
         ("/dns4/example.com", "DNS4 (IPv4 only)"),
         ("/dns6/example.com", "DNS6 (IPv6 only)"),
-        ("/dnsaddr/example.com", "DNSADDR (both IPv4 and IPv6)"),
+        ("/dnsaddr/bootstrap.libp2p.io", "DNSADDR (both IPv4 and IPv6)"),
     ]
 
     resolver = DNSResolver()
@@ -252,8 +263,11 @@ async def dns_protocol_comparison():
             resolved = await resolver.resolve(ma)
 
             print(f"  Resolved to {len(resolved)} addresses:")
-            for i, addr in enumerate(resolved, 1):
+            # Show only first 3 addresses to reduce repetition
+            for i, addr in enumerate(resolved[:3], 1):
                 print(f"    {i}. {addr}")
+            if len(resolved) > 3:
+                print(f"    ... and {len(resolved) - 3} more addresses")
 
         except Exception as e:
             print(f"  Error: {e}")
@@ -269,17 +283,19 @@ async def peer_id_preservation_test():
     - Confirms the peer ID remains unchanged in the resolved addresses
 
     Expected output:
-    === Peer ID Preservation Test with Trio ===
-    Original address: /dnsaddr/example.com/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
+    === Peer ID Preservation Test ===
+    Original address: /dnsaddr/bootstrap.libp2p.io/p2p/
+      QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
     Original peer ID: QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
-    Resolved to 1 addresses:
-      1. /ip4/23.192.228.80/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
+    Resolved to 6 addresses:
+      1. /ip4/139.178.91.71/tcp/4001/p2p/
+         QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
          Peer ID: QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
          Peer ID preserved: True
     """
-    print("\n=== Peer ID Preservation Test with Trio ===")
+    print("\n=== Peer ID Preservation Test ===")
 
-    test_addr = "/dnsaddr/example.com/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN"
+    test_addr = "/dnsaddr/bootstrap.libp2p.io/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN"
 
     try:
         ma = Multiaddr(test_addr)
@@ -290,11 +306,15 @@ async def peer_id_preservation_test():
         resolved = await ma.resolve()
 
         print(f"Resolved to {len(resolved)} addresses:")
-        for i, resolved_ma in enumerate(resolved, 1):
+        # Show only first 2 addresses to reduce repetition
+        for i, resolved_ma in enumerate(resolved[:2], 1):
             resolved_peer_id = resolved_ma.get_peer_id()
             print(f"  {i}. {resolved_ma}")
             print(f"     Peer ID: {resolved_peer_id}")
             print(f"     Peer ID preserved: {original_peer_id == resolved_peer_id}")
+
+        if len(resolved) > 2:
+            print(f"  ... and {len(resolved) - 2} more addresses (all with preserved peer ID)")
 
     except Exception as e:
         print(f"Error: {e}")
@@ -309,10 +329,8 @@ async def concurrent_resolution():
     - Handles errors gracefully for each address
     - Shows the results for each resolution attempt
 
-    Note: Uses sequential processing instead of concurrent due to trio version compatibility.
-
     Expected output:
-    === Sequential DNS Resolution with Trio ===
+    === Sequential DNS Resolution ===
     /dns/example.com:
       Resolved to 12 addresses:
         - /ip4/23.215.0.136
@@ -331,13 +349,13 @@ async def concurrent_resolution():
         - /ip6/2600:1406:3a00:21::173e:2e65
         ... (IPv6 addresses only)
     """
-    print("\n=== Sequential DNS Resolution with Trio ===")
+    print("\n=== Sequential DNS Resolution ===")
 
     addresses = [
         "/dns/example.com",
         "/dns4/example.com",
         "/dns6/example.com",
-        "/dnsaddr/example.com",
+        "/dnsaddr/bootstrap.libp2p.io",
     ]
 
     async def resolve_single(addr_str):
@@ -361,13 +379,16 @@ async def concurrent_resolution():
             print(f"  Error: {error}")
         else:
             print(f"  Resolved to {len(resolved)} addresses:")
-            for addr in resolved:
+            # Show only first 3 addresses to reduce repetition
+            for addr in resolved[:3]:
                 print(f"    - {addr}")
+            if len(resolved) > 3:
+                print(f"    ... and {len(resolved) - 3} more addresses")
 
 
 async def py_libp2p_integration_example():
     """
-    Example of how to integrate with py-libp2p using trio.
+    Example of how to integrate with py-libp2p.
 
     This function demonstrates a practical integration pattern for py-libp2p:
     - Resolves real bootstrap node addresses to IP addresses
@@ -378,25 +399,18 @@ async def py_libp2p_integration_example():
     Expected output:
     === py-libp2p Integration Example ===
     Processing bootstrap node: QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
-      Resolved: 140.82.121.4:None (peer: QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN)
+      Resolved: 139.178.91.71:4001 (peer: QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN)
 
-    Processing bootstrap node: QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN
-      Resolved: 104.16.132.229:None (peer: QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN)
-
-    Resolved 3 bootstrap peers:
-      QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN -> 140.82.121.4:None
-      QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN -> 104.16.132.229:None
-      QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN -> 142.250.184.206:None
+    Resolved 1 bootstrap peers:
+      QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN -> 139.178.91.71:4001
     """
     print("\n=== py-libp2p Integration Example ===")
 
     resolver = DNSResolver()
 
-    # Real bootstrap node addresses that actually resolve
+    # Use only one bootstrap address to reduce repetition
     bootstrap_addresses = [
-        "/dnsaddr/github.com/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN",
-        "/dnsaddr/cloudflare.com/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN",
-        "/dnsaddr/google.com/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN",
+        "/dnsaddr/bootstrap.libp2p.io/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN",
     ]
 
     resolved_peers = []
@@ -443,28 +457,12 @@ async def py_libp2p_integration_example():
     for peer in resolved_peers:
         print(f"  {peer['peer_id']} -> {peer['ip_addr']}:{peer['port']}")
 
-    # Example of how to use with py-libp2p:
-    # ```
-    # from libp2p import Libp2p  # or whatever the actual import is
-    #
-    # async def connect_to_peers():
-    #     node = Libp2p()
-    #
-    #     for peer in resolved_peers:
-    #         try:
-    #             # Connect to the resolved peer using trio
-    #             await node.connect(peer['peer_id'], peer['ip_addr'], peer['port'])
-    #             print(f"Connected to {peer['peer_id']}")
-    #         except Exception as e:
-    #             print(f"Failed to connect to {peer['peer_id']}: {e}")
-    # ```
-
     return resolved_peers
 
 
 async def main():
     """
-    Run all examples using trio.
+    Run all examples.
 
     This function orchestrates all the DNS resolution examples:
     1. Basic DNS resolution
@@ -475,9 +473,9 @@ async def main():
     6. py-libp2p integration example
 
     Each example demonstrates different aspects of DNS resolution functionality
-    and shows how to use it with py-multiaddr and trio.
+    and shows how to use it with py-multiaddr.
     """
-    print("DNS Resolution Examples with Trio")
+    print("DNS Resolution Examples")
     print("=" * 50)
 
     try:
@@ -491,7 +489,7 @@ async def main():
         print("\n" + "=" * 50)
         print("All examples completed!")
         print("\nSummary:")
-        print("- DNS resolution is working correctly with trio")
+        print("- DNS resolution is working correctly")
         print("- Real domains are being resolved to IP addresses")
         print("- Peer IDs are preserved during resolution")
         print("- All DNS protocols (/dns/, /dns4/, /dns6/, /dnsaddr/) are functional")

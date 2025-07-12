@@ -1,0 +1,1 @@
+Added full support for dnsaddr protocol and dns4 and dns6 as well

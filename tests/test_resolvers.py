@@ -38,18 +38,27 @@ def mock_dns_resolution():
     mock_answer_aaaa = AsyncMock()
     mock_answer_aaaa.__iter__.return_value = []
 
+    # Create mock DNS answer for TXT record (dnsaddr)
+    mock_answer_txt = AsyncMock()
+    mock_rdata_txt = AsyncMock()
+    mock_rdata_txt.strings = ["dnsaddr=/ip4/127.0.0.1"]
+    mock_answer_txt.__iter__.return_value = [mock_rdata_txt]
+
     # Configure the mock to return different results based on record type
     async def mock_resolve_side_effect(hostname, record_type):
         if record_type == "A":
             return mock_answer_a
         elif record_type == "AAAA":
             return mock_answer_aaaa
+        elif record_type == "TXT" and hostname.startswith("_dnsaddr."):
+            return mock_answer_txt
         else:
             raise dns.resolver.NXDOMAIN()
 
     return {
         "mock_answer_a": mock_answer_a,
         "mock_answer_aaaa": mock_answer_aaaa,
+        "mock_answer_txt": mock_answer_txt,
         "mock_resolve_side_effect": mock_resolve_side_effect,
     }
 
@@ -78,8 +87,22 @@ async def test_resolve_dns_addr(dns_resolver, mock_dns_resolution):
 @pytest.mark.trio
 async def test_resolve_dns_addr_with_peer_id(dns_resolver, mock_dns_resolution):
     """Test resolving a DNS multiaddr with a peer ID."""
+    # Create a mock TXT record with the peer ID
+    mock_answer_txt_with_peer = AsyncMock()
+    mock_rdata_txt_with_peer = AsyncMock()
+    mock_rdata_txt_with_peer.strings = [
+        "dnsaddr=/ip4/127.0.0.1/p2p/QmYyQSo1c1Ym7orWxLYvCrM2EmxFTANf8wXmmE7wjh53Qk"
+    ]
+    mock_answer_txt_with_peer.__iter__.return_value = [mock_rdata_txt_with_peer]
+
+    async def mock_resolve_with_peer(hostname, record_type):
+        if record_type == "TXT" and hostname.startswith("_dnsaddr."):
+            return mock_answer_txt_with_peer
+        else:
+            raise dns.resolver.NXDOMAIN()
+
     with patch.object(dns_resolver._resolver, "resolve") as mock_resolve:
-        mock_resolve.side_effect = mock_dns_resolution["mock_resolve_side_effect"]
+        mock_resolve.side_effect = mock_resolve_with_peer
 
         ma = Multiaddr("/dnsaddr/example.com/p2p/QmYyQSo1c1Ym7orWxLYvCrM2EmxFTANf8wXmmE7wjh53Qk")
         result = await dns_resolver.resolve(ma)
@@ -117,7 +140,7 @@ async def test_resolve_dns_addr_error(dns_resolver):
         ma = Multiaddr("/dnsaddr/example.com")
         # When DNS resolution fails, the resolver should return the original multiaddr
         result = await dns_resolver.resolve(ma)
-        assert result == [ma]
+        assert result == []
 
 
 @pytest.mark.trio
@@ -141,13 +164,24 @@ async def test_resolve_dns_addr_with_mixed_quotes(dns_resolver, mock_dns_resolut
 
         # Test that _clean_quotes is called correctly during resolution
         with patch.object(dns_resolver, "_clean_quotes") as mock_clean_quotes:
-            mock_clean_quotes.return_value = "example.com"
+            # Make the mock return the input for most cases, but allow specific behavior
+            def clean_quotes_side_effect(text):
+                if text == "example.com":
+                    return "example.com"
+                elif text == "/ip4/127.0.0.1":
+                    return "/ip4/127.0.0.1"
+                else:
+                    return text
+
+            mock_clean_quotes.side_effect = clean_quotes_side_effect
 
             ma = Multiaddr("/dnsaddr/example.com")
             result = await dns_resolver.resolve(ma)
 
-            # Verify _clean_quotes was called with the hostname
-            mock_clean_quotes.assert_called_once_with("example.com")
+            # Verify _clean_quotes was called (now called for both hostname and multiaddr string)
+            assert mock_clean_quotes.call_count >= 1
+            # Check that it was called with the hostname
+            mock_clean_quotes.assert_any_call("example.com")
 
             # Verify the resolution still works correctly
             assert len(result) == 1

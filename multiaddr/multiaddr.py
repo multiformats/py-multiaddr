@@ -249,6 +249,29 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
             raise ValueError(f"Address {s} does not contain subaddress: {addr_str}")
         return Multiaddr(s[:i])
 
+    def decapsulate_code(self, code: int) -> "Multiaddr":
+        """
+        Remove the last occurrence of the protocol with the given code and everything after it.
+        If the protocol code is not present, return the original multiaddr.
+        """
+        # Find all protocol codes and their offsets
+        offsets = []
+        for offset, proto, codec, part_value in bytes_iter(self._bytes):
+            offsets.append((offset, proto.code))
+        # Find the last occurrence of the code
+        last_index = -1
+        for i, (offset, proto_code) in enumerate(offsets):
+            if proto_code == code:
+                last_index = i
+        if last_index == -1:
+            # Protocol code not found, return original
+            return self
+        # Get the offset to slice up to
+        cut_offset = offsets[last_index][0]
+        if cut_offset == 0:
+            return self.__class__("")
+        return self.__class__(self._bytes[:cut_offset])
+
     def value_for_protocol(self, proto: Any) -> Optional[Any]:
         """Return the value (if any) following the specified protocol
 
@@ -318,7 +341,9 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
             StringParseError: If the string multiaddr is invalid.
         """
         if not addr:
-            raise exceptions.StringParseError("empty multiaddr", addr)
+            # Allow empty multiaddrs (like JavaScript implementation)
+            self._bytes = b""
+            return
 
         # Handle other protocols
         parts = iter(addr.strip("/").split("/"))
@@ -434,7 +459,9 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
             BinaryParseError: If the binary multiaddr is invalid.
         """
         if not addr:
-            raise exceptions.BinaryParseError("empty multiaddr", addr, 0)
+            # Allow empty multiaddrs (like JavaScript implementation)
+            self._bytes = b""
+            return
 
         self._bytes = addr
 

@@ -77,6 +77,16 @@ En/decapsulate
     m1.decapsulate(Multiaddr("/udp"))
     # <Multiaddr /ip4/127.0.0.1>
 
+    # Decapsulate by protocol code
+    m2 = Multiaddr("/ip4/192.168.1.1/tcp/8080/udp/1234")
+    m2.decapsulate_code(6)  # TCP protocol code
+    # <Multiaddr /ip4/192.168.1.1>
+
+    # Decapsulate multiple layers
+    m3 = Multiaddr("/ip4/10.0.0.1/tcp/443/tls/p2p/QmPeer")
+    m3.decapsulate_code(6)  # Remove TCP and everything after
+    # <Multiaddr /ip4/10.0.0.1>
+
 
 Tunneling
 ---------
@@ -114,10 +124,21 @@ Multiaddr supports DNS-based address resolution using the DNSADDR protocol. This
     # [Multiaddr("/ip4/93.184.216.34"), Multiaddr("/ip6/2606:2800:220:1:248:1893:25c8:1946")]
 
     # DNSADDR with peer ID (bootstrap node style)
-    ma_with_peer = Multiaddr("/dnsaddr/github.com/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN")
+    ma_with_peer = Multiaddr("/dnsaddr/bootstrap.libp2p.io/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN")
     resolved_with_peer = await ma_with_peer.resolve()
     print(resolved_with_peer)
-    # [Multiaddr("/ip4/140.82.121.4/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN")]
+    # [Multiaddr("/ip4/147.75.83.83/tcp/4001/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN")]
+
+    # DNS4 and DNS6 resolution (IPv4/IPv6 specific)
+    ma_dns4 = Multiaddr("/dns4/example.com/tcp/443")
+    resolved_dns4 = await ma_dns4.resolve()
+    print(resolved_dns4)
+    # [Multiaddr("/ip4/93.184.216.34/tcp/443")]
+
+    ma_dns6 = Multiaddr("/dns6/example.com/tcp/443")
+    resolved_dns6 = await ma_dns6.resolve()
+    print(resolved_dns6)
+    # [Multiaddr("/ip6/2606:2800:220:1:248:1893:25c8:1946/tcp/443")]
 
     # Using the DNS resolver directly
     from multiaddr.resolvers import DNSResolver
@@ -170,7 +191,7 @@ Multiaddr provides thin waist address validation functionality to process multia
     addr = Multiaddr("/ip6/::/tcp/8080")
     result = get_thin_waist_addresses(addr)
     print(result)
-    # [<Multiaddr /ip6/fd9b:9eba:8224:1:41a1:8939:231a:b414/tcp/8080>]
+    # [<Multiaddr /ip6/::1/tcp/8080>, <Multiaddr /ip6/fd9b:9eba:8224:1:41a1:8939:231a:b414/tcp/8080>]
 
     # Port override
     addr = Multiaddr("/ip4/0.0.0.0/tcp/8080")

@@ -227,8 +227,8 @@ def test_encapsulate():
     assert str(decapsulated) == "/ip4/127.0.0.1/udp/1234"
 
     m4 = Multiaddr("/ip4/127.0.0.1")
-    with pytest.raises(ValueError):
-        decapsulated.decapsulate(m4)
+    # JavaScript returns empty multiaddr when decapsulating a prefix
+    assert str(decapsulated.decapsulate(m4)) == ""
 
     m5 = Multiaddr("/ip6/::1")
     with pytest.raises(ValueError):
@@ -587,3 +587,27 @@ def test_circuit_with_consistent_cid_format():
     decapsulated = combined.decapsulate("/p2p-circuit")
     assert str(decapsulated) == f"/ip4/127.0.0.1/tcp/1234/p2p/{relay_peer_id}"
     assert decapsulated.get_peer_id() == relay_peer_id
+
+
+def test_decapsulate_code():
+    from multiaddr import Multiaddr
+    from multiaddr.protocols import P_DNS4, P_IP4, P_P2P, P_TCP
+
+    # Use a valid Peer ID (CID) for /p2p/
+    valid_peer_id = "QmYyQSo1c1Ym7orWxLYvCrM2EmxFTANf8wXmmE7wjh53Qk"
+    ma = Multiaddr(f"/ip4/1.2.3.4/tcp/80/p2p/{valid_peer_id}")
+    assert str(ma.decapsulate_code(P_P2P)) == "/ip4/1.2.3.4/tcp/80"
+    assert str(ma.decapsulate_code(P_TCP)) == "/ip4/1.2.3.4"
+    assert str(ma.decapsulate_code(P_IP4)) == ""
+    # Not present: returns original
+    assert str(ma.decapsulate_code(9999)) == str(ma)
+
+    # Multiple occurrences
+    ma2 = Multiaddr("/dns4/example.com/tcp/1234/dns4/foo.com/tcp/5678")
+    assert str(ma2.decapsulate_code(P_DNS4)) == "/dns4/example.com/tcp/1234"
+    # Remove the last tcp
+    assert str(ma2.decapsulate_code(P_TCP)) == "/dns4/example.com/tcp/1234/dns4/foo.com"
+
+    # No-op on empty
+    ma3 = Multiaddr("")
+    assert str(ma3.decapsulate_code(P_TCP)) == ""
