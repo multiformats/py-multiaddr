@@ -164,6 +164,7 @@ PROTOCOLS = [
     Protocol(P_P2P_WEBRTC_STAR, "p2p-webrtc-star", None),
     Protocol(P_P2P_WEBRTC_DIRECT, "p2p-webrtc-direct", None),
     Protocol(P_P2P_CIRCUIT, "p2p-circuit", None),
+    Protocol(P_WEBTRANSPORT, "webtransport", None),
     Protocol(P_UNIX, "unix", "fspath"),
 ]
 
