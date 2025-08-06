@@ -14,4 +14,4 @@ class Codec(CodecBase):
         return netaddr.IPAddress(string, version=6).packed
 
     def to_string(self, proto, buf):
-        return str(netaddr.IPAddress(int.from_bytes(buf, byteorder='big'), version=6))
+        return str(netaddr.IPAddress(int.from_bytes(buf, byteorder="big"), version=6))

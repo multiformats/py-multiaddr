@@ -14,8 +14,8 @@ class Codec(CodecBase):
 
     def to_bytes(self, proto, string):
         try:
-            addr, port = string.split(':', 1)
-            if addr.endswith('.onion'):
+            addr, port = string.split(":", 1)
+            if addr.endswith(".onion"):
                 addr = addr[:-6]
             if len(addr) != 56:
                 raise ValueError("Invalid onion3 address length")
@@ -31,7 +31,7 @@ class Codec(CodecBase):
                 raise ValueError("Invalid base32 encoding")
             if len(addr_bytes) != 35:
                 raise ValueError("Decoded onion3 address must be 35 bytes")
-            return addr_bytes + port_num.to_bytes(2, byteorder='big')
+            return addr_bytes + port_num.to_bytes(2, byteorder="big")
         except (ValueError, UnicodeEncodeError, binascii.Error) as e:
             raise BinaryParseError(str(e), string.encode(), proto)
 
@@ -40,14 +40,14 @@ class Codec(CodecBase):
             if len(buf) != 37:
                 raise ValueError("Invalid onion3 address length")
             try:
-                addr = base64.b32encode(buf[:35]).decode('ascii').lower()
+                addr = base64.b32encode(buf[:35]).decode("ascii").lower()
             except binascii.Error:
                 raise ValueError("Invalid base32 encoding")
             # Remove padding
-            addr = addr.rstrip('=')
+            addr = addr.rstrip("=")
             if len(addr) != 56:
                 raise ValueError("Invalid onion3 address length")
-            port = str(int.from_bytes(buf[35:], byteorder='big'))
+            port = str(int.from_bytes(buf[35:], byteorder="big"))
             if not 1 <= int(port) <= 65535:
                 raise ValueError("Invalid onion3 port range")
             return f"{addr}:{port}"
