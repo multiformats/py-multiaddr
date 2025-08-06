@@ -16,6 +16,6 @@ class Codec(CodecBase):
 
     def to_string(self, proto, buf):
         try:
-            return str(netaddr.IPAddress(int.from_bytes(buf, byteorder='big'), version=4))
+            return str(netaddr.IPAddress(int.from_bytes(buf, byteorder="big"), version=4))
         except (ValueError, netaddr.AddrFormatError):
             raise BinaryParseError("Invalid IPv4 address bytes", buf, "ip4")

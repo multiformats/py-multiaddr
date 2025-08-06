@@ -85,7 +85,7 @@ result = get_thin_waist_addresses(addr, port=9000)
 
 ## Requirements
 
-- Python 3.9+
+- Python 3.10+
 - `multiaddr` library with `psutil` dependency
 - Network interfaces to demonstrate wildcard expansion
 

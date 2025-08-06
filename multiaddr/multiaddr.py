@@ -1,6 +1,6 @@
 import collections.abc
 from collections.abc import Iterator, Sequence
-from typing import Any, Optional, TypeVar, Union, overload
+from typing import Any, TypeVar, Union, overload
 
 import varint
 
@@ -24,7 +24,7 @@ class MultiAddrKeys(collections.abc.KeysView[Any], collections.abc.Sequence[Any]
         proto = self._mapping.registry.find(proto)
         return collections.abc.Sequence.__contains__(self, proto)
 
-    def __getitem__(self, idx: Union[int, slice]) -> Union[Any, Sequence[Any]]:
+    def __getitem__(self, idx: int | slice) -> Any | Sequence[Any]:
         if isinstance(idx, slice):
             return list(self)[idx]
         if idx < 0:
@@ -62,9 +62,7 @@ class MultiAddrItems(
     @overload
     def __getitem__(self, idx: slice) -> Sequence[tuple[Any, Any]]: ...
 
-    def __getitem__(
-        self, idx: Union[int, slice]
-    ) -> Union[tuple[Any, Any], Sequence[tuple[Any, Any]]]:
+    def __getitem__(self, idx: int | slice) -> tuple[Any, Any] | Sequence[tuple[Any, Any]]:
         if isinstance(idx, slice):
             return list(self)[idx]
         if idx < 0:
@@ -101,7 +99,7 @@ class MultiAddrValues(collections.abc.ValuesView[Any], collections.abc.Sequence[
     def __contains__(self, value: object) -> bool:
         return collections.abc.Sequence.__contains__(self, value)
 
-    def __getitem__(self, idx: Union[int, slice]) -> Union[Any, Sequence[Any]]:
+    def __getitem__(self, idx: int | slice) -> Any | Sequence[Any]:
         if isinstance(idx, slice):
             return list(self)[idx]
         if idx < 0:
@@ -272,7 +270,7 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
             return self.__class__("")
         return self.__class__(self._bytes[:cut_offset])
 
-    def value_for_protocol(self, proto: Any) -> Optional[Any]:
+    def value_for_protocol(self, proto: Any) -> Any | None:
         """Return the value (if any) following the specified protocol
 
         Returns
@@ -465,7 +463,7 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
 
         self._bytes = addr
 
-    def get_peer_id(self) -> Optional[str]:
+    def get_peer_id(self) -> str | None:
         """Get the peer ID from the multiaddr.
 
         For circuit addresses, returns the target peer ID, not the relay peer ID.

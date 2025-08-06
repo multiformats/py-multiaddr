@@ -1,0 +1,1 @@
+Drop python3.9 and run py-upgrade, set up CI, add readthedocs config, updates to Makefile

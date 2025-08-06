@@ -85,7 +85,7 @@ All examples completed!
 
 ## Requirements
 
-- Python 3.9+
+- Python 3.10+
 - py-multiaddr library
 - trio library
 - Internet connection for DNS resolution

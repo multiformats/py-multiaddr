@@ -35,13 +35,7 @@ setup:
 	pip install -r requirements_dev.txt
 
 lint:
-	python -m ruff check --fix
-
-fix:
-	python -m ruff check --fix
-
-typecheck:
-	pre-commit run pyright-pretty --all-files
+	pre-commit run --all-files
 
 test:
 	python -m pytest tests
@@ -56,12 +50,14 @@ coverage:
 	coverage html
 	$(BROWSER) htmlcov/index.html
 
-docs:
+docs-ci:
 	rm -f docs/multiaddr.rst
 	rm -f docs/modules.rst
 	sphinx-apidoc -o docs/ multiaddr
 	$(MAKE) -C docs clean
-	$(MAKE) -C docs html
+	$(MAKE) -C docs html SPHINXOPTS="-W"
+
+docs: docs-ci
 	$(BROWSER) docs/_build/html/index.html
 
 servedocs: docs

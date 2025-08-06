@@ -1,0 +1,41 @@
+name: Run tox
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - github-actions
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  tox:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        toxenv: [core, lint]
+        include:
+          - python-version: "3.10"
+            toxenv: docs
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: |
+          python_version="${{ matrix.python-version }}"
+          toxenv="${{ matrix.toxenv }}"
+          if [[ "$toxenv" == "docs" ]]; then
+            echo "TOXENV=docs" | tee -a "$GITHUB_ENV"
+          else
+            echo "TOXENV=py${python_version}-${toxenv}" | tr -d '.' | tee -a "$GITHUB_ENV"
+          fi
+          python -m pip install --upgrade pip
+          python -m pip install "tox>=4.10"
+      - run: |
+          python -m tox run -r
