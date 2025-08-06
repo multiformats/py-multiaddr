@@ -56,13 +56,18 @@ coverage:
 	coverage html
 	$(BROWSER) htmlcov/index.html
 
-docs:
+docs-base:
 	rm -f docs/multiaddr.rst
 	rm -f docs/modules.rst
 	sphinx-apidoc -o docs/ multiaddr
 	$(MAKE) -C docs clean
+
+docs: docs-base
 	$(MAKE) -C docs html
 	$(BROWSER) docs/_build/html/index.html
+
+docs-ci: docs-base
+	$(MAKE) -C docs html SPHINXOPTS="-W"
 
 servedocs: docs
 	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
