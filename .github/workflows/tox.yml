@@ -23,21 +23,19 @@ jobs:
             toxenv: docs
       fail-fast: false
     steps:
-      - env:
-          python-version: ${{ matrix.python-version }}
-          toxenv: ${{ matrix.toxenv }}
-        run: |
-          if [[ "$toxenv" == 'docs' ]]; then
-            echo 'TOXENV=docs' | tee -a $GITHUB_ENV
-          else
-            echo "TOXENV=py${python-version}-${toxenv}" | tr -d '.' | tee -a "$GITHUB_ENV"
-          fi
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - run: |
+          python_version="${{ matrix.python-version }}"
+          toxenv="${{ matrix.toxenv }}"
+          if [[ "$toxenv" == "docs" ]]; then
+            echo "TOXENV=docs" | tee -a "$GITHUB_ENV"
+          else
+            echo "TOXENV=py${python_version}-${toxenv}" | tr -d '.' | tee -a "$GITHUB_ENV"
+          fi
           python -m pip install --upgrade pip
-          python -m pip install tox
+          python -m pip install "tox>=4.10"
       - run: |
           python -m tox run -r
