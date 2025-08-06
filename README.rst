@@ -10,8 +10,8 @@ py-multiaddr
 .. image:: https://codecov.io/github/multiformats/py-multiaddr/coverage.svg?branch=master
         :target: https://codecov.io/github/multiformats/py-multiaddr?branch=master
 
-.. image:: https://readthedocs.org/projects/multiaddr/badge/?version=latest
-        :target: https://readthedocs.org/projects/multiaddr/?badge=latest
+.. image:: https://readthedocs.org/projects/py-multiaddr/badge/?version=latest
+        :target: https://readthedocs.org/projects/py-multiaddr/?badge=latest
         :alt: Documentation Status
 ..
 
