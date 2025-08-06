@@ -1,5 +1,5 @@
 import importlib
-from typing import Any, Dict, Union
+from typing import Any
 
 # These are special sizes
 LENGTH_PREFIXED_VAR_SIZE = -1
@@ -27,10 +27,10 @@ class NoneCodec(CodecBase):
         return b""
 
 
-CODEC_CACHE: Dict[str, CodecBase] = {}
+CODEC_CACHE: dict[str, CodecBase] = {}
 
 
-def codec_by_name(name: Union[str, None]) -> CodecBase:
+def codec_by_name(name: str | None) -> CodecBase:
     if name is None:  # Special "do nothing - expect nothing" pseudo-codec
         return NoneCodec()
     codec = CODEC_CACHE.get(name)

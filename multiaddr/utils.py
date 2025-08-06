@@ -1,5 +1,5 @@
 import socket
-from typing import Any, Optional
+from typing import Any
 
 import psutil
 
@@ -35,7 +35,7 @@ def is_link_local_ip(ip: str) -> bool:
         return len(parts) == 4 and parts[0] == "169" and parts[1] == "254"
 
 
-def get_multiaddr_options(ma: Multiaddr) -> Optional[dict[str, Any]]:
+def get_multiaddr_options(ma: Multiaddr) -> dict[str, Any] | None:
     """Extract options from a multiaddr (similar to toOptions() in JS).
 
     Returns a dictionary with 'family', 'host', 'transport', and 'port' keys,
@@ -78,7 +78,7 @@ def get_multiaddr_options(ma: Multiaddr) -> Optional[dict[str, Any]]:
 
 
 def get_thin_waist_addresses(
-    ma: Optional[Multiaddr] = None, port: Optional[int] = None
+    ma: Multiaddr | None = None, port: int | None = None
 ) -> list[Multiaddr]:
     """Get all thin waist addresses on the current host that match the family of the
     passed multiaddr and optionally override the port.

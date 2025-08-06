@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union
+from typing import Any
 
 
 class Error(Exception):
@@ -34,8 +34,8 @@ class StringParseError(ParseError):
         self,
         message: str,
         string: str,
-        protocol: Optional[str] = None,
-        original: Optional[Exception] = None,
+        protocol: str | None = None,
+        original: Exception | None = None,
     ) -> None:
         self.message = message
         self.string = string
@@ -43,7 +43,7 @@ class StringParseError(ParseError):
         self.original = original
 
         if protocol:
-            message = "Invalid MultiAddr {!r} protocol {}: {}".format(string, protocol, message)
+            message = f"Invalid MultiAddr {string!r} protocol {protocol}: {message}"
         else:
             message = f"Invalid MultiAddr {string!r}: {message}"
 
@@ -69,8 +69,8 @@ class BinaryParseError(ParseError):
         self,
         message: str,
         binary: bytes,
-        protocol: Union[str, int],
-        original: Optional[Exception] = None,
+        protocol: str | int,
+        original: Exception | None = None,
     ) -> None:
         self.message = message
         self.binary = binary
@@ -119,7 +119,7 @@ class ProtocolExistsError(ProtocolRegistryError):
 class ProtocolNotFoundError(ProtocolRegistryError):
     """No protocol with the given name or code found"""
 
-    def __init__(self, value: Union[str, int], kind: str = "name") -> None:
+    def __init__(self, value: str | int, kind: str = "name") -> None:
         self.value = value
         self.kind = kind
 

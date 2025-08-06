@@ -21,7 +21,7 @@ Example usage:
 
 import logging
 import re
-from typing import Optional, cast
+from typing import cast
 
 import dns.asyncresolver
 import dns.rdataclass
@@ -53,9 +53,7 @@ class DNSResolver(Resolver):
         """Initialize the DNS resolver."""
         self._resolver = dns.asyncresolver.Resolver()
 
-    async def resolve(
-        self, maddr: "Multiaddr", options: Optional[dict] = None
-    ) -> list["Multiaddr"]:
+    async def resolve(self, maddr: "Multiaddr", options: dict | None = None) -> list["Multiaddr"]:
         """
         Resolve a DNS multiaddr to its actual addresses.
 
@@ -132,7 +130,7 @@ class DNSResolver(Resolver):
         hostname: str,
         original_ma: "Multiaddr",
         max_depth: int,
-        signal: Optional[trio.CancelScope] = None,
+        signal: trio.CancelScope | None = None,
     ) -> list["Multiaddr"]:
         """
         Resolve a DNSADDR record according to libp2p specification.
@@ -191,9 +189,9 @@ class DNSResolver(Resolver):
     async def _query_dnsaddr_txt_records(
         self,
         dnsaddr_hostname: str,
-        peer_id: Optional[str],
+        peer_id: str | None,
         max_depth: int,
-        signal: Optional[trio.CancelScope] = None,
+        signal: trio.CancelScope | None = None,
         _debug_level: int = 0,
     ) -> list["Multiaddr"]:
         """
@@ -282,7 +280,7 @@ class DNSResolver(Resolver):
         return results
 
     async def _resolve_dns(
-        self, hostname: str, protocol_code: int, signal: Optional[trio.CancelScope] = None
+        self, hostname: str, protocol_code: int, signal: trio.CancelScope | None = None
     ) -> list["Multiaddr"]:
         """Resolve a DNS record.
 
@@ -344,7 +342,7 @@ class DNSResolver(Resolver):
             raise ResolutionError(f"Failed to resolve DNS {hostname}: {e!s}")
 
     async def _resolve_dns_with_stack(
-        self, maddr: "Multiaddr", signal: Optional[trio.CancelScope] = None
+        self, maddr: "Multiaddr", signal: trio.CancelScope | None = None
     ) -> list["Multiaddr"]:
         """Resolve a DNS record while preserving the rest of the multiaddr stack.
 

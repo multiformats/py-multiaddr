@@ -34,7 +34,7 @@ Example usage:
     print(proto.name)  # 'tcp'
 """
 
-from typing import Any, Optional, Union
+from typing import Any
 
 import varint
 
@@ -87,7 +87,7 @@ class Protocol:
         "name",  # string
     ]
 
-    def __init__(self, code: int, name: str, codec: Optional[str]) -> None:
+    def __init__(self, code: int, name: str, codec: str | None) -> None:
         if not isinstance(code, int):
             raise TypeError("code must be an integer")
         if not isinstance(name, str):
@@ -174,7 +174,7 @@ class ProtocolRegistry:
 
     __slots__ = ("_codes_to_protocols", "_locked", "_names_to_protocols")
 
-    def __init__(self, protocols: Union[list[Protocol], tuple[Protocol, ...]] = ()) -> None:
+    def __init__(self, protocols: list[Protocol] | tuple[Protocol, ...] = ()) -> None:
         self._locked = False
         protocols_tuple = tuple(protocols) if isinstance(protocols, list) else protocols
         self._codes_to_protocols: dict[int, Protocol] = {
@@ -210,7 +210,7 @@ class ProtocolRegistry:
         self._codes_to_protocols[proto.code] = proto
         return proto
 
-    def add_alias_name(self, proto: Union[Protocol, str], alias_name: str) -> None:
+    def add_alias_name(self, proto: Protocol | str, alias_name: str) -> None:
         """Add an alternate name for an existing protocol description to the registry
 
         Raises
@@ -238,7 +238,7 @@ class ProtocolRegistry:
 
         self._names_to_protocols[alias_name] = proto
 
-    def add_alias_code(self, proto: Union[Protocol, int], alias_code: int) -> None:
+    def add_alias_code(self, proto: Protocol | int, alias_code: int) -> None:
         """Add an alternate code for an existing protocol description to the registry
 
         Raises
@@ -316,7 +316,7 @@ class ProtocolRegistry:
         except KeyError:
             raise exceptions.ProtocolNotFoundError(code)
 
-    def find(self, proto: Union[Protocol, str, int]) -> Protocol:
+    def find(self, proto: Protocol | str | int) -> Protocol:
         """Find a protocol by its name, code, or Protocol instance
 
         Raises
@@ -361,7 +361,7 @@ def protocol_with_code(code: int) -> Protocol:
     return REGISTRY.find_by_code(code)
 
 
-def protocol_with_any(proto: Union[Protocol, str, int]) -> Protocol:
+def protocol_with_any(proto: Protocol | str | int) -> Protocol:
     """Find a protocol by its name, code, or Protocol instance
 
     Raises
