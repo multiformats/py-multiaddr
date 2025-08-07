@@ -84,10 +84,16 @@ notes: check-bump validate-newsfragments
 	make docs
 	git commit -m "Compile release notes for v$(UPCOMING_VERSION)"
 
-deploy-prep: clean authors docs dist
-	@echo "Did you remember to bump the version?"
-	@echo "If not, run 'bumpversion {patch, minor, major}' and run this target again"
-	@echo "Don't forget to update HISTORY.rst"
+release: check-bump clean
+	# verify that notes command ran correctly
+	./newsfragments/validate_files.py is-empty
+	CURRENT_SIGN_SETTING=$(git config commit.gpgSign)
+	git config commit.gpgSign true
+	bump-my-version bump $(bump)
+	python -m build
+	git config commit.gpgSign "$(CURRENT_SIGN_SETTING)"
+	git push upstream && git push upstream --tags
+	twine upload dist/*
 
 # helpers
 
