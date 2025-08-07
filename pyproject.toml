@@ -54,6 +54,7 @@ dev = [
     "ruff",
     "towncrier>=24,<25",
     "tox>=4.10.0",
+    "twine",
     "watchdog>=3.0.0",
     "wheel>=0.31.0",
 ]
