@@ -8,6 +8,11 @@ version = "0.0.9"
 description = "Python implementation of jbenet's multiaddr"
 readme = "README.rst"
 authors = [{ name = "Steven Buss", email = "steven.buss@gmail.com" }]
+maintainers = [
+    { name = "pacrob", email = "pacrob@protonmail.com" },
+    { name = "acul71" },
+    { name = "Manu Sheel Gupta", email = "manu@seeta.in" },
+]
 license = { text = "MIT License" }
 keywords = ["multiaddr"]
 classifiers = [
