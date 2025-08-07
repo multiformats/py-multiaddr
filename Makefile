@@ -40,10 +40,6 @@ lint:
 test:
 	python -m pytest tests
 
-test-all:
-	python3.11 -m pytest tests
-	python3.13 -m pytest tests
-
 coverage:
 	coverage run --source multiaddr setup.py test
 	coverage report -m
@@ -70,9 +66,6 @@ authors:
 dist: clean
 	python -m build
 	ls -l dist
-
-install: clean
-	python setup.py install
 
 # build newsfragments into release notes and verify docs build correctly
 notes: check-bump validate-newsfragments
