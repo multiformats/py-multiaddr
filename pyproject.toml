@@ -106,7 +106,7 @@ showcontent = true
 
 [[tool.towncrier.type]]
 directory = "internal"
-name = "Internal Changes - for py-libp2p Contributors"
+name = "Internal Changes - for py-multiaddr Contributors"
 showcontent = true
 
 [[tool.towncrier.type]]
