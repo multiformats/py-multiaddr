@@ -8,6 +8,11 @@ version = "0.0.9"
 description = "Python implementation of jbenet's multiaddr"
 readme = "README.rst"
 authors = [{ name = "Steven Buss", email = "steven.buss@gmail.com" }]
+maintainers = [
+    { name = "pacrob", email = "pacrob@protonmail.com" },
+    { name = "acul71" },
+    { name = "Manu Sheel Gupta", email = "manu@seeta.in" },
+]
 license = { text = "MIT License" }
 keywords = ["multiaddr"]
 classifiers = [
@@ -54,6 +59,7 @@ dev = [
     "ruff",
     "towncrier>=24,<25",
     "tox>=4.10.0",
+    "twine",
     "watchdog>=3.0.0",
     "wheel>=0.31.0",
 ]
@@ -106,7 +112,7 @@ showcontent = true
 
 [[tool.towncrier.type]]
 directory = "internal"
-name = "Internal Changes - for py-libp2p Contributors"
+name = "Internal Changes - for py-multiaddr Contributors"
 showcontent = true
 
 [[tool.towncrier.type]]
@@ -125,7 +131,7 @@ name = "Removals"
 showcontent = true
 
 [tool.bumpversion]
-current_version = "0.0.10"
+current_version = "0.0.9"
 parse = """
     (?P<major>\\d+)
     \\.(?P<minor>\\d+)
