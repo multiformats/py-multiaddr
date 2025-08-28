@@ -1,4 +1,5 @@
 import urllib.parse
+from typing import Any
 
 from ..exceptions import BinaryParseError
 from . import CodecBase
@@ -8,7 +9,7 @@ class Codec(CodecBase):
     SIZE = 0  # Variable size
     IS_PATH = False  # Default to False, will be set to True for ip6zone protocol
 
-    def to_bytes(self, proto, string: str) -> bytes:
+    def to_bytes(self, proto: Any, string: str) -> bytes:
         """Convert a UTF-8 string to its binary representation."""
         if not string:
             raise ValueError("String cannot be empty")
@@ -28,7 +29,7 @@ class Codec(CodecBase):
         # Do not add varint length prefix here; the framework handles it
         return encoded
 
-    def to_string(self, proto, buf: bytes) -> str:
+    def to_string(self, proto: Any, buf: bytes) -> str:
         """Convert a binary UTF-8 string to its string representation."""
         if not buf:
             raise ValueError("Buffer cannot be empty")

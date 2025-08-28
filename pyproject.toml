@@ -34,7 +34,7 @@ dependencies = [
     "netaddr",
     "psutil",
     #"py-cid @ git+https://github.com/acul71/py-cid-fork.git",
-    "py-cid @ git+https://github.com/ipld/py-cid@c8f5e8b9d78a998e2dbf5694f0ca75b1f1a4db36",
+    "py-cid @ git+https://github.com/ipld/py-cid@6c5d62f ",
     "py-multicodec >= 0.2.0",
     "trio-typing>=0.0.4",
     "trio>=0.26.0",
@@ -187,3 +187,21 @@ replace = "current_version = \"{new_version}\""
 filename = "multiaddr/__init__.py"
 search = "__version__ = \"{current_version}\""
 replace = "__version__ = \"{new_version}\""
+
+[tool.mypy]
+python_version = "3.10"
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_incomplete_defs = true
+disallow_subclassing_any = false
+disallow_untyped_calls = true
+disallow_untyped_decorators = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+incremental = false
+strict_equality = true
+strict_optional = true
+warn_redundant_casts = true
+warn_return_any = false
+warn_unused_configs = true
+warn_unused_ignores = false

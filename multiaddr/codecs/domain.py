@@ -1,3 +1,5 @@
+from typing import Any
+
 import idna
 
 from ..exceptions import BinaryParseError
@@ -11,7 +13,7 @@ class Codec(CodecBase):
     SIZE = SIZE
     IS_PATH = IS_PATH
 
-    def to_bytes(self, proto, string: str) -> bytes:
+    def to_bytes(self, proto: Any, string: str) -> bytes:
         """Convert a domain name string to its binary representation (UTF-8),
         validating with IDNA."""
         if not string:
@@ -23,7 +25,7 @@ class Codec(CodecBase):
         except idna.IDNAError as e:
             raise ValueError(f"Invalid domain name: {e!s}")
 
-    def to_string(self, proto, buf: bytes) -> str:
+    def to_string(self, proto: Any, buf: bytes) -> str:
         """Convert a binary domain name to its string representation (UTF-8),
         validating with IDNA."""
         if not buf:
@@ -37,13 +39,13 @@ class Codec(CodecBase):
             raise BinaryParseError(f"Invalid domain name encoding: {e!s}", buf, proto.name, e)
 
 
-def to_bytes(proto, string):
+def to_bytes(proto: Any, string: str) -> bytes:
     # Validate using IDNA, but store as UTF-8
     idna.encode(string, uts46=True)
     return string.encode("utf-8")
 
 
-def to_string(proto, buf):
+def to_string(proto: Any, buf: bytes) -> str:
     string = buf.decode("utf-8")
     # Validate using IDNA
     idna.encode(string, uts46=True)

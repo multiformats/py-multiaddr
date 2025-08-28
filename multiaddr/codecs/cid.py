@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 import base58
 import cid
@@ -93,7 +94,7 @@ class Codec(CodecBase):
     SIZE = SIZE
     IS_PATH = IS_PATH
 
-    def to_bytes(self, proto, string: str) -> bytes:
+    def to_bytes(self, proto: Any, string: str) -> bytes:
         """Convert a CID string to its binary representation."""
         if not string:
             raise ValueError("CID string cannot be empty")
@@ -122,7 +123,7 @@ class Codec(CodecBase):
             logger.debug(f"[DEBUG CID to_bytes] Failed to parse as CIDv1: {e}")
             raise ValueError(f"Invalid CID: {string}")
 
-    def to_string(self, proto, buf: bytes) -> str:
+    def to_string(self, proto: Any, buf: bytes) -> str:
         """Convert a binary CID to its string representation."""
         if not buf:
             raise ValueError("CID buffer cannot be empty")

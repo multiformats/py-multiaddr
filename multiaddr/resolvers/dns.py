@@ -21,7 +21,7 @@ Example usage:
 
 import logging
 import re
-from typing import cast
+from typing import Any, cast
 
 import dns.asyncresolver
 import dns.rdataclass
@@ -49,11 +49,13 @@ class DNSResolver(Resolver):
     MAX_RECURSIVE_DEPTH = 32
     DEFAULT_TIMEOUT = 5.0  # 5 seconds timeout
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the DNS resolver."""
         self._resolver = dns.asyncresolver.Resolver()
 
-    async def resolve(self, maddr: "Multiaddr", options: dict | None = None) -> list["Multiaddr"]:
+    async def resolve(
+        self, maddr: "Multiaddr", options: dict[str, Any] | None = None
+    ) -> list["Multiaddr"]:
         """
         Resolve a DNS multiaddr to its actual addresses.
 
@@ -178,7 +180,7 @@ class DNSResolver(Resolver):
                 with trio.CancelScope() as cancel_scope:  # type: ignore[call-arg]
                     # Set a timeout for DNS resolution
                     cancel_scope.deadline = trio.current_time() + self.DEFAULT_TIMEOUT
-                    cancel_scope.cancelled_caught = True
+                    cancel_scope.cancelled_caught = True  # type: ignore[misc]
 
                     return await self._query_dnsaddr_txt_records(
                         dnsaddr_hostname, peer_id, max_depth, cancel_scope

@@ -326,7 +326,7 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
         """
         from .resolvers.dns import DNSResolver
 
-        resolver = DNSResolver()
+        resolver: DNSResolver = DNSResolver()
         return await resolver.resolve(self)
 
     def _from_string(self, addr: str) -> None:
@@ -357,8 +357,8 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
             if part == "unix":
                 try:
                     # Get the next part as the path value
-                    value = next(parts)
-                    if not value:
+                    unix_path_value = next(parts)
+                    if not unix_path_value:
                         raise exceptions.StringParseError("empty unix path", addr)
 
                     # Join any remaining parts as part of the path
@@ -373,7 +373,7 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
                             break
 
                     if remaining_parts:
-                        value = value + "/" + "/".join(remaining_parts)
+                        unix_path_value = unix_path_value + "/" + "/".join(remaining_parts)
 
                     proto = protocol_with_name("unix")
                     codec = codec_by_name(proto.codec)
@@ -382,7 +382,7 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
 
                     try:
                         self._bytes += varint.encode(proto.code)
-                        buf = codec.to_bytes(proto, value)
+                        buf = codec.to_bytes(proto, unix_path_value)
                         # Add length prefix for variable-sized or zero-sized codecs
                         if codec.SIZE <= 0:
                             self._bytes += varint.encode(len(buf))
@@ -396,11 +396,11 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
 
             # Handle other protocols
             # Split protocol name and value if present
+            protocol_value: str | None = None
             if "=" in part:
-                proto_name, value = part.split("=", 1)
+                proto_name, protocol_value = part.split("=", 1)
             else:
                 proto_name = part
-                value = None
 
             try:
                 proto = protocol_with_name(proto_name)
@@ -409,23 +409,26 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
 
             # If the protocol expects a value, get it
             if proto.codec is not None:
-                if value is None:
+                if protocol_value is None:
                     try:
-                        value = next(parts)
+                        protocol_value = next(parts)
                     except StopIteration:
                         raise exceptions.StringParseError(
                             f"missing value for protocol: {proto_name}", addr
                         )
                 # Validate value (optional: could add more checks here)
                 # If value looks like a protocol name, that's an error
-                try:
-                    protocol_with_name(value)
-                    # If no exception, value is a protocol name, which is not allowed here
-                    raise exceptions.StringParseError(
-                        f"expected value for protocol {proto_name}, got protocol name {value}", addr
-                    )
-                except exceptions.ProtocolNotFoundError:
-                    pass  # value is not a protocol name, so it's valid as a value
+                if protocol_value is not None:
+                    try:
+                        protocol_with_name(protocol_value)
+                        # If no exception, value is a protocol name, which is not allowed here
+                        raise exceptions.StringParseError(
+                            f"expected value for protocol {proto_name}, "
+                            f"got protocol name {protocol_value}",
+                            addr,
+                        )
+                    except exceptions.ProtocolNotFoundError:
+                        pass  # value is not a protocol name, so it's valid as a value
 
             codec = codec_by_name(proto.codec)
             if not codec:
@@ -439,7 +442,7 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
                 if proto.codec is None:
                     continue
 
-                buf = codec.to_bytes(proto, value or "")
+                buf = codec.to_bytes(proto, protocol_value or "")
                 if codec.SIZE <= 0:  # Add length prefix for variable-sized or zero-sized codecs
                     self._bytes += varint.encode(len(buf))
                 if buf:  # Only append buffer if it's not empty
