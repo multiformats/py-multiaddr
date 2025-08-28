@@ -22,16 +22,13 @@ help:
 	@echo "lint - run pre-commit hooks on all files"
 	@echo "typecheck - run mypy and pyrefly type checking"
 	@echo "test - run tests quickly with the default Python"
-	@echo "test-all - run tests with Python 3.11 and 3.13"
 	@echo "coverage - run tests with coverage report"
 	@echo "docs-ci - generate docs for CI"
 	@echo "docs - generate docs and open in browser"
 	@echo "servedocs - serve docs with live reload"
 	@echo "authors - generate AUTHORS file from git"
 	@echo "dist - build package and show contents"
-	@echo "install - install package locally"
 	@echo "notes - consume towncrier newsfragments and update release notes (requires bump parameter)"
-	@echo "deploy-prep - prepare for deployment"
 	@echo "pr - run clean, lint, and test (everything needed before creating a PR)"
 
 clean: clean-build clean-pyc clean-test
@@ -70,7 +67,7 @@ test:
 	python -m pytest tests
 
 coverage:
-	coverage run --source multiaddr setup.py test
+	coverage run --source multiaddr -m pytest tests
 	coverage report -m
 	coverage html
 	$(BROWSER) htmlcov/index.html
