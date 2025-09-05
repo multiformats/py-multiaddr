@@ -33,7 +33,7 @@ dependencies = [
     "idna",
     "netaddr",
     "psutil",
-    "py-cid @ git+https://github.com/ipld/py-cid.git@acul71/new-setup",
+    "py-cid @ git+https://github.com/ipld/py-cid.git@6c5d62f865e380116689d11348a4be82fe4f2703",
     "py-multicodec >= 0.2.0",
     "trio-typing>=0.0.4",
     "trio>=0.26.0",
