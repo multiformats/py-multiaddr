@@ -42,7 +42,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/multiformats/py-multiaddr"
-Download = "https://github.com/multiformats/py-multiaddr/tarball/0.0.9"
+Download = "https://github.com/multiformats/py-multiaddr/tarball/0.0.10"
 
 [project.optional-dependencies]
 dev = [
@@ -178,16 +178,12 @@ search = "version = \"{current_version}\""
 replace = "version = \"{new_version}\""
 
 [[tool.bumpversion.files]]
-filename = "pyproject.toml"
-search = "current_version = \"{current_version}\""
-replace = "current_version = \"{new_version}\""
-
-[[tool.bumpversion.files]]
 filename = "multiaddr/__init__.py"
 search = "__version__ = \"{current_version}\""
 replace = "__version__ = \"{new_version}\""
 
 [[tool.bumpversion.files]]
+filename = "pyproject.toml"
 search = "Download = \"https://github.com/multiformats/py-multiaddr/tarball/{current_version}\""
 replace = "Download = \"https://github.com/multiformats/py-multiaddr/tarball/{new_version}\""
 
