@@ -1,9 +1,0 @@
-Add py-libp2p-style typecheck functionality and PR workflow
-
-- Add make help and make pr targets
-- Add make fix and make typecheck targets
-- Add mypy and pyrefly to dev dependencies
-- Add type stubs for netaddr and psutil
-- Update pre-commit config with local typecheck hooks
-- Update setup target to use pyproject.toml dev dependencies
-- Match py-libp2p workflow: clean → fix → lint → typecheck → test

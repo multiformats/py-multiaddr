@@ -1,4 +1,0 @@
-Fix coverage target and update AUTHORS file
-
-- Fix coverage target to use pytest instead of setup.py test
-- Update AUTHORS file with latest contributors from git history
