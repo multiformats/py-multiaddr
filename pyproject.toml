@@ -187,6 +187,10 @@ filename = "multiaddr/__init__.py"
 search = "__version__ = \"{current_version}\""
 replace = "__version__ = \"{new_version}\""
 
+[[tool.bumpversion.files]]
+search = "Download = 'https://github.com/multiformats/py-multiaddr/tarball/{current_version}'"
+replace = "Download = 'https://github.com/multiformats/py-multiaddr/tarball/{new_version}'"
+
 [tool.mypy]
 python_version = "3.10"
 check_untyped_defs = true
