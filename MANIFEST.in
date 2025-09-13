@@ -6,7 +6,6 @@ include LICENSE-MIT
 include README.rst
 
 recursive-include tests *
-recursive-include docs *.rst conf.py Makefile make.bat
 
 global-include *.pyi
 

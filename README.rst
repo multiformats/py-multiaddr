@@ -258,7 +258,7 @@ Please be aware that all interactions related to multiformats are subject to the
 Development
 -----------
 
-For development setup, see `CONTRIBUTING.rst`_.
+For development setup, see :doc:`contributing`.
 
 .. code-block:: bash
 
@@ -283,7 +283,6 @@ Dual-licensed:
 .. _the issues: https://github.com/multiformats/py-multiaddr/issues
 .. _contributing document: https://github.com/multiformats/multiformats/blob/master/contributing.md
 .. _Code of Conduct: https://github.com/ipfs/community/blob/master/code-of-conduct.md
-.. _CONTRIBUTING.rst: CONTRIBUTING.rst
 .. _standard-readme: https://github.com/RichardLitt/standard-readme
 .. _MIT: LICENSE-MIT
 .. _Apache 2: LICENSE-APACHE2
