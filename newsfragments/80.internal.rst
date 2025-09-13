@@ -1,0 +1,1 @@
+Added full tests and doc. All typecheck passes

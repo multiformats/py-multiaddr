@@ -3,33 +3,13 @@ History
 
 .. towncrier release notes start
 
-py-multiaddr v0.0.10 (2025-08-28)
----------------------------------
+0.0.9 (2019-12-23)
+------------------
 
-Improved Documentation
-~~~~~~~~~~~~~~~~~~~~~~
-
-- Adds example of DNS address resolution. (`#75 <https://github.com/multiformats/py-multiaddr/issues/75>`__)
-
-
-Features
-~~~~~~~~
-
-- Added support for CIDv1 format and improved sequence protocol handling with enhanced indexing and slicing operations. (`#65 <https://github.com/multiformats/py-multiaddr/issues/65>`__)
-- Add quic tests. new quic example (`#66 <https://github.com/multiformats/py-multiaddr/issues/66>`__)
-- Adds DNSADDR protocol support. (`#68 <https://github.com/multiformats/py-multiaddr/issues/68>`__)
-- Add thin waist address validation (`#72 <https://github.com/multiformats/py-multiaddr/issues/72>`__)
-- Adds support for p2p-circuit addresses. (`#74 <https://github.com/multiformats/py-multiaddr/issues/74>`__)
-- Added full support for dnsaddr protocol and dns4 and dns6 as well (`#80 <https://github.com/multiformats/py-multiaddr/issues/80>`__)
-
-
-Internal Changes - for py-multiaddr Contributors
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-- Enhanced type safety with comprehensive type hints, improved validation, and expanded test coverage for better code reliability and maintainability. (`#65 <https://github.com/multiformats/py-multiaddr/issues/65>`__)
-- Added full tests and doc. All typecheck passes (`#80 <https://github.com/multiformats/py-multiaddr/issues/80>`__)
-- Drop python3.9 and run py-upgrade, set up CI, add readthedocs config, updates to Makefile (`#85 <https://github.com/multiformats/py-multiaddr/issues/85>`__)
-
+* Add Multiaddr.__hash__ method for hashable multiaddrs
+* Add onion3 address support
+* Fix broken reST and links in documentation
+* Remove emoji from README.rst
 
 0.0.7 (2019-5-8)
 ----------------

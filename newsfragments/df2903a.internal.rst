@@ -1,0 +1,10 @@
+Fix mypy type annotation errors
+
+- Add missing type annotations to all codec methods (to_bytes, to_string)
+- Add return type annotations to __str__ methods in exceptions
+- Fix bytes formatting issue in BinaryParseError.__str__
+- Add proper type annotations to DNS resolver methods
+- Fix dict type parameters in resolver options
+- Add type annotation to DNSResolver instance in multiaddr.py
+- Break long function signature to comply with line length limits
+- All changes verified with mypy, tests, and make pr

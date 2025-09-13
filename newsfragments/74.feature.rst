@@ -1,0 +1,1 @@
+Adds support for p2p-circuit addresses.
