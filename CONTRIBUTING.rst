@@ -20,6 +20,7 @@ Report bugs at https://github.com/multiformats/py-multiaddr/issues.
 If you are reporting a bug, please include:
 
 * Your operating system name and version.
+* Python version.
 * Any details about your local setup that might be helpful in troubleshooting.
 * Detailed steps to reproduce the bug.
 
@@ -62,13 +63,13 @@ Ready to contribute? Here's how to set up `multiaddr` for local development.
 1. Fork the `multiaddr` repo on GitHub.
 2. Clone your fork locally::
 
-    $ git clone git@github.com:your_name_here/multiaddr.git
+    $ git clone git@github.com:your_name_here/py-multiaddr.git
 
-3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development::
+3. Install your local copy into a virtual environment::
 
-    $ mkvirtualenv multiaddr
-    $ cd multiaddr/
-    $ python setup.py develop
+    $ python -m venv venv
+    $ source venv/bin/activate  # On Windows: venv\Scripts\activate
+    $ pip install -e ".[dev]"
 
 4. Create a branch for local development::
 
@@ -76,13 +77,19 @@ Ready to contribute? Here's how to set up `multiaddr` for local development.
 
    Now you can make your changes locally.
 
-5. When you're done making changes, check that your changes pass flake8 and the tests, including testing other Python versions with tox::
+5. When you're done making changes, run the development workflow::
 
-    $ flake8 multiaddr tests
-    $ python setup.py test
-    $ tox
+    $ make pr
 
-   To get flake8 and tox, just pip install them into your virtualenv.
+   This will run: clean → fix → lint → typecheck → test
+
+   Or run individual commands::
+
+    $ make fix      # Fix formatting & linting issues with ruff
+    $ make lint     # Run pre-commit hooks on all files
+    $ make typecheck # Run mypy and pyrefly type checking
+    $ make test     # Run tests with pytest
+    $ make coverage # Run tests with coverage report
 
 6. Commit your changes and push your branch to GitHub::
 
@@ -101,13 +108,41 @@ Before you submit a pull request, check that it meets these guidelines:
 2. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring, and add the
    feature to the list in README.rst.
-3. The pull request should work for Python 2.7, 3.4+ and PyPy3. Check
-   https://travis-ci.org/multiformats/py-multiaddr/pull_requests
-   and make sure that the tests pass for all supported Python versions.
+3. The pull request should work for Python 3.10+ (Python 3.9 support was dropped).
+4. All type checking must pass (mypy and pyrefly).
+5. All pre-commit hooks must pass.
+6. Code must be formatted with ruff.
+
+Development Workflow
+--------------------
+
+The project follows a py-libp2p-style development workflow:
+
+1. **Clean**: Remove build artifacts
+2. **Fix**: Auto-fix formatting and linting issues
+3. **Lint**: Run pre-commit hooks
+4. **Typecheck**: Run mypy and pyrefly
+5. **Test**: Run the test suite
+
+Use ``make pr`` to run the complete workflow.
+
+Release Notes
+-------------
+
+When contributing, please add a newsfragment file in the ``newsfragments/`` directory.
+See ``newsfragments/README.md`` for details on the format and types.
 
 Tips
 ----
 
 To run a subset of tests::
 
-    $ python -m unittest tests.test_multiaddr
+    $ python -m pytest tests/test_multiaddr.py
+
+To run with coverage::
+
+    $ make coverage
+
+To build documentation::
+
+    $ make docs

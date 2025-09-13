@@ -41,7 +41,7 @@ def string_to_bytes(string: str) -> bytes:
         try:
             logger.debug(f"[DEBUG string_to_bytes] Raw CID value before encoding: {value}")
             buf = codec.to_bytes(proto, value)
-            logger.debug(f"[DEBUG string_to_bytes] Generated buf: proto={proto.name}, buf={buf}")
+            logger.debug(f"[DEBUG string_to_bytes] Generated buf: proto={proto.name}, buf={buf!r}")
         except Exception as exc:
             logger.debug(f"[DEBUG string_to_bytes] Error: {exc}")
             raise exceptions.StringParseError(str(exc), string) from exc
@@ -93,11 +93,11 @@ def bytes_to_string(buf: bytes) -> str:
                     value = codec.to_string(proto, bs.read(size))
                 logger.debug(f"[DEBUG] bytes_to_string: proto={proto.name}, value='{value}'")
                 if codec.IS_PATH and value.startswith("/"):
-                    strings.append(f"/{proto.name}{value}")
+                    strings.append("/" + proto.name + value)  # type: ignore[arg-type]
                 else:
-                    strings.append(f"/{proto.name}/{value}")
+                    strings.append("/" + proto.name + "/" + value)  # type: ignore[arg-type]
             else:
-                strings.append(f"/{proto.name}")
+                strings.append("/" + proto.name)  # type: ignore[arg-type]
         except Exception as exc:
             # Use the code as the protocol identifier if proto is not available
             # Ensure we always have either a string or an integer

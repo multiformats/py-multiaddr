@@ -49,7 +49,7 @@ class StringParseError(ParseError):
 
         super().__init__(message)
 
-    def __str__(self):
+    def __str__(self) -> str:
         base = super().__str__()
         if self.protocol is not None:
             base += f" (protocol: {self.protocol})"
@@ -81,12 +81,12 @@ class BinaryParseError(ParseError):
 
         super().__init__(message)
 
-    def __str__(self):
+    def __str__(self) -> str:
         base = super().__str__()
         if self.protocol is not None:
             base += f" (protocol: {self.protocol})"
         if self.binary is not None:
-            base += f" (binary: {self.binary})"
+            base += f" (binary: {self.binary!r})"
         if self.original is not None:
             base += f" (cause: {self.original})"
         return base

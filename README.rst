@@ -4,8 +4,8 @@ py-multiaddr
 .. image:: https://img.shields.io/pypi/v/multiaddr.svg
         :target: https://pypi.python.org/pypi/multiaddr
 
-.. image:: https://api.travis-ci.com/multiformats/py-multiaddr.svg?branch=master
-        :target: https://travis-ci.com/multiformats/py-multiaddr
+.. image:: https://github.com/multiformats/py-multiaddr/actions/workflows/ci.yml/badge.svg
+        :target: https://github.com/multiformats/py-multiaddr/actions
 
 .. image:: https://codecov.io/github/multiformats/py-multiaddr/coverage.svg?branch=master
         :target: https://codecov.io/github/multiformats/py-multiaddr?branch=master
@@ -23,6 +23,19 @@ py-multiaddr
 
 
 .. contents:: :local:
+
+Installation
+============
+
+.. code-block:: bash
+
+    pip install multiaddr
+
+Requirements
+------------
+
+- Python 3.10+
+- trio (for async DNS resolution)
 
 Usage
 =====
@@ -217,10 +230,22 @@ Multiaddr provides thin waist address validation functionality to process multia
 
 For comprehensive examples including error handling, practical usage scenarios, and detailed network interface information, see the `thin waist examples <https://github.com/multiformats/py-multiaddr/tree/master/examples/thin_waist>`_ in the examples directory.
 
+Features
+========
+
+- **Multiaddr Protocol Support**: Full support for the multiaddr specification
+- **DNS Resolution**: Async DNS and DNSADDR resolution with trio
+- **Thin Waist Validation**: Network interface discovery and wildcard expansion
+- **Protocol Support**: IPv4, IPv6, TCP, UDP, DNS, DNS4, DNS6, DNSADDR, p2p, p2p-circuit, onion, onion3, quic, tls, and more
+- **Type Safety**: Full type hints and mypy support
+- **Modern Python**: Python 3.10+ support with modern tooling
+
 Maintainers
 ===========
 
 Original author: `@sbuss`_.
+
+Current maintainers: `@acul71`_, `@pacrob`_, `@manusheel`_.
 
 Contribute
 ==========
@@ -229,6 +254,23 @@ Contributions welcome. Please check out `the issues`_.
 
 Check out our `contributing document`_ for more information on how we work, and about contributing in general.
 Please be aware that all interactions related to multiformats are subject to the IPFS `Code of Conduct`_.
+
+Development
+-----------
+
+For development setup, see :doc:`contributing`.
+
+.. code-block:: bash
+
+    # Clone the repository
+    git clone https://github.com/multiformats/py-multiaddr.git
+    cd py-multiaddr
+
+    # Install in development mode
+    pip install -e ".[dev]"
+
+    # Run the development workflow
+    make pr
 
 License
 =======
@@ -245,3 +287,6 @@ Dual-licensed:
 .. _MIT: LICENSE-MIT
 .. _Apache 2: LICENSE-APACHE2
 .. _`@sbuss`: https://github.com/sbuss
+.. _`@acul71`: https://github.com/acul71
+.. _`@pacrob`: https://github.com/pacrob
+.. _`@manusheel`: https://github.com/manusheel

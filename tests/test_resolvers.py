@@ -201,7 +201,7 @@ async def test_resolve_cancellation_with_error():
     """Test that DNS resolution can be cancelled."""
     ma = Multiaddr("/dnsaddr/nonexistent.example.com")
     signal = trio.CancelScope()  # type: ignore[call-arg]
-    signal.cancelled_caught = True
+    signal.cancelled_caught = True  # type: ignore[misc]
     dns_resolver = DNSResolver()
 
     # Mock the DNS resolver to simulate a slow lookup that can be cancelled

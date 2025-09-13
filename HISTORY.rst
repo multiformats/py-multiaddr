@@ -3,6 +3,23 @@ History
 
 .. towncrier release notes start
 
+0.0.10 (2025-6-18)
+------------------
+
+* Fix Type Issues and add strict type checks using Ruff & Pyright
+* Spec updates, Python 3.4- unsupport & custom registries by @ntninja in #59
+* add quic-v1 protocol by @justheuristic in #63
+* Fix/typecheck by @acul71 in #65
+* chore: rm local pyrightconfig.json by @arcinston in #70
+
+0.0.9 (2019-12-23)
+------------------
+
+* Add Multiaddr.__hash__ method for hashable multiaddrs
+* Add onion3 address support
+* Fix broken reST and links in documentation
+* Remove emoji from README.rst
+
 0.0.7 (2019-5-8)
 ----------------
 

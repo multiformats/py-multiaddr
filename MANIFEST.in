@@ -1,11 +1,15 @@
 include AUTHORS
 include CONTRIBUTING.rst
 include HISTORY.rst
-include LICENSE
+include LICENSE-APACHE2
+include LICENSE-MIT
 include README.rst
 
 recursive-include tests *
+
+global-include *.pyi
+
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
-
-recursive-include docs *.rst conf.py Makefile make.bat
+prune .tox
+prune venv*

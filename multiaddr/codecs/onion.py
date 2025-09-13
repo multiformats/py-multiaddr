@@ -1,5 +1,6 @@
 import base64
 import binascii
+from typing import Any
 
 from ..codecs import CodecBase
 from ..exceptions import BinaryParseError
@@ -12,7 +13,7 @@ class Codec(CodecBase):
     SIZE = SIZE
     IS_PATH = IS_PATH
 
-    def to_bytes(self, proto, string):
+    def to_bytes(self, proto: Any, string: str) -> bytes:
         try:
             addr, port = string.split(":", 1)
             if addr.endswith(".onion"):
@@ -32,7 +33,7 @@ class Codec(CodecBase):
         except (ValueError, UnicodeEncodeError, binascii.Error) as e:
             raise BinaryParseError(str(e), string.encode(), proto)
 
-    def to_string(self, proto, buf):
+    def to_string(self, proto: Any, buf: bytes) -> str:
         try:
             if len(buf) != 12:  # 10 bytes for address + 2 bytes for port
                 raise ValueError("Invalid onion address length")

@@ -1,5 +1,6 @@
 import logging
 import urllib.parse
+from typing import Any
 
 from ..exceptions import BinaryParseError
 from . import LENGTH_PREFIXED_VAR_SIZE, CodecBase
@@ -14,7 +15,7 @@ class Codec(CodecBase):
     SIZE = SIZE
     IS_PATH = IS_PATH
 
-    def to_bytes(self, proto, string: str) -> bytes:
+    def to_bytes(self, proto: Any, string: str) -> bytes:
         """Convert a filesystem path to its binary representation."""
         logger.debug(f"[DEBUG fspath.to_bytes] input value: {string}")
         if not string:
@@ -35,12 +36,12 @@ class Codec(CodecBase):
 
         # Encode as UTF-8
         encoded = string.encode("utf-8")
-        logger.debug(f"[DEBUG fspath.to_bytes] encoded bytes: {encoded}")
+        logger.debug(f"[DEBUG fspath.to_bytes] encoded bytes: {encoded!r}")
         return encoded
 
-    def to_string(self, proto, buf: bytes) -> str:
+    def to_string(self, proto: Any, buf: bytes) -> str:
         """Convert a binary filesystem path to its string representation."""
-        logger.debug(f"[DEBUG fspath.to_string] input bytes: {buf}")
+        logger.debug(f"[DEBUG fspath.to_string] input bytes: {buf!r}")
         if not buf:
             raise ValueError("Path buffer cannot be empty")
 
