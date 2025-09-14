@@ -1,5 +1,4 @@
 import pytest
-import struct
 
 from multiaddr.codecs import memory
 from multiaddr.exceptions import BinaryParseError
@@ -19,6 +18,7 @@ def test_to_bytes_and_to_string_roundtrip():
         out = codec.to_string(None, b)
         assert out == s
 
+
 def test_invalid_string_to_bytes():
     codec = memory.Codec()
 
@@ -33,6 +33,7 @@ def test_invalid_string_to_bytes():
     # too large
     with pytest.raises(ValueError):
         codec.to_bytes(None, str(2**64))
+
 
 def test_invalid_bytes_to_string():
     codec = memory.Codec()
@@ -53,6 +54,7 @@ def test_specific_encoding():
     expected_bytes = b"\x00\x00\x00\x00\x00\x00\x00*"
     assert codec.to_bytes(None, "42") == expected_bytes
     assert codec.to_string(None, expected_bytes) == "42"
+
 
 def test_memory_validate_function():
     # Directly test the helper
