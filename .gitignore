@@ -47,6 +47,8 @@ nosetests.xml
 coverage.xml
 *,cover
 .hypothesis/
+.mypy_cache
+.ruff_cache
 
 # Translations
 *.mo
@@ -67,3 +69,7 @@ target/
 
 # Editor vscode
 .vscode/
+
+# Virtual environments
+venv
+.venv
