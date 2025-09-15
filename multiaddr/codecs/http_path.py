@@ -46,4 +46,3 @@ class Codec(CodecBase):
         """
         if len(b) == 0:
             raise ValueError("Empty http path is not allowed")
-

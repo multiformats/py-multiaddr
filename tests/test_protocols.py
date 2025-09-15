@@ -2,7 +2,7 @@ import pytest
 import varint
 
 from multiaddr import Multiaddr, exceptions, protocols
-from multiaddr.codecs import memory
+from multiaddr.codecs import http_path, memory
 from multiaddr.exceptions import BinaryParseError
 
 
@@ -270,3 +270,48 @@ def test_memory_integration_invalid_values():
     with pytest.raises(ValueError):
         Multiaddr(f"/memory/{2**64}")
 
+
+def test_http_path_bytes_string_roundtrip():
+    codec = http_path.Codec()
+
+    # some valid HTTP path strings
+    for s in ["/foo", "/foo/bar", "/a b", "/こんにちは", "/path/with/special!@#"]:
+        b = codec.to_bytes(None, s)
+        assert isinstance(b, bytes)
+        out = codec.to_string(None, b)
+        # URL-escaped roundtrip should match quote/unquote behavior
+        from urllib.parse import quote
+
+        assert out == quote(s)
+
+
+def test_http_path_empty_string_raises():
+    codec = http_path.Codec()
+    with pytest.raises(ValueError):
+        codec.to_bytes(None, "")
+
+
+def test_http_path_empty_bytes_raises():
+    codec = http_path.Codec()
+    with pytest.raises(BinaryParseError):
+        codec.to_string(None, b"")
+
+
+def test_http_path_special_characters():
+    codec = http_path.Codec()
+    path = "/foo bar/あいうえお"
+    b = codec.to_bytes(None, path)
+    from urllib.parse import quote
+
+    assert codec.to_string(None, b) == quote(path)
+
+
+def test_http_path_validate_function():
+    codec = http_path.Codec()
+
+    # valid path
+    codec.validate(b"/valid/path")  # should not raise
+
+    # empty path
+    with pytest.raises(ValueError):
+        codec.validate(b"")
