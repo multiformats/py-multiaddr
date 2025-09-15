@@ -1,5 +1,6 @@
 import pytest
 
+from multiaddr import protocols
 from multiaddr.exceptions import (
     BinaryParseError,
     ProtocolLookupError,
@@ -802,3 +803,25 @@ def test_decapsulate_code():
     # No-op on empty
     ma3 = Multiaddr("")
     assert str(ma3.decapsulate_code(P_TCP)) == ""
+
+
+def test_memory_protocol_integration():
+    ma = Multiaddr("/memory/12345")
+    assert str(ma) == "/memory/12345"
+    assert len(ma.protocols()) == 1
+    assert ma.protocols()[0].name == "memory"  # type: ignore
+    assert ma.value_for_protocol(777) == "12345"
+
+    # Binary rountrip
+    binary = ma.to_bytes()
+    reconstructed = Multiaddr(binary)
+    assert str(reconstructed) == str(ma)
+
+
+def test_memory_protocol_properties():
+    proto = protocols.Protocol(protocols.P_MEMORY, "memory", "memory")
+    assert proto.size == 64  # 8 bytes/ 64 bits
+    assert not proto.path  # Not a path protocol
+    assert proto.code == 777
+    assert proto.name == "memory"
+    assert proto.codec == "memory"

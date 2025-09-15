@@ -167,7 +167,7 @@ PROTOCOLS = [
     Protocol(P_P2P_CIRCUIT, "p2p-circuit", None),
     Protocol(P_WEBTRANSPORT, "webtransport", None),
     Protocol(P_UNIX, "unix", "fspath"),
-    Protocol(P_MEMORY, "memory", None),
+    Protocol(P_MEMORY, "memory", "memory"),
 ]
 
 

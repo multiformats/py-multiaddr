@@ -1,7 +1,9 @@
 import pytest
 import varint
 
-from multiaddr import exceptions, protocols
+from multiaddr import Multiaddr, exceptions, protocols
+from multiaddr.codecs import memory
+from multiaddr.exceptions import BinaryParseError
 
 
 def test_code_to_varint():
@@ -180,3 +182,90 @@ def test_add_protocol_lock(valid_params):
 def test_protocol_repr():
     proto = protocols.protocol_with_name("ip4")
     assert "Protocol(code=4, name='ip4', codec='ip4')" == repr(proto)
+
+
+def test_to_bytes_and_to_string_roundtrip():
+    codec = memory.Codec()
+
+    # some valid values
+    for val in [0, 1, 42, 2**32, 2**64 - 1]:
+        s = str(val)
+        b = codec.to_bytes(None, s)
+        # must be exactly 8 bytes
+        assert isinstance(b, bytes)
+        assert len(b) == 8
+        # roundtrip back to string
+        out = codec.to_string(None, b)
+        assert out == s
+
+
+def test_invalid_string_to_bytes():
+    codec = memory.Codec()
+
+    # not a number
+    with pytest.raises(ValueError):
+        codec.to_bytes(None, "abc")
+
+    # negative number
+    with pytest.raises(ValueError):
+        codec.to_bytes(None, "-1")
+
+    # too large
+    with pytest.raises(ValueError):
+        codec.to_bytes(None, str(2**64))
+
+
+def test_invalid_bytes_to_string():
+    codec = memory.Codec()
+
+    # too short
+    with pytest.raises(BinaryParseError):
+        codec.to_string(None, b"\x00\x01")
+
+    # too long
+    with pytest.raises(BinaryParseError):
+        codec.to_string(None, b"\x00" * 9)
+
+
+def test_specific_encoding():
+    codec = memory.Codec()
+
+    # 42 encoded in big-endian
+    expected_bytes = b"\x00\x00\x00\x00\x00\x00\x00*"
+    assert codec.to_bytes(None, "42") == expected_bytes
+    assert codec.to_string(None, expected_bytes) == "42"
+
+
+def test_memory_validate_function():
+    # Directly test the helper
+    codec = memory.Codec()
+
+    # Valid case
+    codec.memory_validate(b"\x00" * 8)  # should not raise
+
+    # Invalid length
+    with pytest.raises(ValueError):
+        codec.memory_validate(b"\x00" * 7)
+
+
+def test_memory_integration_edge_values():
+    # Minimum (0)
+    ma0 = Multiaddr("/memory/0")
+    assert str(ma0) == "/memory/0"
+    assert ma0.value_for_protocol(777) == "0"
+
+    # Maximum (2**64 - 1)
+    max_val = str(2**64 - 1)
+    mamax = Multiaddr(f"/memory/{max_val}")
+    assert str(mamax) == f"/memory/{max_val}"
+    assert mamax.value_for_protocol(777) == max_val
+
+
+def test_memory_integration_invalid_values():
+    # Negative number
+    with pytest.raises(ValueError):
+        Multiaddr("/memory/-1")
+
+    # Too large (overflow > uint64)
+    with pytest.raises(ValueError):
+        Multiaddr(f"/memory/{2**64}")
