@@ -48,6 +48,8 @@ clean-pyc:
 
 clean-test:
 	rm -fr .tox/
+	rm -fr .mypy_cache
+	rm -fr .ruff_cache
 	rm -f .coverage
 	rm -fr htmlcov/
 
