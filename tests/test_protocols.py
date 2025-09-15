@@ -269,3 +269,4 @@ def test_memory_integration_invalid_values():
     # Too large (overflow > uint64)
     with pytest.raises(ValueError):
         Multiaddr(f"/memory/{2**64}")
+
