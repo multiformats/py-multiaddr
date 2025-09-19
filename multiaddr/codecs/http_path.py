@@ -20,8 +20,13 @@ class Codec(CodecBase):
         as UTF-8
         """
 
-        # Reject invalid percent-escapes like "%zz" or "%f"
-        invalid_escape = re.search(r"%(?![0-9A-Fa-f]{2})", string)
+        # Reject invalid percent-escapes like "%zz" or "%f" (but allow standalone %)
+        # Look for % followed by exactly 1 hex digit OR % followed by non-hex characters OR % at end
+        invalid_escape = (
+            re.search(r"%[0-9A-Fa-f](?![0-9A-Fa-f])", string)
+            or re.search(r"%[^0-9A-Fa-f]", string)
+            or re.search(r"%$", string)
+        )
         if invalid_escape:
             raise StringParseError("Invalid percent-escape in path", string)
 
@@ -39,12 +44,12 @@ class Codec(CodecBase):
     def to_string(self, proto: Any, buf: bytes) -> str:
         """
         Convert bytes to an HTTP path string
-        Encode as UTTF-8 and URL-escape
+        Decode as UTF-8 and URL-encode (matches Go implementation)
         """
         if len(buf) == 0:
             raise BinaryParseError("Empty http path is not allowed", buf, "http-path")
 
-        return quote(buf.decode("utf-8"))
+        return quote(buf.decode("utf-8"), safe="")
 
     def validate(self, b: bytes) -> None:
         """

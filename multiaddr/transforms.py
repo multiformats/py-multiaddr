@@ -93,6 +93,7 @@ def bytes_to_string(buf: bytes) -> str:
                     value = codec.to_string(proto, bs.read(size))
                 logger.debug(f"[DEBUG] bytes_to_string: proto={proto.name}, value='{value}'")
                 if codec.IS_PATH and value.startswith("/"):
+                    # For path protocols, the codec already handles URL encoding
                     strings.append("/" + proto.name + value)  # type: ignore[arg-type]
                 else:
                     strings.append("/" + proto.name + "/" + value)  # type: ignore[arg-type]

@@ -832,8 +832,8 @@ def test_http_path_multiaddr_roundtrip():
     """Test basic http-path in multiaddr string roundtrip"""
     test_cases = [
         "/http-path/foo",
-        "/http-path/foo/bar",
-        "/http-path/api/v1/users",
+        "/http-path/foo%2Fbar",  # URL-encoded forward slashes
+        "/http-path/api%2Fv1%2Fusers",  # URL-encoded forward slashes
     ]
 
     for addr_str in test_cases:
@@ -848,10 +848,16 @@ def test_http_path_multiaddr_roundtrip():
 def test_http_path_url_encoding():
     """Test special characters and URL encoding behavior"""
     test_cases = [
-        ("/foo bar", "/foo%20bar"),
-        ("/path/with/special!@#", "/path/with/special%21%40%23"),
-        ("/こんにちは", "/%E3%81%93%E3%82%93%E3%81%AB%E3%81%A1%E3%81%AF"),
-        ("/tmp/bar", "/tmp%2Fbar"),  # Forward slash encoding
+        ("/foo%20bar", "/foo%20bar"),  # Already URL-encoded input
+        (
+            "/path%2Fwith%2Fspecial%21%40%23",
+            "/path%2Fwith%2Fspecial%21%40%23",
+        ),  # Already URL-encoded input
+        (
+            "/%E3%81%93%E3%82%93%E3%81%AB%E3%81%A1%E3%81%AF",
+            "/%E3%81%93%E3%82%93%E3%81%AB%E3%81%A1%E3%81%AF",
+        ),  # Already URL-encoded input
+        ("/tmp%2Fbar", "/tmp%2Fbar"),  # Already URL-encoded input
     ]
 
     for input_path, expected_encoded in test_cases:
@@ -864,8 +870,8 @@ def test_http_path_url_encoding():
 def test_http_path_in_complex_multiaddr():
     """Test http-path as part of larger multiaddr chains"""
     test_cases = [
-        ("/ip4/127.0.0.1/tcp/443/tls/http/http-path/api/v1", "api/v1"),
-        ("/ip4/127.0.0.1/tcp/80/http/http-path/static/css", "static/css"),
+        ("/ip4/127.0.0.1/tcp/443/tls/http/http-path/api%2Fv1", "api%2Fv1"),
+        ("/ip4/127.0.0.1/tcp/80/http/http-path/static%2Fcss", "static%2Fcss"),
         ("/dns/example.com/tcp/443/tls/http/http-path/docs", "docs"),
     ]
 
@@ -898,8 +904,8 @@ def test_http_path_value_extraction():
     """Test extracting http-path values from multiaddr"""
     test_cases = [
         ("/http-path/foo", "foo"),
-        ("/http-path/foo/bar", "foo/bar"),
-        ("/http-path/api/v1/users", "api/v1/users"),
+        ("/http-path/foo%2Fbar", "foo%2Fbar"),
+        ("/http-path/api%2Fv1%2Fusers", "api%2Fv1%2Fusers"),
         ("/ip4/127.0.0.1/tcp/80/http/http-path/docs", "docs"),
     ]
 
@@ -912,12 +918,12 @@ def test_http_path_value_extraction():
 def test_http_path_edge_cases():
     """Test edge cases and special character handling"""
 
-    # Test with various special characters
+    # Test with various special characters (URL-encoded input)
     special_paths = [
-        "path with spaces",
-        "path/with/multiple/slashes",
-        "path/with/unicode/测试",
-        "path/with/symbols!@#$%^&*()",
+        "path%20with%20spaces",
+        "path%2Fwith%2Fmultiple%2Fslashes",
+        "path%2Fwith%2Funicode%2F%E6%B5%8B%E8%AF%95",
+        "path%2Fwith%2Fsymbols%21%40%23%24%25%5E%26%2A%28%29",
     ]
 
     for path in special_paths:

@@ -274,15 +274,16 @@ def test_memory_integration_invalid_values():
 def test_http_path_bytes_string_roundtrip():
     codec = http_path.Codec()
 
-    # some valid HTTP path strings
+    # some valid HTTP path strings (URL-encoded input as expected by multiaddr system)
+    from urllib.parse import quote
+
     for s in ["/foo", "/foo/bar", "/a b", "/こんにちは", "/path/with/special!@#"]:
-        b = codec.to_bytes(None, s)
+        encoded_s = quote(s, safe="")  # Use same encoding as codec
+        b = codec.to_bytes(None, encoded_s)
         assert isinstance(b, bytes)
         out = codec.to_string(None, b)
-        # URL-escaped roundtrip should match quote/unquote behavior
-        from urllib.parse import quote
-
-        assert out == quote(s)
+        # Should return the same URL-encoded string
+        assert out == encoded_s
 
 
 def test_http_path_empty_string_raises():
@@ -300,10 +301,12 @@ def test_http_path_empty_bytes_raises():
 def test_http_path_special_characters():
     codec = http_path.Codec()
     path = "/foo bar/あいうえお"
-    b = codec.to_bytes(None, path)
     from urllib.parse import quote
 
-    assert codec.to_string(None, b) == quote(path)
+    encoded_path = quote(path, safe="")  # Use same encoding as codec
+    b = codec.to_bytes(None, encoded_path)
+
+    assert codec.to_string(None, b) == encoded_path
 
 
 def test_http_path_validate_function():
