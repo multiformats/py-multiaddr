@@ -10,6 +10,7 @@ from multiaddr.exceptions import (
 from multiaddr.multiaddr import Multiaddr
 from multiaddr.protocols import (
     P_DNS,
+    P_HTTP_PATH,
     P_IP4,
     P_IP6,
     P_P2P,
@@ -825,3 +826,102 @@ def test_memory_protocol_properties():
     assert proto.code == 777
     assert proto.name == "memory"
     assert proto.codec == "memory"
+
+
+def test_http_path_multiaddr_roundtrip():
+    """Test basic http-path in multiaddr string roundtrip"""
+    test_cases = [
+        "/http-path/foo",
+        "/http-path/foo/bar",
+        "/http-path/api/v1/users",
+    ]
+
+    for addr_str in test_cases:
+        m = Multiaddr(addr_str)
+        assert str(m) == addr_str
+        # Verify protocol value extraction
+        path_value = m.value_for_protocol(P_HTTP_PATH)
+        expected_path = addr_str.replace("/http-path/", "")
+        assert path_value == expected_path
+
+
+def test_http_path_url_encoding():
+    """Test special characters and URL encoding behavior"""
+    test_cases = [
+        ("/foo bar", "/foo%20bar"),
+        ("/path/with/special!@#", "/path/with/special%21%40%23"),
+        ("/こんにちは", "/%E3%81%93%E3%82%93%E3%81%AB%E3%81%A1%E3%81%AF"),
+        ("/tmp/bar", "/tmp%2Fbar"),  # Forward slash encoding
+    ]
+
+    for input_path, expected_encoded in test_cases:
+        addr_str = f"/http-path{input_path}"
+        m = Multiaddr(addr_str)
+        # The string representation should show URL-encoded path
+        assert str(m) == f"/http-path{expected_encoded}"
+
+
+def test_http_path_in_complex_multiaddr():
+    """Test http-path as part of larger multiaddr chains"""
+    test_cases = [
+        ("/ip4/127.0.0.1/tcp/443/tls/http/http-path/api/v1", "api/v1"),
+        ("/ip4/127.0.0.1/tcp/80/http/http-path/static/css", "static/css"),
+        ("/dns/example.com/tcp/443/tls/http/http-path/docs", "docs"),
+    ]
+
+    for addr_str, expected_path in test_cases:
+        m = Multiaddr(addr_str)
+        assert str(m) == addr_str
+
+        # Extract the http-path value
+        path_value = m.value_for_protocol(P_HTTP_PATH)
+        assert path_value == expected_path
+
+
+def test_http_path_error_cases():
+    """Test error handling for invalid http-path values"""
+
+    # Empty path should raise error
+    with pytest.raises(StringParseError):
+        Multiaddr("/http-path/")
+
+    # Missing path value should raise error
+    with pytest.raises(StringParseError):
+        Multiaddr("/http-path")
+
+    # Invalid URL encoding should raise error
+    with pytest.raises(StringParseError):
+        Multiaddr("/http-path/invalid%zz")
+
+
+def test_http_path_value_extraction():
+    """Test extracting http-path values from multiaddr"""
+    test_cases = [
+        ("/http-path/foo", "foo"),
+        ("/http-path/foo/bar", "foo/bar"),
+        ("/http-path/api/v1/users", "api/v1/users"),
+        ("/ip4/127.0.0.1/tcp/80/http/http-path/docs", "docs"),
+    ]
+
+    for addr_str, expected_path in test_cases:
+        m = Multiaddr(addr_str)
+        path_value = m.value_for_protocol(P_HTTP_PATH)
+        assert path_value == expected_path
+
+
+def test_http_path_edge_cases():
+    """Test edge cases and special character handling"""
+
+    # Test with various special characters
+    special_paths = [
+        "path with spaces",
+        "path/with/multiple/slashes",
+        "path/with/unicode/测试",
+        "path/with/symbols!@#$%^&*()",
+    ]
+
+    for path in special_paths:
+        addr_str = f"/http-path/{path}"
+        m = Multiaddr(addr_str)
+        # Should handle encoding properly
+        assert m.value_for_protocol(P_HTTP_PATH) == path

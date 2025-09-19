@@ -1,8 +1,9 @@
+import re
 from typing import Any
 from urllib.parse import quote, unquote
 
 from ..codecs import CodecBase
-from ..exceptions import BinaryParseError
+from ..exceptions import BinaryParseError, StringParseError
 
 IS_PATH = True
 SIZE = -1  # LengthPrefixedVarSize
@@ -19,13 +20,19 @@ class Codec(CodecBase):
         as UTF-8
         """
 
+        # Reject invalid percent-escapes like "%zz" or "%f"
+        invalid_escape = re.search(r"%(?![0-9A-Fa-f]{2})", string)
+        if invalid_escape:
+            raise StringParseError("Invalid percent-escape in path", string)
+
+        # Now safely unquote
         try:
             unescaped = unquote(string)
         except Exception:
-            raise ValueError(f"Invalid HTTP path string: {string}")
+            raise StringParseError("Invalid HTTP path string", string)
 
-        if len(unescaped) == 0:
-            raise ValueError("empty http path is not allowed")
+        if not unescaped:
+            raise StringParseError("empty http path is not allowed", string)
 
         return unescaped.encode("utf-8")
 
