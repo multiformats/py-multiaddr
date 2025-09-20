@@ -5,7 +5,7 @@ from urllib.parse import quote, unquote
 from ..codecs import CodecBase
 from ..exceptions import BinaryParseError, StringParseError
 
-IS_PATH = True
+IS_PATH = False
 SIZE = -1  # LengthPrefixedVarSize
 
 

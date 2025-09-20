@@ -354,7 +354,7 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
                 continue
 
             # Special handling for unix paths
-            if part in ("unix", "http-path"):
+            if part in ("unix",):
                 try:
                     # Get the next part as the path value
                     protocol_path_value = next(parts)

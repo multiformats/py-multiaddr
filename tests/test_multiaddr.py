@@ -931,3 +931,53 @@ def test_http_path_edge_cases():
         m = Multiaddr(addr_str)
         # Should handle encoding properly
         assert m.value_for_protocol(P_HTTP_PATH) == path
+
+
+def test_http_path_only_reads_http_path_part():
+    """Test that http-path only reads its own part, not subsequent protocols"""
+    # This test verifies that when we have /http-path/tmp%2Fbar/p2p-circuit,
+    # the ValueForProtocol only returns the http-path part (tmp%2Fbar)
+    # and doesn't include the /p2p-circuit part
+    addr_str = "/http-path/tmp%2Fbar/p2p-circuit"
+    m = Multiaddr(addr_str)
+
+    # Should only return the http-path part, not the p2p-circuit part
+    http_path_value = m.value_for_protocol(P_HTTP_PATH)
+    assert http_path_value == "tmp%2Fbar"
+
+    # The full string should still include both parts
+    assert str(m) == addr_str
+
+
+def test_http_path_malformed_percent_escape():
+    """Test that malformed percent-escapes are properly rejected"""
+    # This tests the specific case from Go: /http-path/thisIsMissingAfullByte%f
+    # The %f is an incomplete percent-escape and should be rejected
+    bad_addr = "/http-path/thisIsMissingAfullByte%f"
+
+    with pytest.raises(StringParseError, match="Invalid percent-escape"):
+        Multiaddr(bad_addr)
+
+
+def test_http_path_raw_value_access():
+    """Test accessing raw unescaped values from http-path components"""
+    # This test demonstrates how to get the raw unescaped value
+    # similar to Go's SplitLast and RawValue functionality
+    addr_str = "/http-path/tmp%2Fbar"
+    m = Multiaddr(addr_str)
+
+    # Get the URL-encoded value (what ValueForProtocol returns)
+    encoded_value = m.value_for_protocol(P_HTTP_PATH)
+    assert encoded_value == "tmp%2Fbar"
+
+    # Get the raw unescaped value by accessing the component directly
+    # This is similar to Go's component.RawValue()
+    from urllib.parse import unquote
+
+    raw_value = unquote(encoded_value)
+    assert raw_value == "tmp/bar"
+
+    # Verify the roundtrip
+    from urllib.parse import quote
+
+    assert quote(raw_value, safe="") == encoded_value
