@@ -10,6 +10,7 @@ from multiaddr.exceptions import (
 from multiaddr.multiaddr import Multiaddr
 from multiaddr.protocols import (
     P_DNS,
+    P_HTTP_PATH,
     P_IP4,
     P_IP6,
     P_P2P,
@@ -825,3 +826,158 @@ def test_memory_protocol_properties():
     assert proto.code == 777
     assert proto.name == "memory"
     assert proto.codec == "memory"
+
+
+def test_http_path_multiaddr_roundtrip():
+    """Test basic http-path in multiaddr string roundtrip"""
+    test_cases = [
+        "/http-path/foo",
+        "/http-path/foo%2Fbar",  # URL-encoded forward slashes
+        "/http-path/api%2Fv1%2Fusers",  # URL-encoded forward slashes
+    ]
+
+    for addr_str in test_cases:
+        m = Multiaddr(addr_str)
+        assert str(m) == addr_str
+        # Verify protocol value extraction
+        path_value = m.value_for_protocol(P_HTTP_PATH)
+        expected_path = addr_str.replace("/http-path/", "")
+        assert path_value == expected_path
+
+
+def test_http_path_url_encoding():
+    """Test special characters and URL encoding behavior"""
+    test_cases = [
+        ("/foo%20bar", "/foo%20bar"),  # Already URL-encoded input
+        (
+            "/path%2Fwith%2Fspecial%21%40%23",
+            "/path%2Fwith%2Fspecial%21%40%23",
+        ),  # Already URL-encoded input
+        (
+            "/%E3%81%93%E3%82%93%E3%81%AB%E3%81%A1%E3%81%AF",
+            "/%E3%81%93%E3%82%93%E3%81%AB%E3%81%A1%E3%81%AF",
+        ),  # Already URL-encoded input
+        ("/tmp%2Fbar", "/tmp%2Fbar"),  # Already URL-encoded input
+    ]
+
+    for input_path, expected_encoded in test_cases:
+        addr_str = f"/http-path{input_path}"
+        m = Multiaddr(addr_str)
+        # The string representation should show URL-encoded path
+        assert str(m) == f"/http-path{expected_encoded}"
+
+
+def test_http_path_in_complex_multiaddr():
+    """Test http-path as part of larger multiaddr chains"""
+    test_cases = [
+        ("/ip4/127.0.0.1/tcp/443/tls/http/http-path/api%2Fv1", "api%2Fv1"),
+        ("/ip4/127.0.0.1/tcp/80/http/http-path/static%2Fcss", "static%2Fcss"),
+        ("/dns/example.com/tcp/443/tls/http/http-path/docs", "docs"),
+    ]
+
+    for addr_str, expected_path in test_cases:
+        m = Multiaddr(addr_str)
+        assert str(m) == addr_str
+
+        # Extract the http-path value
+        path_value = m.value_for_protocol(P_HTTP_PATH)
+        assert path_value == expected_path
+
+
+def test_http_path_error_cases():
+    """Test error handling for invalid http-path values"""
+
+    # Empty path should raise error
+    with pytest.raises(StringParseError):
+        Multiaddr("/http-path/")
+
+    # Missing path value should raise error
+    with pytest.raises(StringParseError):
+        Multiaddr("/http-path")
+
+    # Invalid URL encoding should raise error
+    with pytest.raises(StringParseError):
+        Multiaddr("/http-path/invalid%zz")
+
+
+def test_http_path_value_extraction():
+    """Test extracting http-path values from multiaddr"""
+    test_cases = [
+        ("/http-path/foo", "foo"),
+        ("/http-path/foo%2Fbar", "foo%2Fbar"),
+        ("/http-path/api%2Fv1%2Fusers", "api%2Fv1%2Fusers"),
+        ("/ip4/127.0.0.1/tcp/80/http/http-path/docs", "docs"),
+    ]
+
+    for addr_str, expected_path in test_cases:
+        m = Multiaddr(addr_str)
+        path_value = m.value_for_protocol(P_HTTP_PATH)
+        assert path_value == expected_path
+
+
+def test_http_path_edge_cases():
+    """Test edge cases and special character handling"""
+
+    # Test with various special characters (URL-encoded input)
+    special_paths = [
+        "path%20with%20spaces",
+        "path%2Fwith%2Fmultiple%2Fslashes",
+        "path%2Fwith%2Funicode%2F%E6%B5%8B%E8%AF%95",
+        "path%2Fwith%2Fsymbols%21%40%23%24%25%5E%26%2A%28%29",
+    ]
+
+    for path in special_paths:
+        addr_str = f"/http-path/{path}"
+        m = Multiaddr(addr_str)
+        # Should handle encoding properly
+        assert m.value_for_protocol(P_HTTP_PATH) == path
+
+
+def test_http_path_only_reads_http_path_part():
+    """Test that http-path only reads its own part, not subsequent protocols"""
+    # This test verifies that when we have /http-path/tmp%2Fbar/p2p-circuit,
+    # the ValueForProtocol only returns the http-path part (tmp%2Fbar)
+    # and doesn't include the /p2p-circuit part
+    addr_str = "/http-path/tmp%2Fbar/p2p-circuit"
+    m = Multiaddr(addr_str)
+
+    # Should only return the http-path part, not the p2p-circuit part
+    http_path_value = m.value_for_protocol(P_HTTP_PATH)
+    assert http_path_value == "tmp%2Fbar"
+
+    # The full string should still include both parts
+    assert str(m) == addr_str
+
+
+def test_http_path_malformed_percent_escape():
+    """Test that malformed percent-escapes are properly rejected"""
+    # This tests the specific case from Go: /http-path/thisIsMissingAfullByte%f
+    # The %f is an incomplete percent-escape and should be rejected
+    bad_addr = "/http-path/thisIsMissingAfullByte%f"
+
+    with pytest.raises(StringParseError, match="Invalid percent-escape"):
+        Multiaddr(bad_addr)
+
+
+def test_http_path_raw_value_access():
+    """Test accessing raw unescaped values from http-path components"""
+    # This test demonstrates how to get the raw unescaped value
+    # similar to Go's SplitLast and RawValue functionality
+    addr_str = "/http-path/tmp%2Fbar"
+    m = Multiaddr(addr_str)
+
+    # Get the URL-encoded value (what ValueForProtocol returns)
+    encoded_value = m.value_for_protocol(P_HTTP_PATH)
+    assert encoded_value == "tmp%2Fbar"
+
+    # Get the raw unescaped value by accessing the component directly
+    # This is similar to Go's component.RawValue()
+    from urllib.parse import unquote
+
+    raw_value = unquote(encoded_value)
+    assert raw_value == "tmp/bar"
+
+    # Verify the roundtrip
+    from urllib.parse import quote
+
+    assert quote(raw_value, safe="") == encoded_value
