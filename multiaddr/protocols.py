@@ -49,6 +49,7 @@ __all__ = ("PROTOCOLS", "REGISTRY", "Protocol")
 P_IP4 = 0x04
 P_IP6 = 0x29
 P_IP6ZONE = 0x2A
+P_IPCIDR = 0x2B
 P_TCP = 0x06
 P_UDP = 0x0111
 P_DCCP = 0x21
@@ -144,6 +145,7 @@ PROTOCOLS = [
     Protocol(P_DCCP, "dccp", "uint16be"),
     Protocol(P_IP6, "ip6", "ip6"),
     Protocol(P_IP6ZONE, "ip6zone", "utf8"),
+    Protocol(P_IPCIDR, "ipcidr", "ipcidr"),
     Protocol(P_DNS, "dns", "domain"),
     Protocol(P_DNS4, "dns4", "domain"),
     Protocol(P_DNS6, "dns6", "domain"),

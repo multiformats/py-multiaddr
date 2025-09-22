@@ -2,8 +2,8 @@ import pytest
 import varint
 
 from multiaddr import Multiaddr, exceptions, protocols
-from multiaddr.codecs import http_path, memory
-from multiaddr.exceptions import BinaryParseError
+from multiaddr.codecs import http_path, ipcidr, memory
+from multiaddr.exceptions import BinaryParseError, StringParseError
 
 
 def test_code_to_varint():
@@ -318,3 +318,52 @@ def test_http_path_validate_function():
     # empty path
     with pytest.raises(ValueError):
         codec.validate(b"")
+
+
+def test_ipcidr_valid_roundtrip():
+    codec = ipcidr.Codec()
+
+    for val in ["0", "8", "16", "24", "32", "128", "255"]:
+        b = codec.to_bytes(None, val)
+        s = codec.to_string(None, b)
+
+        # back and forth conversion should match
+        assert s == val
+        assert codec.to_bytes(None, s) == b
+
+
+def test_ipcidr_bytes_to_string():
+    codec = ipcidr.Codec()
+
+    assert codec.to_string(None, bytes([0])) == "0"
+    assert codec.to_string(None, bytes([24])) == "24"
+    assert codec.to_string(None, bytes([255])) == "255"
+
+
+def test_ipcidr_invalid_string_inputs():
+    codec = ipcidr.Codec()
+
+    with pytest.raises(StringParseError):
+        codec.to_bytes(None, "-1")  # negative
+
+    with pytest.raises(StringParseError):
+        codec.to_bytes(None, "256")  # too large
+
+    with pytest.raises(StringParseError):
+        codec.to_bytes(None, "abc")  # not a number
+
+
+def test_ipcidr_invalid_bytes_inputs():
+    codec = ipcidr.Codec()
+
+    with pytest.raises(BinaryParseError):
+        codec.to_string(None, b"")  # empty
+
+    with pytest.raises(BinaryParseError):
+        codec.to_string(None, b"\x01\x02")  # too long
+
+    with pytest.raises(ValueError):
+        codec.validate(b"")  # validate should fail empty
+
+    with pytest.raises(ValueError):
+        codec.validate(b"\x01\x02")
