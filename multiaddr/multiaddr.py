@@ -354,12 +354,12 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
                 continue
 
             # Special handling for unix paths
-            if part == "unix":
+            if part in ("unix",):
                 try:
                     # Get the next part as the path value
-                    unix_path_value = next(parts)
-                    if not unix_path_value:
-                        raise exceptions.StringParseError("empty unix path", addr)
+                    protocol_path_value = next(parts)
+                    if not protocol_path_value:
+                        raise exceptions.StringParseError("empty protocol path", addr)
 
                     # Join any remaining parts as part of the path
                     remaining_parts = []
@@ -373,16 +373,16 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
                             break
 
                     if remaining_parts:
-                        unix_path_value = unix_path_value + "/" + "/".join(remaining_parts)
+                        protocol_path_value = protocol_path_value + "/" + "/".join(remaining_parts)
 
-                    proto = protocol_with_name("unix")
+                    proto = protocol_with_name(part)
                     codec = codec_by_name(proto.codec)
                     if not codec:
                         raise exceptions.StringParseError(f"unknown codec: {proto.codec}", addr)
 
                     try:
                         self._bytes += varint.encode(proto.code)
-                        buf = codec.to_bytes(proto, unix_path_value)
+                        buf = codec.to_bytes(proto, protocol_path_value)
                         # Add length prefix for variable-sized or zero-sized codecs
                         if codec.SIZE <= 0:
                             self._bytes += varint.encode(len(buf))

@@ -158,6 +158,7 @@ PROTOCOLS = [
     Protocol(P_QUIC1, "quic-v1", None),
     Protocol(P_HTTP, "http", None),
     Protocol(P_HTTPS, "https", None),
+    Protocol(P_HTTP_PATH, "http-path", "http_path"),
     Protocol(P_TLS, "tls", None),
     Protocol(P_WS, "ws", None),
     Protocol(P_WSS, "wss", None),

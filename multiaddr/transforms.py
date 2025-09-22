@@ -27,9 +27,9 @@ def string_to_bytes(string: str) -> bytes:
         logger.debug(f"[DEBUG string_to_bytes] Encoded protocol code: {encoded_code}")
         bs.append(encoded_code)
 
-        # Special case: protocols with codec=None are flag protocols
+        # Special case: protocols with codec=None or SIZE=0 are flag protocols
         # (no value, no length prefix, no buffer)
-        if codec is None:
+        if codec is None or getattr(codec, "SIZE", None) == 0:
             logger.debug(
                 f"[DEBUG string_to_bytes] Protocol {proto.name} has no data, "
                 "skipping value encoding"
@@ -93,6 +93,7 @@ def bytes_to_string(buf: bytes) -> str:
                     value = codec.to_string(proto, bs.read(size))
                 logger.debug(f"[DEBUG] bytes_to_string: proto={proto.name}, value='{value}'")
                 if codec.IS_PATH and value.startswith("/"):
+                    # For path protocols, the codec already handles URL encoding
                     strings.append("/" + proto.name + value)  # type: ignore[arg-type]
                 else:
                     strings.append("/" + proto.name + "/" + value)  # type: ignore[arg-type]
