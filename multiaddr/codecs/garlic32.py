@@ -8,13 +8,15 @@ from ..codecs import CodecBase
 SIZE = -1
 IS_PATH = False
 
+
 class Codec(CodecBase):
     """
     Codec for I2P garlic32 addresses
     """
+
     SIZE = SIZE
     IS_PATH = IS_PATH
-    
+
     def validate(self, b: bytes) -> None:
         """
         Validates the byte representation of a garlic32 address.
@@ -32,7 +34,7 @@ class Codec(CodecBase):
             raise ValueError(
                 f"Invalid length for garlic32: must be 32 or >= 35 bytes, got {len(b)}"
             )
-            
+
     def to_bytes(self, proto: Any, string: str) -> bytes:
         """
         Converts the string representation of a garlic32 address to bytes.
@@ -66,7 +68,7 @@ class Codec(CodecBase):
         # Validate the decoded bytes after decoding.
         self.validate(decoded_bytes)
         return decoded_bytes
-    
+
     def to_string(self, proto: Any, buf: bytes) -> str:
         """
         Converts the byte representation of a garlic32 address to its string form.
@@ -85,7 +87,7 @@ class Codec(CodecBase):
 
         # Encode to Base32, which produces an uppercase string with padding.
         encoded_bytes = base64.b32encode(buf)
-        addr_string = encoded_bytes.decode('utf-8')
+        addr_string = encoded_bytes.decode("utf-8")
 
         # The Go implementation uses a lowercase alphabet and trims padding.
         return addr_string.lower().rstrip("=")
