@@ -1,8 +1,11 @@
+import base64
+import os
+
 import pytest
 import varint
 
 from multiaddr import Multiaddr, exceptions, protocols
-from multiaddr.codecs import http_path, memory
+from multiaddr.codecs import garlic64, http_path, memory
 from multiaddr.exceptions import BinaryParseError
 
 
@@ -318,3 +321,85 @@ def test_http_path_validate_function():
     # empty path
     with pytest.raises(ValueError):
         codec.validate(b"")
+
+
+INVALID_BYTES_385 = os.urandom(385)
+SHORT_GARLIC64_STRING = base64.b64encode(INVALID_BYTES_385, altchars=b"-~").decode("utf-8")
+
+VALID_BYTES_386 = os.urandom(386)
+VALID_GARLIC64_STRING_386 = base64.b64encode(VALID_BYTES_386, altchars=b"-~").decode("utf-8")
+
+
+def test_garlic64_valid_roundtrip():
+    codec = garlic64.Codec()
+
+    # Convert the valid string to bytes
+    b = codec.to_bytes(None, VALID_GARLIC64_STRING_386)
+    assert isinstance(b, bytes)
+    assert b == VALID_BYTES_386
+
+    # Convert the bytes back to a string
+    s_out = codec.to_string(None, b)
+    assert s_out == VALID_GARLIC64_STRING_386
+
+
+def test_garlic64_custom_alphabet():
+    codec = garlic64.Codec()
+
+    special_bytes = b"\xff" * 386
+
+    # Standard base64 would have '+' and '/'
+    standard_b64 = base64.b64encode(special_bytes).decode("utf-8")
+    assert "+" in standard_b64 or "/" in standard_b64
+
+    # Our codec should produce a string with '-' and '~' instead
+    garlic_str = codec.to_string(None, special_bytes)
+    assert "+" not in garlic_str
+    assert "/" not in garlic_str
+    assert "-" in garlic_str or "~" in garlic_str
+
+
+def test_garlic64_string_decodes_to_short_bytes_raises():
+    """
+    Tests that calling to_bytes() with a string that decodes to less than
+    386 bytes raises a ValueError, as the validation should fail.
+    """
+    codec = garlic64.Codec()
+    with pytest.raises(ValueError):
+        codec.to_bytes(None, SHORT_GARLIC64_STRING)
+
+
+def test_garlic64_bytes_too_short_raises():
+    """
+    Tests that calling to_string() with a byte array shorter than
+    386 bytes raises a ValueError.
+    """
+    codec = garlic64.Codec()
+    with pytest.raises(ValueError):
+        codec.to_string(None, INVALID_BYTES_385)
+
+
+def test_garlic64_invalid_b64_string_raises():
+    """
+    Tests that passing a string with invalid Base64 characters to
+    to_bytes() raises a ValueError.
+    """
+    codec = garlic64.Codec()
+    invalid_string = "this-is-not-valid-base64-!@#$%"
+    with pytest.raises(ValueError):
+        codec.to_bytes(None, invalid_string)
+
+
+def test_garlic64_memory_validate_function():
+    """
+    Directly tests the memory_validate method to ensure it correctly
+    validates byte length.
+    """
+    codec = garlic64.Codec()
+
+    # A valid byte array should not raise an error
+    codec.validate(VALID_BYTES_386)
+
+    # An invalid (too short) byte array should raise a ValueError
+    with pytest.raises(ValueError):
+        codec.validate(INVALID_BYTES_385)
