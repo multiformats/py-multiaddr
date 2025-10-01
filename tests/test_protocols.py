@@ -5,7 +5,7 @@ import pytest
 import varint
 
 from multiaddr import Multiaddr, exceptions, protocols
-from multiaddr.codecs import garlic64, http_path, memory
+from multiaddr.codecs import garlic32, garlic64, http_path, memory
 from multiaddr.exceptions import BinaryParseError
 
 
@@ -403,3 +403,109 @@ def test_garlic64_memory_validate_function():
     # An invalid (too short) byte array should raise a ValueError
     with pytest.raises(ValueError):
         codec.validate(INVALID_BYTES_385)
+
+
+def create_garlic32_string(b: bytes) -> str:
+    """Helper to create a valid garlic32 string from bytes."""
+    return base64.b32encode(b).decode("utf-8").lower().rstrip("=")
+
+
+# --- Test Data ---
+
+# Valid length: 32 bytes
+VALID_BYTES_32 = os.urandom(32)
+VALID_GARLIC32_STRING_32 = create_garlic32_string(VALID_BYTES_32)
+
+# Valid length: 35 bytes
+VALID_BYTES_35 = os.urandom(35)
+VALID_GARLIC32_STRING_35 = create_garlic32_string(VALID_BYTES_35)
+
+# Valid length: 40 bytes
+VALID_BYTES_40 = os.urandom(40)
+VALID_GARLIC32_STRING_40 = create_garlic32_string(VALID_BYTES_40)
+
+# Invalid length: 34 bytes
+INVALID_BYTES_34 = os.urandom(34)
+INVALID_GARLIC32_STRING_34 = create_garlic32_string(INVALID_BYTES_34)
+
+
+@pytest.mark.parametrize(
+    "valid_bytes, valid_string",
+    [
+        (VALID_BYTES_32, VALID_GARLIC32_STRING_32),
+        (VALID_BYTES_35, VALID_GARLIC32_STRING_35),
+        (VALID_BYTES_40, VALID_GARLIC32_STRING_40),
+    ],
+)
+def test_garlic32_valid_roundtrip(valid_bytes, valid_string):
+    """
+    Tests that valid garlic32 strings of different lengths can be
+    converted to bytes and back without modification.
+    """
+    codec = garlic32.Codec()
+
+    # Convert the valid string to bytes
+    b = codec.to_bytes(None, valid_string)
+    assert isinstance(b, bytes)
+    assert b == valid_bytes
+
+    # Convert the bytes back to a string
+    s_out = codec.to_string(None, b)
+    assert s_out == valid_string
+
+
+def test_garlic32_padding_and_case_handling():
+    """
+    Tests that the codec correctly handles stripped padding and is case-insensitive
+    on input, while producing lowercase, unpadded output.
+    """
+    codec = garlic32.Codec()
+    # String is lowercase and has no padding
+    assert codec.to_string(None, VALID_BYTES_32) == VALID_GARLIC32_STRING_32
+
+    # Decoder should handle uppercase input
+    assert codec.to_bytes(None, VALID_GARLIC32_STRING_32.upper()) == VALID_BYTES_32
+
+
+def test_garlic32_bytes_invalid_length_raises():
+    """
+    Tests that to_string() raises an error if the byte array has an
+    invalid length.
+    """
+    codec = garlic32.Codec()
+    with pytest.raises(ValueError):
+        codec.to_string(None, INVALID_BYTES_34)  # 34 bytes is invalid
+    with pytest.raises(ValueError):
+        codec.to_string(None, os.urandom(31))  # 31 bytes is invalid
+
+
+def test_garlic32_invalid_b32_string_raises():
+    """
+    Tests that passing a string with invalid Base32 characters
+    (like '1' or '8') raises a ValueError.
+    """
+    codec = garlic32.Codec()
+    # Add padding to make it a valid length for b32decode to attempt parsing
+    invalid_string = "thisisnotvalidbase32string1890===="
+    with pytest.raises(ValueError):
+        codec.to_bytes(None, invalid_string)
+
+
+def test_garlic32_memory_validate_function():
+    """
+    Directly tests the memory_validate method.
+    """
+    codec = garlic32.Codec()
+
+    # Valid lengths
+    codec.validate(VALID_BYTES_32)
+    codec.validate(VALID_BYTES_35)
+    codec.validate(VALID_BYTES_40)
+
+    # Invalid lengths
+    with pytest.raises(ValueError):
+        codec.validate(INVALID_BYTES_34)
+    with pytest.raises(ValueError):
+        codec.validate(os.urandom(0))
+    with pytest.raises(ValueError):
+        codec.validate(os.urandom(33))
