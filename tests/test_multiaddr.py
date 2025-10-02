@@ -83,6 +83,9 @@ def test_invalid(addr_str):
         "/ip6/::1",
         "/ip6/2601:9:4f81:9700:803e:ca65:66e8:c21",
         "/ip6/2001:db8::/ipcidr/32",
+        "/ipcidr/24",  # missing IP address (valid in multiaddr format)
+        "/ip4/1.2.3.0/ipcidr/128",  # invalid IPv4 CIDR but valid multiaddr
+        "/ip6/::/ipcidr/255",  # invalid IPv6 CIDR but valid multiaddr
         "/ip6zone/x/ip6/fe80::1",
         "/ip6zone/x%y/ip6/fe80::1",
         "/ip6zone/x%y/ip6/::",
