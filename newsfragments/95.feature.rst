@@ -1,0 +1,5 @@
+Added ipcidr protocol support to py-multiaddr
+
+- Implements protocol code 43 (0x2B) for CIDR notation support
+- Full compatibility with Go multiaddr implementation
+- Comprehensive test coverage including edge cases
