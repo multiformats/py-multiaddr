@@ -5,8 +5,8 @@ import pytest
 import varint
 
 from multiaddr import Multiaddr, exceptions, protocols
-from multiaddr.codecs import garlic32, garlic64, http_path, memory
-from multiaddr.exceptions import BinaryParseError
+from multiaddr.codecs import garlic32, garlic64, http_path, ipcidr, memory
+from multiaddr.exceptions import BinaryParseError, StringParseError
 
 
 def test_code_to_varint():
@@ -323,6 +323,7 @@ def test_http_path_validate_function():
         codec.validate(b"")
 
 
+# --- Garlic64 Test Data ---
 INVALID_BYTES_385 = os.urandom(385)
 SHORT_GARLIC64_STRING = base64.b64encode(INVALID_BYTES_385, altchars=b"-~").decode("utf-8")
 
@@ -410,8 +411,7 @@ def create_garlic32_string(b: bytes) -> str:
     return base64.b32encode(b).decode("utf-8").lower().rstrip("=")
 
 
-# --- Test Data ---
-
+# --- Garlic32 Test Data ---
 # Valid length: 32 bytes
 VALID_BYTES_32 = os.urandom(32)
 VALID_GARLIC32_STRING_32 = create_garlic32_string(VALID_BYTES_32)
@@ -509,3 +509,53 @@ def test_garlic32_memory_validate_function():
         codec.validate(os.urandom(0))
     with pytest.raises(ValueError):
         codec.validate(os.urandom(33))
+
+
+# --- IPCIDR Tests ---
+def test_ipcidr_valid_roundtrip():
+    codec = ipcidr.Codec()
+
+    for val in ["0", "8", "16", "24", "32", "128", "255"]:
+        b = codec.to_bytes(None, val)
+        s = codec.to_string(None, b)
+
+        # back and forth conversion should match
+        assert s == val
+        assert codec.to_bytes(None, s) == b
+
+
+def test_ipcidr_bytes_to_string():
+    codec = ipcidr.Codec()
+
+    assert codec.to_string(None, bytes([0])) == "0"
+    assert codec.to_string(None, bytes([24])) == "24"
+    assert codec.to_string(None, bytes([255])) == "255"
+
+
+def test_ipcidr_invalid_string_inputs():
+    codec = ipcidr.Codec()
+
+    with pytest.raises(StringParseError):
+        codec.to_bytes(None, "-1")  # negative
+
+    with pytest.raises(StringParseError):
+        codec.to_bytes(None, "256")  # too large
+
+    with pytest.raises(StringParseError):
+        codec.to_bytes(None, "abc")  # not a number
+
+
+def test_ipcidr_invalid_bytes_inputs():
+    codec = ipcidr.Codec()
+
+    with pytest.raises(BinaryParseError):
+        codec.to_string(None, b"")  # empty
+
+    with pytest.raises(BinaryParseError):
+        codec.to_string(None, b"\x01\x02")  # too long
+
+    with pytest.raises(ValueError):
+        codec.validate(b"")  # validate should fail empty
+
+    with pytest.raises(ValueError):
+        codec.validate(b"\x01\x02")
