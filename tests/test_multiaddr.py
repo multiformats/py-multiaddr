@@ -129,6 +129,7 @@ def test_invalid(addr_str):
         "/ip4/127.0.0.1/p2p/QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC/tcp/1234/unix/stdio",
         "/dns/example.com",
         "/dns4/موقع.وزارة-الاتصالات.مصر",
+        "/ip4/127.0.0.1/tcp/443/tls/sni/example.com/http/http-path/foo",
     ],
 )  # nopep8
 def test_valid(addr_str):

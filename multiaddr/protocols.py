@@ -152,6 +152,7 @@ PROTOCOLS = [
     Protocol(P_DNS4, "dns4", "domain"),
     Protocol(P_DNS6, "dns6", "domain"),
     Protocol(P_DNSADDR, "dnsaddr", "domain"),
+    Protocol(P_SNI, "sni", "domain"),
     Protocol(P_SCTP, "sctp", "uint16be"),
     Protocol(P_UDT, "udt", None),
     Protocol(P_UTP, "utp", None),
