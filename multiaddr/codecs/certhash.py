@@ -1,24 +1,25 @@
 from typing import Any
-import multibase 
+
+import multibase
 import multihash
 
 from ..codecs import CodecBase
-from ..exceptions import BinaryParseError
 
 SIZE = -1
 IS_PATH = False
 
+
 class Codec(CodecBase):
     """
     Codec for certificate hashes (certhash).
-    
+
     A certhash is a multihash of a certificate, encoded as a multibase string
     using the 'base64url' encoding.
     """
-    
+
     SIZE = SIZE
     IS_PATH = IS_PATH
-    
+
     def validate(self, b: bytes) -> None:
         """
         Validates that the byte representation is a valid multihash.
@@ -32,7 +33,7 @@ class Codec(CodecBase):
         try:
             multihash.decode(b)
         except Exception as e:
-            raise ValueError(f"Invalid certhash: not a valid multihash") from e
+            raise ValueError("Invalid certhash: not a valid multihash") from e
 
     def to_bytes(self, proto: Any, string: str) -> bytes:
         """
@@ -60,7 +61,7 @@ class Codec(CodecBase):
         # Validate that the decoded bytes are a valid multihash.
         self.validate(decoded_bytes)
         return decoded_bytes
-    
+
     def to_string(self, proto: Any, buf: bytes) -> str:
         """
         Converts the raw multihash bytes of a certhash to its string form.
@@ -80,5 +81,5 @@ class Codec(CodecBase):
 
         # Encode the bytes using base64url, which is standard for certhash.
         # The result from `multibase.encode` is bytes, so we decode to a string.
-        encoded_string = multibase.encode('base64url', buf)
-        return encoded_string.decode('utf-8')
+        encoded_string = multibase.encode("base64url", buf)
+        return encoded_string.decode("utf-8")
