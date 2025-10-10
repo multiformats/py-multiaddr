@@ -1,11 +1,13 @@
 import base64
 import os
 
+import multibase
+import multihash
 import pytest
 import varint
 
 from multiaddr import Multiaddr, exceptions, protocols
-from multiaddr.codecs import garlic32, garlic64, http_path, ipcidr, memory
+from multiaddr.codecs import garlic32, garlic64, certhash, http_path, ipcidr, memory
 from multiaddr.exceptions import BinaryParseError, StringParseError
 
 
@@ -559,3 +561,65 @@ def test_ipcidr_invalid_bytes_inputs():
 
     with pytest.raises(ValueError):
         codec.validate(b"\x01\x02")
+
+
+# --------CERT-HASH---------
+
+VALID_MULTIHASH_BYTES = multihash.encode(b"hello world", "sha2-256")
+VALID_CERTHASH_STRING = multibase.encode("base64url", VALID_MULTIHASH_BYTES).decode("utf-8")
+
+INVALID_BYTES = b"this is not a multihash"
+INVALID_CONTENT_STRING = multibase.encode("base64url", INVALID_BYTES).decode("utf-8")
+
+
+def test_certhash_valid_roundtrip():
+    codec = certhash.Codec()
+    b = codec.to_bytes(None, VALID_CERTHASH_STRING)
+    assert isinstance(b, bytes)
+    assert b == VALID_MULTIHASH_BYTES
+
+
+def test_certhash_invalid_multihash_bytes_raises():
+    """
+    Tests that calling to_string() with bytes that are not a valid
+    multihash raises a ValueError.
+    """
+    codec = certhash.Codec()
+    with pytest.raises(ValueError):
+        codec.to_string(None, INVALID_BYTES)
+
+
+def test_certhash_valid_multibase_but_invalid_content_raises():
+    """
+    Tests that to_bytes() raises an error if the string is valid multibase
+    but its decoded content is not a valid multihash.
+    """
+    codec = certhash.Codec()
+    with pytest.raises(ValueError):
+        codec.to_bytes(None, INVALID_CONTENT_STRING)
+
+
+def test_certhash_invalid_multibase_string_raises():
+    """
+    Tests that passing a string with an invalid multibase prefix or
+    encoding raises an error.
+    """
+    codec = certhash.Codec()
+    # 'z' is a valid multibase prefix, but the content is not valid base58.
+    invalid_string = "z-this-is-not-valid"
+    with pytest.raises(Exception):  # Catches errors from the multibase library
+        codec.to_bytes(None, invalid_string)
+
+
+def test_certhash_memory_validate_function():
+    """
+    Directly tests the validate method.
+    """
+    codec = certhash.Codec()
+
+    # A valid multihash should not raise an error
+    codec.validate(VALID_MULTIHASH_BYTES)
+
+    # Invalid bytes should raise a ValueError
+    with pytest.raises(ValueError):
+        codec.validate(INVALID_BYTES)
