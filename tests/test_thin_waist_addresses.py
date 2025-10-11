@@ -21,13 +21,6 @@ def test_specific_address_override_port():
     addrs = get_thin_waist_addresses(input_addr, 100)
     assert addrs == [Multiaddr("/ip4/123.123.123.123/tcp/100")]
 
-
-def test_ignore_non_thin_waist():
-    # Should raise StringParseError for unknown protocol (e.g. /webrtc)
-    with pytest.raises(StringParseError):
-        Multiaddr("/ip4/123.123.123.123/udp/1234/webrtc")
-
-
 def test_ipv4_wildcard():
     input_addr = Multiaddr("/ip4/0.0.0.0/tcp/1234")
     addrs = get_thin_waist_addresses(input_addr)

@@ -81,6 +81,8 @@ P_HTTP_PATH = 0x01E1
 P_SNI = 0x01C1
 P_NOISE = 0x01C6
 P_WEBTRANSPORT = 0x01D1
+P_WEBRTC_DIRECT = 0x118
+P_WEBRTC = 0X119
 P_MEMORY = 0x309
 
 
@@ -176,6 +178,8 @@ PROTOCOLS = [
     Protocol(P_P2P_CIRCUIT, "p2p-circuit", None),
     Protocol(P_WEBTRANSPORT, "webtransport", None),
     Protocol(P_UNIX, "unix", "fspath"),
+    Protocol(P_WEBRTC_DIRECT, "webrtc-direct", None),
+    Protocol(P_WEBRTC, "webrtc", None),
     Protocol(P_MEMORY, "memory", "memory"),
 ]
 
