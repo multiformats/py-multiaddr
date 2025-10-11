@@ -133,7 +133,7 @@ def test_invalid(addr_str):
         "/dns/example.com",
         "/dns4/موقع.وزارة-الاتصالات.مصر",
         "/ip4/127.0.0.1/tcp/443/tls/sni/example.com/http/http-path/foo",
-	    "/memory/4",
+        "/memory/4",
         "/http-path/tmp%2Fbar",
         "/http-path/tmp%2Fbar%2Fbaz",
         "/http-path/foo",

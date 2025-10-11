@@ -82,8 +82,9 @@ P_SNI = 0x01C1
 P_NOISE = 0x01C6
 P_WEBTRANSPORT = 0x01D1
 P_WEBRTC_DIRECT = 0x118
-P_WEBRTC = 0X119
+P_WEBRTC = 0x119
 P_MEMORY = 0x309
+P_CERTHASH = 0x1D2
 
 
 class Protocol:
@@ -181,6 +182,7 @@ PROTOCOLS = [
     Protocol(P_WEBRTC_DIRECT, "webrtc-direct", None),
     Protocol(P_WEBRTC, "webrtc", None),
     Protocol(P_MEMORY, "memory", "memory"),
+    Protocol(P_CERTHASH, "certhash", "certhash"),
 ]
 
 
