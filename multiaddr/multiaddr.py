@@ -20,17 +20,17 @@ class MultiAddrKeys(collections.abc.KeysView[Any], collections.abc.Sequence[Any]
         self._mapping = mapping
         super().__init__(mapping)
 
-    def __contains__(self, proto: object) -> bool:
-        proto = self._mapping.registry.find(proto)
+    def __contains__(self, key: object) -> bool:
+        proto = self._mapping.registry.find(key)
         return collections.abc.Sequence.__contains__(self, proto)
 
-    def __getitem__(self, idx: int | slice) -> Any | Sequence[Any]:
-        if isinstance(idx, slice):
-            return list(self)[idx]
-        if idx < 0:
-            idx = len(self) + idx
+    def __getitem__(self, index: int | slice) -> Any | Sequence[Any]:
+        if isinstance(index, slice):
+            return list(self)[index]
+        if index < 0:
+            index = len(self) + index
         for idx2, proto in enumerate(self):
-            if idx2 == idx:
+            if idx2 == index:
                 return proto
         raise IndexError("Protocol list index out of range")
 
@@ -49,26 +49,26 @@ class MultiAddrItems(
         self._mapping = mapping
         super().__init__(mapping)
 
-    def __contains__(self, item: object) -> bool:
-        if not isinstance(item, tuple) or len(item) != 2:
+    def __contains__(self, value: object) -> bool:
+        if not isinstance(value, tuple) or len(value) != 2:
             return False
-        proto, value = item
+        proto, val = value
         proto = self._mapping.registry.find(proto)
-        return collections.abc.Sequence.__contains__(self, (proto, value))
+        return collections.abc.Sequence.__contains__(self, (proto, val))
 
     @overload
-    def __getitem__(self, idx: int) -> tuple[Any, Any]: ...
+    def __getitem__(self, index: int) -> tuple[Any, Any]: ...
 
     @overload
-    def __getitem__(self, idx: slice) -> Sequence[tuple[Any, Any]]: ...
+    def __getitem__(self, index: slice) -> Sequence[tuple[Any, Any]]: ...
 
-    def __getitem__(self, idx: int | slice) -> tuple[Any, Any] | Sequence[tuple[Any, Any]]:
-        if isinstance(idx, slice):
-            return list(self)[idx]
-        if idx < 0:
-            idx = len(self) + idx
+    def __getitem__(self, index: int | slice) -> tuple[Any, Any] | Sequence[tuple[Any, Any]]:
+        if isinstance(index, slice):
+            return list(self)[index]
+        if index < 0:
+            index = len(self) + index
         for idx2, item in enumerate(self):
-            if idx2 == idx:
+            if idx2 == index:
                 return item
         raise IndexError("Protocol item list index out of range")
 
@@ -99,13 +99,13 @@ class MultiAddrValues(collections.abc.ValuesView[Any], collections.abc.Sequence[
     def __contains__(self, value: object) -> bool:
         return collections.abc.Sequence.__contains__(self, value)
 
-    def __getitem__(self, idx: int | slice) -> Any | Sequence[Any]:
-        if isinstance(idx, slice):
-            return list(self)[idx]
-        if idx < 0:
-            idx = len(self) + idx
+    def __getitem__(self, index: int | slice) -> Any | Sequence[Any]:
+        if isinstance(index, slice):
+            return list(self)[index]
+        if index < 0:
+            index = len(self) + index
         for idx2, value in enumerate(self):
-            if idx2 == idx:
+            if idx2 == index:
                 return value
         raise IndexError("Protocol value list index out of range")
 
