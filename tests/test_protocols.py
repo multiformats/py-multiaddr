@@ -565,7 +565,7 @@ def test_ipcidr_invalid_bytes_inputs():
 
 # --------CERT-HASH---------
 
-VALID_MULTIHASH_BYTES = multihash.encode(b"hello world", "sha2-256")
+VALID_MULTIHASH_BYTES = multihash.digest(b"hello world", "sha2-256").encode()
 VALID_CERTHASH_STRING = multibase.encode("base64url", VALID_MULTIHASH_BYTES).decode("utf-8")
 
 INVALID_BYTES = b"this is not a multihash"
