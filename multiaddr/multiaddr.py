@@ -20,8 +20,8 @@ class MultiAddrKeys(collections.abc.KeysView[Any], collections.abc.Sequence[Any]
         self._mapping = mapping
         super().__init__(mapping)
 
-    def __contains__(self, key: object) -> bool:
-        proto = self._mapping.registry.find(key)
+    def __contains__(self, value: object) -> bool:
+        proto = self._mapping.registry.find(value)
         return collections.abc.Sequence.__contains__(self, proto)
 
     def __getitem__(self, index: int | slice) -> Any | Sequence[Any]:
@@ -49,10 +49,10 @@ class MultiAddrItems(
         self._mapping = mapping
         super().__init__(mapping)
 
-    def __contains__(self, value: object) -> bool:
-        if not isinstance(value, tuple) or len(value) != 2:
+    def __contains__(self, item: object) -> bool:
+        if not isinstance(item, tuple) or len(item) != 2:
             return False
-        proto, val = value
+        proto, val = item
         proto = self._mapping.registry.find(proto)
         return collections.abc.Sequence.__contains__(self, (proto, val))
 
