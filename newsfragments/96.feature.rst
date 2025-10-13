@@ -1,0 +1,7 @@
+Added garlic32 and garlic64 protocol support to py-multiaddr
+
+- Implements protocol code 446 and 447.
+- Full compatibility with Go multiaddr implementation
+- Comprehensive test coverage including edge cases
+- Complete documentation and examples in examples/garlic/garlic_examples.py
+- Integration with multiaddr documentation system

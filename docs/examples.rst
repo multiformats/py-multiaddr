@@ -84,6 +84,23 @@ This example demonstrates:
    :language: python
    :caption: examples/decapsulate/decapsulate_example.py
 
+Garlic Protocol Examples
+------------------------
+
+The `examples/garlic/` directory demonstrates how to work with garlic32 and garlic64 protocols for I2P (Invisible Internet Project) addresses.
+
+This example shows:
+- Basic garlic64 and garlic32 protocol usage
+- Protocol validation and error handling
+- Binary encoding and decoding operations
+- Multiaddr integration with peer IDs
+- I2P address format validation
+- Custom base64 alphabet handling (-~ instead of +/)
+
+.. literalinclude:: ../examples/garlic/garlic_examples.py
+   :language: python
+   :caption: examples/garlic/garlic_examples.py
+
 Running the Examples
 --------------------
 
@@ -105,5 +122,8 @@ All examples can be run directly with Python:
 
     # Decapsulate examples
     python examples/decapsulate/decapsulate_example.py
+
+    # Garlic protocol examples
+    python examples/garlic/garlic_examples.py
 
 Note: Some examples require network connectivity and may take a few seconds to complete due to DNS resolution.

@@ -66,6 +66,8 @@ P_WS = 0x01DD
 P_WSS = 0x01DE
 P_ONION = 0x01BC
 P_ONION3 = 0x01BD
+P_GARLIC64 = 0x1BE
+P_GARLIC32 = 0x1BF
 P_P2P_CIRCUIT = 0x0122
 P_DNS = 0x35
 P_DNS4 = 0x36
@@ -156,6 +158,8 @@ PROTOCOLS = [
     Protocol(P_P2P, "p2p", "cid"),
     Protocol(P_ONION, "onion", "onion"),
     Protocol(P_ONION3, "onion3", "onion3"),
+    Protocol(P_GARLIC64, "garlic64", "garlic64"),
+    Protocol(P_GARLIC32, "garlic32", "garlic32"),
     Protocol(P_QUIC, "quic", None),
     Protocol(P_QUIC1, "quic-v1", None),
     Protocol(P_HTTP, "http", None),
