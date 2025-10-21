@@ -3,6 +3,27 @@ History
 
 .. towncrier release notes start
 
+py-multiaddr v0.0.12 (2025-10-21)
+---------------------------------
+
+Features
+~~~~~~~~
+
+- Added the http-path protocol in reference with go-multiaddr. (`#94 <https://github.com/multiformats/py-multiaddr/issues/94>`__)
+- Added ipcidr protocol support to py-multiaddr
+
+  - Implements protocol code 43 (0x2B) for CIDR notation support
+  - Full compatibility with Go multiaddr implementation
+  - Comprehensive test coverage including edge cases (`#95 <https://github.com/multiformats/py-multiaddr/issues/95>`__)
+- Added garlic32 and garlic64 protocol support to py-multiaddr
+
+  - Implements protocol code 446 and 447.
+  - Full compatibility with Go multiaddr implementation
+  - Comprehensive test coverage including edge cases
+  - Complete documentation and examples in examples/garlic/garlic_examples.py
+  - Integration with multiaddr documentation system (`#96 <https://github.com/multiformats/py-multiaddr/issues/96>`__)
+
+
 py-multiaddr v0.0.11 (2025-09-15)
 ---------------------------------
 

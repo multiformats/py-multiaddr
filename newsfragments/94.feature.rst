@@ -1,1 +1,0 @@
-Added the http-path protocol in reference with go-multiaddr.
