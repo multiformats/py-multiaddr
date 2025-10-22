@@ -7,7 +7,7 @@ import pytest
 import varint
 
 from multiaddr import Multiaddr, exceptions, protocols
-from multiaddr.codecs import garlic32, garlic64, certhash, http_path, ipcidr, memory
+from multiaddr.codecs import certhash, garlic32, garlic64, http_path, ipcidr, memory
 from multiaddr.exceptions import BinaryParseError, StringParseError
 
 
