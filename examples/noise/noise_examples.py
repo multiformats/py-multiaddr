@@ -15,7 +15,7 @@ This script shows various examples of Noise protocol usage:
 2. **Protocol Validation**: Testing valid (/noise) and invalid (/noise/value)
    addresses.
 3. **Binary Encoding/Decoding**: Working with binary representations.
-4. **Multiaddr Integration**: Using 'noise' in a realistic multiaddr string 
+4. **Multiaddr Integration**: Using 'noise' in a realistic multiaddr string
    (e.g., /ip4/127.0.0.1/tcp/12345/noise).
 5. **Error Handling**: Demonstrating errors when a value is incorrectly
    provided.
@@ -29,7 +29,7 @@ NOISE Protocol Examples
 ==================================================
 === Basic Noise Usage ===
 Original Noise: /noise
-    Protocols: ['noise'] 
+    Protocols: ['noise']
     Binary length: 2 bytes
     Valid Noise address: True
 
@@ -38,22 +38,22 @@ Testing valid Noise: /noise
     Valid: True
     Protocols: ['noise']
 
-Testing invalid Noise (with value): /noise/somevalue 
-    Valid: False 
+Testing invalid Noise (with value): /noise/somevalue
+    Valid: False
     Error: Protocol 'noise' does not take an argument
 
 === Binary Encoding/Decoding ===
-Noise binary operations: 
-    Original: /noise 
-    Binary: 2 bytes 
+Noise binary operations:
+    Original: /noise
+    Binary: 2 bytes
     Round-trip: /noise Match: True
 
 === Multiaddr Integration ===
 Complex multiaddr with Noise:
-    Address: /ip4/127.0.0.1/tcp/12345/noise/p2p/Qm... 
-    Protocols: ['ip4', 'tcp', 'noise', 'p2p'] 
+    Address: /ip4/127.0.0.1/tcp/12345/noise/p2p/Qm...
+    Protocols: ['ip4', 'tcp', 'noise', 'p2p']
     Has 'noise' protocol: True
-    
+
 ==================================================
 All examples completed!
 ```
@@ -83,6 +83,7 @@ from multiaddr import Multiaddr
 
 NOISE_ADDR = "/noise"
 
+
 def basic_noise_usage():
     """
     Basic Noise usage example.
@@ -92,9 +93,9 @@ def basic_noise_usage():
     - Extracting protocol information
     - Getting binary representation
     """
-    
-    print(f'Original Noise: {NOISE_ADDR}')
-    
+
+    print(f"Original Noise: {NOISE_ADDR}")
+
     try:
         ma = Multiaddr(NOISE_ADDR)
         print(f"Protocols: {[p.name for p in ma.protocols()]}")
@@ -109,7 +110,8 @@ def basic_noise_usage():
         print(f"Error: {e}")
         print("Valid Noise address: False")
 
-def protocol_validation(): 
+
+def protocol_validation():
     """
     Demonstrate protocol validation.
 
@@ -140,7 +142,8 @@ def protocol_validation():
         print("  Valid: False")
         print(f"  Error: {e}")
 
-def binary_encoding_decoding(): 
+
+def binary_encoding_decoding():
     """
     Demonstrate binary encoding and decoding.
 
@@ -166,9 +169,10 @@ def binary_encoding_decoding():
 
     except Exception as e:
         print(f"  Error: {e}")
-        
-def multiaddr_integration(): 
-    """ 
+
+
+def multiaddr_integration():
+    """
     Demonstrate Noise protocol integration with other protocols.
 
     This function shows:
@@ -191,12 +195,13 @@ def multiaddr_integration():
         print(f"  Protocols: {protocols}")
 
         # Check for 'noise' protocol
-        has_noise = 'noise' in protocols
+        has_noise = "noise" in protocols
         print(f"  Has 'noise' protocol: {has_noise}")
 
     except Exception as e:
         print(f"  Error: {e}")
-        
+
+
 def main():
     """
     Run all Noise protocol examples.
@@ -231,6 +236,7 @@ def main():
         print("\nExamples interrupted by user")
     except Exception as e:
         print(f"\nUnexpected error: {e}")
-        
+
+
 if __name__ == "__main__":
     main()
