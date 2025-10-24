@@ -611,7 +611,7 @@ def test_certhash_invalid_multibase_string_raises():
         codec.to_bytes(None, invalid_string)
 
 
-def test_certhash_memory_validate_function():
+def test_certhash_validate_function():
     """
     Directly tests the validate method.
     """
