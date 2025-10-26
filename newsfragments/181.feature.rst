@@ -1,0 +1,7 @@
+Added the following protocols in reference with go-multiaddr
+
+- SNI: 0x01C1
+- NOISE: 0x01C6
+- CERTHASH:
+- WEBRTC:
+- WEBRTC-DIRECT:

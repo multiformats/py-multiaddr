@@ -81,7 +81,10 @@ P_HTTP_PATH = 0x01E1
 P_SNI = 0x01C1
 P_NOISE = 0x01C6
 P_WEBTRANSPORT = 0x01D1
+P_WEBRTC_DIRECT = 0x118
+P_WEBRTC = 0x119
 P_MEMORY = 0x309
+P_CERTHASH = 0x1D2
 
 
 class Protocol:
@@ -152,6 +155,8 @@ PROTOCOLS = [
     Protocol(P_DNS4, "dns4", "domain"),
     Protocol(P_DNS6, "dns6", "domain"),
     Protocol(P_DNSADDR, "dnsaddr", "domain"),
+    Protocol(P_SNI, "sni", "domain"),
+    Protocol(P_NOISE, "noise", None),
     Protocol(P_SCTP, "sctp", "uint16be"),
     Protocol(P_UDT, "udt", None),
     Protocol(P_UTP, "utp", None),
@@ -174,7 +179,10 @@ PROTOCOLS = [
     Protocol(P_P2P_CIRCUIT, "p2p-circuit", None),
     Protocol(P_WEBTRANSPORT, "webtransport", None),
     Protocol(P_UNIX, "unix", "fspath"),
+    Protocol(P_WEBRTC_DIRECT, "webrtc-direct", None),
+    Protocol(P_WEBRTC, "webrtc", None),
     Protocol(P_MEMORY, "memory", "memory"),
+    Protocol(P_CERTHASH, "certhash", "certhash"),
 ]
 
 

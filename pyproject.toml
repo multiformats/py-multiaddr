@@ -35,6 +35,8 @@ dependencies = [
     "psutil",
     "py-cid >= 0.3.1",
     "py-multicodec >= 0.2.0",
+    "py-multibase",
+    "py-multihash",
     "trio-typing>=0.0.4",
     "trio>=0.26.0",
     "varint",
