@@ -3,6 +3,21 @@ History
 
 .. towncrier release notes start
 
+py-multiaddr v0.1.0 (2025-10-27)
+--------------------------------
+
+Features
+~~~~~~~~
+
+- Added the following protocols in reference with go-multiaddr
+
+  - SNI: 0x01C1
+  - NOISE: 0x01C6
+  - CERTHASH:
+  - WEBRTC:
+  - WEBRTC-DIRECT: (`#181 <https://github.com/multiformats/py-multiaddr/issues/181>`__)
+
+
 py-multiaddr v0.0.12 (2025-10-21)
 ---------------------------------
 
