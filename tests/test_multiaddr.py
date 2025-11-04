@@ -1022,3 +1022,86 @@ def test_http_path_raw_value_access():
     from urllib.parse import quote
 
     assert quote(raw_value, safe="") == encoded_value
+
+
+def test_tag_only_protocol_rejects_value_slash_syntax():
+    """Test that tag-only protocols reject values using /tag/value syntax"""
+    tag_only_protocols = [
+        "webrtc",
+        "webrtc-direct",
+        "noise",
+        "quic",
+        "quic-v1",
+        "tls",
+        "http",
+        "https",
+        "ws",
+        "wss",
+        "p2p-circuit",
+        "webtransport",
+    ]
+
+    for proto_name in tag_only_protocols:
+        # Should fail with clear error message
+        with pytest.raises(StringParseError) as exc_info:
+            Multiaddr(f"/{proto_name}/value")
+        assert "does not take an argument" in str(exc_info.value)
+        assert proto_name in str(exc_info.value)
+
+
+def test_tag_only_protocol_rejects_value_equals_syntax():
+    """Test that tag-only protocols reject values using /tag=value syntax"""
+    tag_only_protocols = [
+        "webrtc",
+        "webrtc-direct",
+        "noise",
+        "quic",
+        "tls",
+        "http",
+    ]
+
+    for proto_name in tag_only_protocols:
+        # Should fail with clear error message
+        with pytest.raises(StringParseError) as exc_info:
+            Multiaddr(f"/{proto_name}=value")
+        assert "does not take an argument" in str(exc_info.value)
+        assert proto_name in str(exc_info.value)
+
+
+def test_tag_only_protocol_allows_valid_combinations():
+    """Test that tag-only protocols work correctly in valid combinations"""
+    # Single tag protocol
+    assert str(Multiaddr("/webrtc")) == "/webrtc"
+    assert str(Multiaddr("/webrtc-direct")) == "/webrtc-direct"
+
+    # Multiple tag protocols chained
+    assert str(Multiaddr("/webrtc/noise")) == "/webrtc/noise"
+    assert str(Multiaddr("/webrtc-direct/webrtc")) == "/webrtc-direct/webrtc"
+
+    # Tag protocol followed by value protocol
+    assert (
+        str(Multiaddr("/webrtc-direct/ip4/127.0.0.1"))
+        == "/webrtc-direct/ip4/127.0.0.1"
+    )
+
+    # Complex valid address
+    addr = "/ip4/127.0.0.1/udp/9090/webrtc-direct/certhash/uEiDDq4_xNyDorZBH3TlGazyJdOWSwvo4PUo5YHFMrvDE8g"
+    assert str(Multiaddr(addr)) == addr
+
+
+def test_tag_only_protocol_error_message_format():
+    """Test that error messages for tag-only protocols are clear and helpful"""
+    # Test /tag/value syntax
+    with pytest.raises(StringParseError) as exc_info:
+        Multiaddr("/webrtc-direct/invalidvalue")
+    error_msg = str(exc_info.value)
+    assert "does not take an argument" in error_msg
+    assert "webrtc-direct" in error_msg
+    assert "invalidvalue" not in error_msg  # Should not mention the invalid value
+
+    # Test /tag=value syntax
+    with pytest.raises(StringParseError) as exc_info:
+        Multiaddr("/webrtc=somevalue")
+    error_msg = str(exc_info.value)
+    assert "does not take an argument" in error_msg
+    assert "webrtc" in error_msg
