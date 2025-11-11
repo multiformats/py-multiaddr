@@ -1079,10 +1079,7 @@ def test_tag_only_protocol_allows_valid_combinations():
     assert str(Multiaddr("/webrtc-direct/webrtc")) == "/webrtc-direct/webrtc"
 
     # Tag protocol followed by value protocol
-    assert (
-        str(Multiaddr("/webrtc-direct/ip4/127.0.0.1"))
-        == "/webrtc-direct/ip4/127.0.0.1"
-    )
+    assert str(Multiaddr("/webrtc-direct/ip4/127.0.0.1")) == "/webrtc-direct/ip4/127.0.0.1"
 
     # Complex valid address
     addr = "/ip4/127.0.0.1/udp/9090/webrtc-direct/certhash/uEiDDq4_xNyDorZBH3TlGazyJdOWSwvo4PUo5YHFMrvDE8g"

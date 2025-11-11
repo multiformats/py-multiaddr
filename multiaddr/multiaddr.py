@@ -362,7 +362,7 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
                 # Get the next part as the path value
                 if idx + 1 >= len(parts_list):
                     raise exceptions.StringParseError("missing value for unix protocol", addr)
-                
+
                 protocol_path_value = parts_list[idx + 1]
                 if not protocol_path_value:
                     raise exceptions.StringParseError("empty protocol path", addr)
@@ -411,9 +411,16 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
 
             # Fix 2: Validate that tag-only protocols don't accept values via = syntax
             if proto.codec is None and protocol_value is not None:
+                # Construct address string without the invalid value
+                # to avoid including it in error message
+                addr_parts_before = parts_list[:idx]
+                if addr_parts_before or proto_name:
+                    addr_up_to_protocol = "/" + "/".join([*addr_parts_before, proto_name])
+                else:
+                    addr_up_to_protocol = "/"
                 raise exceptions.StringParseError(
                     f"Protocol '{proto.name}' does not take an argument",
-                    addr,
+                    addr_up_to_protocol,
                     proto.name,
                 )
 
@@ -447,13 +454,16 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
             # Special case: protocols with codec=None are flag protocols
             # (no value, no length prefix, no buffer)
             if proto.codec is None:
+                # Encode the protocol code first
+                self._bytes += varint.encode(proto.code)
+
                 # Fix 1: Check if next part exists and is not a valid protocol name
                 # If it's not a valid protocol, it's an invalid value
                 # Look ahead to find the next non-empty part
                 next_idx = idx + 1
                 while next_idx < len(parts_list) and not parts_list[next_idx]:
                     next_idx += 1
-                
+
                 if next_idx < len(parts_list):
                     next_part = parts_list[next_idx]
                     try:
@@ -466,9 +476,12 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
                         continue
                     except exceptions.ProtocolNotFoundError:
                         # Not a valid protocol name, so it's an invalid value
+                        # Construct address string up to (but not including) the invalid value
+                        # to avoid including it in the error message
+                        addr_up_to_protocol = "/" + "/".join(parts_list[: idx + 1])
                         raise exceptions.StringParseError(
                             f"Protocol '{proto.name}' does not take an argument",
-                            addr,
+                            addr_up_to_protocol,
                             proto.name,
                         )
                 # No next part, continue normally
@@ -485,7 +498,7 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
                     self._bytes += buf
             except Exception as e:
                 raise exceptions.StringParseError(str(e), addr) from e
-            
+
             idx += 1  # Move to next part
 
     def _from_bytes(self, addr: bytes) -> None:
