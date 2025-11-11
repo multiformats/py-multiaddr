@@ -565,7 +565,9 @@ def test_ipcidr_invalid_bytes_inputs():
 
 # --------CERT-HASH---------
 
-VALID_MULTIHASH_BYTES = multihash.encode(b"hello world", "sha2-256")
+# The multihash package provides `encode` at runtime, but some static
+# checkers (ruff/pyright) may not see it. Ignore the attribute check here.
+VALID_MULTIHASH_BYTES = multihash.encode(b"hello world", "sha2-256")  # type: ignore[attr-defined]
 VALID_CERTHASH_STRING = multibase.encode("base64url", VALID_MULTIHASH_BYTES).decode("utf-8")
 
 INVALID_BYTES = b"this is not a multihash"
