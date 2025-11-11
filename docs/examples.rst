@@ -101,6 +101,22 @@ This example shows:
    :language: python
    :caption: examples/garlic/garlic_examples.py
 
+Tag-Only Protocol Examples
+---------------------------
+
+The `examples/tag_only/` directory demonstrates how to work with tag-only protocols (protocols that do not accept values) in multiaddr addresses.
+
+This example shows:
+- Basic tag-only protocol usage (http, https, tls, noise, webrtc, etc.)
+- Protocol validation for tag-only protocols
+- Error handling for invalid value assignments (both ``/tag/value`` and ``/tag=value`` syntaxes)
+- Multiaddr integration with tag-only protocols
+- Chaining multiple tag-only protocols
+
+.. literalinclude:: ../examples/tag_only/tag_only_examples.py
+   :language: python
+   :caption: examples/tag_only/tag_only_examples.py
+
 Running the Examples
 --------------------
 
@@ -125,5 +141,8 @@ All examples can be run directly with Python:
 
     # Garlic protocol examples
     python examples/garlic/garlic_examples.py
+
+    # Tag-only protocol examples
+    python examples/tag_only/tag_only_examples.py
 
 Note: Some examples require network connectivity and may take a few seconds to complete due to DNS resolution.
