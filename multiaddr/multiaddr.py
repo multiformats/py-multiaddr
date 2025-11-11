@@ -369,12 +369,12 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
 
                 # Join any remaining parts as part of the path
                 remaining_parts = []
-                idx += 2  # Skip unix and first path part
+                idx = idx + 2  # Skip unix and first path part
                 while idx < len(parts_list):
                     next_part = parts_list[idx]
                     if next_part:
                         remaining_parts.append(next_part)
-                    idx += 1
+                    idx = idx + 1
 
                 if remaining_parts:
                     protocol_path_value = protocol_path_value + "/" + "/".join(remaining_parts)
