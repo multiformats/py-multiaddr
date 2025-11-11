@@ -3,4 +3,3 @@ Tag-only protocols like ``http``, ``https``, ``tls``, ``noise``, ``webrtc``, etc
 now correctly reject invalid value assignments via both ``/tag/value`` and
 ``/tag=value`` syntax, raising clear error messages that do not include the
 invalid value.
-

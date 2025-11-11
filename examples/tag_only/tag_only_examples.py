@@ -117,7 +117,7 @@ def basic_tag_only_usage():
     for proto_name in TAG_ONLY_PROTOCOLS[:5]:  # Show first 5
         addr_str = f"/{proto_name}"
         try:
-            ma = Multiaddr(addr_str)
+            _ = Multiaddr(addr_str)  # Validate the address
             print(f"  {addr_str}")
         except Exception as e:
             print(f"  {addr_str} - Error: {e}")
@@ -221,7 +221,7 @@ def common_tag_only_protocols():
 
     for name, addr_str in examples:
         try:
-            ma = Multiaddr(addr_str)
+            _ = Multiaddr(addr_str)  # Validate the address
             print(f"{name}: {addr_str}")
         except Exception as e:
             print(f"{name}: {addr_str} - Error: {e}")
@@ -295,4 +295,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
