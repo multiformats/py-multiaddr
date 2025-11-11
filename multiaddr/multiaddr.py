@@ -350,7 +350,7 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
             raise exceptions.StringParseError("empty multiaddr", addr)
 
         self._bytes = b""
-        idx = 0
+        idx: int = 0
         while idx < len(parts_list):
             part = parts_list[idx]
             if not part:
