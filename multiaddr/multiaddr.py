@@ -344,55 +344,53 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
             return
 
         # Handle other protocols
-        parts = iter(addr.strip("/").split("/"))
-        if not parts:
+        # Convert to list to allow peeking ahead for validation
+        parts_list = addr.strip("/").split("/")
+        if not parts_list:
             raise exceptions.StringParseError("empty multiaddr", addr)
 
         self._bytes = b""
-        for part in parts:
+        idx: int = 0
+        while idx < len(parts_list):
+            part = parts_list[idx]
             if not part:
+                idx += 1
                 continue
 
             # Special handling for unix paths
             if part in ("unix",):
-                try:
-                    # Get the next part as the path value
-                    protocol_path_value = next(parts)
-                    if not protocol_path_value:
-                        raise exceptions.StringParseError("empty protocol path", addr)
-
-                    # Join any remaining parts as part of the path
-                    remaining_parts = []
-                    while True:
-                        try:
-                            next_part = next(parts)
-                            if not next_part:
-                                continue
-                            remaining_parts.append(next_part)
-                        except StopIteration:
-                            break
-
-                    if remaining_parts:
-                        protocol_path_value = protocol_path_value + "/" + "/".join(remaining_parts)
-
-                    proto = protocol_with_name(part)
-                    codec = codec_by_name(proto.codec)
-                    if not codec:
-                        raise exceptions.StringParseError(f"unknown codec: {proto.codec}", addr)
-
-                    try:
-                        self._bytes += varint.encode(proto.code)
-                        buf = codec.to_bytes(proto, protocol_path_value)
-                        # Add length prefix for variable-sized or zero-sized codecs
-                        if codec.SIZE <= 0:
-                            self._bytes += varint.encode(len(buf))
-                        if buf:  # Only append buffer if it's not empty
-                            self._bytes += buf
-                    except Exception as e:
-                        raise exceptions.StringParseError(str(e), addr) from e
-                    continue
-                except StopIteration:
+                # Get the next part as the path value
+                if idx + 1 >= len(parts_list):
                     raise exceptions.StringParseError("missing value for unix protocol", addr)
+
+                protocol_path_value = parts_list[idx + 1]
+                if not protocol_path_value:
+                    raise exceptions.StringParseError("empty protocol path", addr)
+
+                # Join any remaining parts as part of the path (collect and consume the rest)
+                remaining_parts = [p for p in parts_list[idx + 2 :] if p]
+                # Consume all remaining parts so outer loop ends
+                idx = len(parts_list)
+
+                if remaining_parts:
+                    protocol_path_value = protocol_path_value + "/" + "/".join(remaining_parts)
+
+                proto = protocol_with_name(part)
+                codec = codec_by_name(proto.codec)
+                if not codec:
+                    raise exceptions.StringParseError(f"unknown codec: {proto.codec}", addr)
+
+                try:
+                    self._bytes += varint.encode(proto.code)
+                    buf = codec.to_bytes(proto, protocol_path_value)
+                    # Add length prefix for variable-sized or zero-sized codecs
+                    if codec.SIZE <= 0:
+                        self._bytes += varint.encode(len(buf))
+                    if buf:  # Only append buffer if it's not empty
+                        self._bytes += buf
+                except Exception as e:
+                    raise exceptions.StringParseError(str(e), addr) from e
+                continue  # Already advanced idx above
 
             # Handle other protocols
             # Split protocol name and value if present
@@ -407,15 +405,30 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
             except Exception as exc:
                 raise exceptions.StringParseError(f"unknown protocol: {proto_name}", addr) from exc
 
+            # Fix 2: Validate that tag-only protocols don't accept values via = syntax
+            if proto.codec is None and protocol_value is not None:
+                # Construct address string without the invalid value
+                # to avoid including it in error message
+                addr_parts_before = parts_list[:idx]
+                if addr_parts_before or proto_name:
+                    addr_up_to_protocol = "/" + "/".join([*addr_parts_before, proto_name])
+                else:
+                    addr_up_to_protocol = "/"
+                raise exceptions.StringParseError(
+                    f"Protocol '{proto.name}' does not take an argument",
+                    addr_up_to_protocol,
+                    proto.name,
+                )
+
             # If the protocol expects a value, get it
             if proto.codec is not None:
                 if protocol_value is None:
-                    try:
-                        protocol_value = next(parts)
-                    except StopIteration:
+                    if idx + 1 >= len(parts_list):
                         raise exceptions.StringParseError(
                             f"missing value for protocol: {proto_name}", addr
                         )
+                    protocol_value = parts_list[idx + 1]
+                    idx += 1  # Consume the value part
                 # Validate value (optional: could add more checks here)
                 # If value looks like a protocol name, that's an error
                 if protocol_value is not None:
@@ -434,13 +447,42 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
             if not codec:
                 raise exceptions.StringParseError(f"unknown codec: {proto.codec}", addr)
 
-            try:
+            # Special case: protocols with codec=None are flag protocols
+            # (no value, no length prefix, no buffer)
+            if proto.codec is None:
+                # Encode the protocol code first
                 self._bytes += varint.encode(proto.code)
 
-                # Special case: protocols with codec=None are flag protocols
-                # (no value, no length prefix, no buffer)
-                if proto.codec is None:
-                    continue
+                # Fix 1: Check if next part exists and is not a valid protocol name
+                # If it's not a valid protocol, it's an invalid value
+                # Look ahead to find the next non-empty part
+                next_idx = idx + 1
+                while next_idx < len(parts_list) and not parts_list[next_idx]:
+                    next_idx += 1
+
+                if next_idx < len(parts_list):
+                    next_part = parts_list[next_idx]
+                    try:
+                        protocol_with_name(next_part)
+                        # It's a valid protocol name, so advance idx to that part
+                        idx = next_idx
+                        continue
+                    except exceptions.ProtocolNotFoundError:
+                        # Not a valid protocol name, so it's an invalid value
+                        # Construct address string up to (but not including) the invalid value
+                        # to avoid including it in the error message
+                        addr_up_to_protocol = "/" + "/".join(parts_list[: idx + 1])
+                        raise exceptions.StringParseError(
+                            f"Protocol '{proto.name}' does not take an argument",
+                            addr_up_to_protocol,
+                            proto.name,
+                        )
+                # No next part, continue normally
+                idx += 1
+                continue
+
+            try:
+                self._bytes += varint.encode(proto.code)
 
                 buf = codec.to_bytes(proto, protocol_value or "")
                 if codec.SIZE <= 0:  # Add length prefix for variable-sized or zero-sized codecs
@@ -449,6 +491,8 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
                     self._bytes += buf
             except Exception as e:
                 raise exceptions.StringParseError(str(e), addr) from e
+
+            idx += 1  # Move to next part
 
     def _from_bytes(self, addr: bytes) -> None:
         """Parse a binary multiaddr.
