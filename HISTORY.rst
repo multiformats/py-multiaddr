@@ -3,6 +3,19 @@ History
 
 .. towncrier release notes start
 
+py-multiaddr v0.1.1 (2025-12-07)
+--------------------------------
+
+Bugfixes
+~~~~~~~~
+
+- Fixed validation for tag-only protocols (protocols that do not accept values).
+  Tag-only protocols like ``http``, ``https``, ``tls``, ``noise``, ``webrtc``, etc.
+  now correctly reject invalid value assignments via both ``/tag/value`` and
+  ``/tag=value`` syntax, raising clear error messages that do not include the
+  invalid value. (`#98 <https://github.com/multiformats/py-multiaddr/issues/98>`__)
+
+
 py-multiaddr v0.1.0 (2025-10-27)
 --------------------------------
 
