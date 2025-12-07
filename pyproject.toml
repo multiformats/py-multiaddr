@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "multiaddr"
-version = "0.1.0"
+version = "0.1.1"
 description = "Python implementation of jbenet's multiaddr"
 readme = "README.rst"
 authors = [{ name = "Steven Buss", email = "steven.buss@gmail.com" }]
@@ -44,7 +44,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/multiformats/py-multiaddr"
-Download = "https://github.com/multiformats/py-multiaddr/tarball/0.1.0"
+Download = "https://github.com/multiformats/py-multiaddr/tarball/0.1.1"
 
 [project.optional-dependencies]
 dev = [
@@ -137,7 +137,7 @@ name = "Removals"
 showcontent = true
 
 [tool.bumpversion]
-current_version = "0.1.0"
+current_version = "0.1.1"
 parse = """
     (?P<major>\\d+)
     \\.(?P<minor>\\d+)
