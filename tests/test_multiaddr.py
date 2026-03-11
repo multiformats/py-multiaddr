@@ -67,8 +67,7 @@ from multiaddr.protocols import (
         "/garlic32/566niximlxdzpanmn4qouucvua3k7neniwss47li5r6ugoertzu:80",
         "/garlic32/566niximlxdzpanmn4qouucvua3k7neniwss47li5r6ugoertzuq:-1",
         "/garlic32/566niximlxdzpanmn4qouucvua3k7neniwss47li5r6ugoertzu@",
-        "/ip4/127.0.0.1/udp/1234/quic-v1/webtransport/certhash/b2uaraocy6yrdblb4sfptaddgimjmmpy",
-        "/ip4/127.0.0.1/udp/1234/quic-v1/webtransport/certhash/b2uaraocy6yrdblb4sfptaddgimjmmpy/certhash/zQmbWTwYGcmdyK9CYfNBcfs9nhZs17a6FQ4Y8oea278xx41",
+        "/ip4/127.0.0.1/udp/1234/quic-v1/webtransport/certhash/b2uaraocy6yrdblb4sfptaddgimjmmp",
         "/udp/1234/sctp",
         "/udp/1234/udt/1234",
         "/udp/1234/utp/1234",
@@ -142,6 +141,8 @@ def test_invalid(addr_str):
         "/ip4/127.0.0.1/tcp/127/webrtc",
         "/certhash/uEiDDq4_xNyDorZBH3TlGazyJdOWSwvo4PUo5YHFMrvDE8g"
         "/ip4/127.0.0.1/udp/9090/webrtc-direct/certhash/uEiDDq4_xNyDorZBH3TlGazyJdOWSwvo4PUo5YHFMrvDE8g",
+        "/ip4/127.0.0.1/udp/1234/quic-v1/webtransport/certhash/u1QEQOFj2IjCsPJFfMAxmQxLGPw",
+        "/ip4/127.0.0.1/udp/1234/quic-v1/webtransport/certhash/u1QEQOFj2IjCsPJFfMAxmQxLGPw/certhash/uEiDDq4_xNyDorZBH3TlGazyJdOWSwvo4PUo5YHFMrvDE8g",
     ],
 )  # nopep8
 def test_valid(addr_str):

@@ -435,18 +435,24 @@ def _go_style_dns_mocks():
         _dnsaddr.example.com → TXT: [dnsaddr=/ip4/192.0.2.1, dnsaddr=/ip6/2001:db8::a3]
     """
     mock_answer_a = AsyncMock()
-    rdata_a1 = AsyncMock(); rdata_a1.address = "192.0.2.1"
-    rdata_a2 = AsyncMock(); rdata_a2.address = "192.0.2.2"
+    rdata_a1 = AsyncMock()
+    rdata_a1.address = "192.0.2.1"
+    rdata_a2 = AsyncMock()
+    rdata_a2.address = "192.0.2.2"
     mock_answer_a.__iter__.return_value = [rdata_a1, rdata_a2]
 
     mock_answer_aaaa = AsyncMock()
-    rdata_aaaa1 = AsyncMock(); rdata_aaaa1.address = "2001:db8::a3"
-    rdata_aaaa2 = AsyncMock(); rdata_aaaa2.address = "2001:db8::a4"
+    rdata_aaaa1 = AsyncMock()
+    rdata_aaaa1.address = "2001:db8::a3"
+    rdata_aaaa2 = AsyncMock()
+    rdata_aaaa2.address = "2001:db8::a4"
     mock_answer_aaaa.__iter__.return_value = [rdata_aaaa1, rdata_aaaa2]
 
     mock_answer_txt = AsyncMock()
-    rdata_txt1 = AsyncMock(); rdata_txt1.strings = ["dnsaddr=/ip4/192.0.2.1"]
-    rdata_txt2 = AsyncMock(); rdata_txt2.strings = ["dnsaddr=/ip6/2001:db8::a3"]
+    rdata_txt1 = AsyncMock()
+    rdata_txt1.strings = ["dnsaddr=/ip4/192.0.2.1"]
+    rdata_txt2 = AsyncMock()
+    rdata_txt2.strings = ["dnsaddr=/ip6/2001:db8::a3"]
     mock_answer_txt.__iter__.return_value = [rdata_txt1, rdata_txt2]
 
     async def side_effect(hostname, record_type):
@@ -501,9 +507,7 @@ async def test_resolve_only_once(dns_resolver, _go_style_dns_mocks):
     """Go: TestResolveOnlyOnce — only the first DNS component is resolved."""
     with patch.object(dns_resolver._resolver, "resolve") as mock:
         mock.side_effect = _go_style_dns_mocks
-        result = await dns_resolver.resolve(
-            Multiaddr("/dns4/example.com/quic/dns6/example.com")
-        )
+        result = await dns_resolver.resolve(Multiaddr("/dns4/example.com/quic/dns6/example.com"))
     # dns4 resolved to 2 IPs, dns6 stays unresolved in each
     assert len(result) == 2
     assert result[0] == Multiaddr("/ip4/192.0.2.1/quic/dns6/example.com")
@@ -524,9 +528,7 @@ async def test_simple_txt_resolve(dns_resolver, _go_style_dns_mocks):
 @pytest.mark.trio
 async def test_resolve_empty_result(dns_resolver):
     """Go: TestEmptyResult — dnsaddr for unknown domain returns empty list."""
-    with patch.object(
-        dns_resolver._resolver, "resolve", side_effect=dns.resolver.NXDOMAIN
-    ):
+    with patch.object(dns_resolver._resolver, "resolve", side_effect=dns.resolver.NXDOMAIN):
         result = await dns_resolver.resolve(Multiaddr("/dnsaddr/none.com"))
     assert result == []
 
@@ -682,9 +684,11 @@ async def test_resolve_all_no_dns():
 @pytest.mark.trio
 async def test_resolve_all_single_dns():
     """Single DNS component is resolved."""
-    resolver = MockResolver({
-        "/dns4/example.com/tcp/80": ["/ip4/1.2.3.4/tcp/80"],
-    })
+    resolver = MockResolver(
+        {
+            "/dns4/example.com/tcp/80": ["/ip4/1.2.3.4/tcp/80"],
+        }
+    )
     result = await resolve_all(resolver, Multiaddr("/dns4/example.com/tcp/80"))
     assert result == [Multiaddr("/ip4/1.2.3.4/tcp/80")]
 
@@ -692,27 +696,25 @@ async def test_resolve_all_single_dns():
 @pytest.mark.trio
 async def test_resolve_all_multiple_dns_components():
     """Multiple DNS components in one multiaddr are all resolved."""
-    resolver = MockResolver({
-        "/dns4/a.example.com/quic/dns6/b.example.com": [
-            "/ip4/1.2.3.4/quic/dns6/b.example.com"
-        ],
-        "/ip4/1.2.3.4/quic/dns6/b.example.com": [
-            "/ip4/1.2.3.4/quic/ip6/::1"
-        ],
-    })
-    result = await resolve_all(
-        resolver, Multiaddr("/dns4/a.example.com/quic/dns6/b.example.com")
+    resolver = MockResolver(
+        {
+            "/dns4/a.example.com/quic/dns6/b.example.com": ["/ip4/1.2.3.4/quic/dns6/b.example.com"],
+            "/ip4/1.2.3.4/quic/dns6/b.example.com": ["/ip4/1.2.3.4/quic/ip6/::1"],
+        }
     )
+    result = await resolve_all(resolver, Multiaddr("/dns4/a.example.com/quic/dns6/b.example.com"))
     assert result == [Multiaddr("/ip4/1.2.3.4/quic/ip6/::1")]
 
 
 @pytest.mark.trio
 async def test_resolve_all_chained():
     """Chained resolution: DNS resolves to another DNS address."""
-    resolver = MockResolver({
-        "/dns4/a.com": ["/dns4/b.com/tcp/80"],
-        "/dns4/b.com/tcp/80": ["/ip4/1.2.3.4/tcp/80"],
-    })
+    resolver = MockResolver(
+        {
+            "/dns4/a.com": ["/dns4/b.com/tcp/80"],
+            "/dns4/b.com/tcp/80": ["/ip4/1.2.3.4/tcp/80"],
+        }
+    )
     result = await resolve_all(resolver, Multiaddr("/dns4/a.com"))
     assert result == [Multiaddr("/ip4/1.2.3.4/tcp/80")]
 
@@ -720,9 +722,11 @@ async def test_resolve_all_chained():
 @pytest.mark.trio
 async def test_resolve_all_max_iterations_exceeded():
     """Raises RecursionLimitError when DNS never fully resolves."""
-    resolver = MockResolver({
-        "/dns4/loop.com": ["/dns4/loop.com"],
-    })
+    resolver = MockResolver(
+        {
+            "/dns4/loop.com": ["/dns4/loop.com"],
+        }
+    )
     with pytest.raises(RecursionLimitError, match="resolve_all exceeded"):
         await resolve_all(resolver, Multiaddr("/dns4/loop.com"), max_iterations=3)
 
@@ -741,28 +745,28 @@ async def test_resolve_all_empty_result():
 
 @pytest.mark.trio
 async def test_resolve_all_cartesian_product():
-    """Go: TestResolveMultiple — dns4 × dns6 produces cartesian product.
+    """Go: TestResolveMultiple — dns4 x dns6 produces cartesian product.
 
     /dns4/example.com/quic/dns6/example.com with dns4→[ip4a, ip4b]
     and dns6→[ip6a, ip6b] produces 4 results.
     """
-    resolver = MockResolver({
-        "/dns4/example.com/quic/dns6/example.com": [
-            "/ip4/192.0.2.1/quic/dns6/example.com",
-            "/ip4/192.0.2.2/quic/dns6/example.com",
-        ],
-        "/ip4/192.0.2.1/quic/dns6/example.com": [
-            "/ip4/192.0.2.1/quic/ip6/2001:db8::a3",
-            "/ip4/192.0.2.1/quic/ip6/2001:db8::a4",
-        ],
-        "/ip4/192.0.2.2/quic/dns6/example.com": [
-            "/ip4/192.0.2.2/quic/ip6/2001:db8::a3",
-            "/ip4/192.0.2.2/quic/ip6/2001:db8::a4",
-        ],
-    })
-    result = await resolve_all(
-        resolver, Multiaddr("/dns4/example.com/quic/dns6/example.com")
+    resolver = MockResolver(
+        {
+            "/dns4/example.com/quic/dns6/example.com": [
+                "/ip4/192.0.2.1/quic/dns6/example.com",
+                "/ip4/192.0.2.2/quic/dns6/example.com",
+            ],
+            "/ip4/192.0.2.1/quic/dns6/example.com": [
+                "/ip4/192.0.2.1/quic/ip6/2001:db8::a3",
+                "/ip4/192.0.2.1/quic/ip6/2001:db8::a4",
+            ],
+            "/ip4/192.0.2.2/quic/dns6/example.com": [
+                "/ip4/192.0.2.2/quic/ip6/2001:db8::a3",
+                "/ip4/192.0.2.2/quic/ip6/2001:db8::a4",
+            ],
+        }
     )
+    result = await resolve_all(resolver, Multiaddr("/dns4/example.com/quic/dns6/example.com"))
     expected = [
         Multiaddr("/ip4/192.0.2.1/quic/ip6/2001:db8::a3"),
         Multiaddr("/ip4/192.0.2.1/quic/ip6/2001:db8::a4"),
@@ -778,23 +782,23 @@ async def test_resolve_all_sandwich():
 
     /quic/dns4/example.com/dns6/example.com/http resolves both DNS components.
     """
-    resolver = MockResolver({
-        "/quic/dns4/example.com/dns6/example.com/http": [
-            "/quic/ip4/192.0.2.1/dns6/example.com/http",
-            "/quic/ip4/192.0.2.2/dns6/example.com/http",
-        ],
-        "/quic/ip4/192.0.2.1/dns6/example.com/http": [
-            "/quic/ip4/192.0.2.1/ip6/2001:db8::a3/http",
-            "/quic/ip4/192.0.2.1/ip6/2001:db8::a4/http",
-        ],
-        "/quic/ip4/192.0.2.2/dns6/example.com/http": [
-            "/quic/ip4/192.0.2.2/ip6/2001:db8::a3/http",
-            "/quic/ip4/192.0.2.2/ip6/2001:db8::a4/http",
-        ],
-    })
-    result = await resolve_all(
-        resolver, Multiaddr("/quic/dns4/example.com/dns6/example.com/http")
+    resolver = MockResolver(
+        {
+            "/quic/dns4/example.com/dns6/example.com/http": [
+                "/quic/ip4/192.0.2.1/dns6/example.com/http",
+                "/quic/ip4/192.0.2.2/dns6/example.com/http",
+            ],
+            "/quic/ip4/192.0.2.1/dns6/example.com/http": [
+                "/quic/ip4/192.0.2.1/ip6/2001:db8::a3/http",
+                "/quic/ip4/192.0.2.1/ip6/2001:db8::a4/http",
+            ],
+            "/quic/ip4/192.0.2.2/dns6/example.com/http": [
+                "/quic/ip4/192.0.2.2/ip6/2001:db8::a3/http",
+                "/quic/ip4/192.0.2.2/ip6/2001:db8::a4/http",
+            ],
+        }
     )
+    result = await resolve_all(resolver, Multiaddr("/quic/dns4/example.com/dns6/example.com/http"))
     expected = [
         Multiaddr("/quic/ip4/192.0.2.1/ip6/2001:db8::a3/http"),
         Multiaddr("/quic/ip4/192.0.2.1/ip6/2001:db8::a4/http"),
@@ -802,5 +806,3 @@ async def test_resolve_all_sandwich():
         Multiaddr("/quic/ip4/192.0.2.2/ip6/2001:db8::a4/http"),
     ]
     assert result == expected
-
-

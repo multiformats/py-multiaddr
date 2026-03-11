@@ -17,9 +17,7 @@ _DNS_PROTOCOLS = frozenset({P_DNS, P_DNS4, P_DNS6, P_DNSADDR})
 
 
 def is_fqdn(s: str) -> bool:
-    """Check if string is a fully qualified domain name (ends with unescaped dot).
-
-    """
+    """Check if string is a fully qualified domain name (ends with unescaped dot)."""
     if not s:
         return False
     # Count trailing backslashes before the final character
@@ -37,25 +35,19 @@ def is_fqdn(s: str) -> bool:
 
 
 def fqdn(s: str) -> str:
-    """Append trailing dot if not already a FQDN.
-
-    """
+    """Append trailing dot if not already a FQDN."""
     if is_fqdn(s):
         return s
     return s + "."
 
 
 def addr_len(maddr: Multiaddr) -> int:
-    """Count the number of protocol components in a multiaddr.
-
-    """
+    """Count the number of protocol components in a multiaddr."""
     return len(list(maddr.protocols()))
 
 
 def offset_addr(maddr: Multiaddr, n: int) -> Multiaddr:
-    """Return a new multiaddr with the first n protocol components removed.
-
-    """
+    """Return a new multiaddr with the first n protocol components removed."""
     parts = maddr.split(n)
     if len(parts) <= n:
         return Multiaddr("/")
@@ -63,9 +55,7 @@ def offset_addr(maddr: Multiaddr, n: int) -> Multiaddr:
 
 
 def matches(maddr: Multiaddr) -> bool:
-    """Check if a multiaddr contains any DNS protocol component.
-
-    """
+    """Check if a multiaddr contains any DNS protocol component."""
     return any(p.code in _DNS_PROTOCOLS for p in maddr.protocols())
 
 

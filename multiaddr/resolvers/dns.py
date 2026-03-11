@@ -36,9 +36,9 @@ from ..multiaddr import Multiaddr
 from ..protocols import P_DNS, P_DNS4, P_DNS6, P_DNSADDR, Protocol
 from .base import Resolver
 
-
 DNSADDR_TXT_PREFIX = "dnsaddr="
 """Prefix for dnsaddr TXT records (e.g. ``dnsaddr=/ip4/...``)."""
+
 
 class DNSResolver(Resolver):
     """
@@ -230,7 +230,7 @@ class DNSResolver(Resolver):
                     txt_data = str(txt_data_raw)
                 logging.debug(f"{indent}  TXT: {txt_data}")
                 if txt_data.startswith(DNSADDR_TXT_PREFIX):
-                    multiaddr_str = txt_data[len(DNSADDR_TXT_PREFIX):]
+                    multiaddr_str = txt_data[len(DNSADDR_TXT_PREFIX) :]
                     multiaddr_str = self._clean_quotes(multiaddr_str).strip()
                     logging.debug(f"{indent}    Parsed multiaddr: {multiaddr_str}")
                     if not multiaddr_str:
