@@ -131,14 +131,14 @@ async def resolve_all(
         resolver: A resolver instance implementing an async ``resolve()`` method.
         maddr: The multiaddr to resolve.
         max_iterations: Safety limit on resolution rounds to prevent infinite
-            loops (default ``32``).
+        loops (default ``32``).
 
     Returns:
         A list of fully-resolved :class:`~multiaddr.Multiaddr` instances.
 
     Raises:
         RecursionLimitError: If DNS components remain after *max_iterations*
-            rounds.
+        rounds.
 
     Example::
 
