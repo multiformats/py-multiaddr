@@ -629,6 +629,11 @@ class TestOffsetAddr:
         ma = Multiaddr("/ip4/127.0.0.1/tcp/80")
         assert offset_addr(ma, 2) == Multiaddr("/")
 
+    def test_negative_offset(self):
+        ma = Multiaddr("/ip4/127.0.0.1/tcp/80")
+        with pytest.raises(ValueError, match="non-negative"):
+            offset_addr(ma, -1)
+
 
 class TestMatches:
     def test_dns4(self):

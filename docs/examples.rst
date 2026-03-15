@@ -117,6 +117,21 @@ This example shows:
    :language: python
    :caption: examples/tag_only/tag_only_examples.py
 
+Resolver Utility Examples
+--------------------------
+
+The `examples/resolver_utils/` directory demonstrates the utility functions ported from go-multiaddr-dns for working with DNS-based multiaddr resolution.
+
+This example shows:
+- Checking for DNS components with ``matches()``
+- FQDN detection and normalization with ``is_fqdn()`` and ``fqdn()``
+- Counting protocol components with ``addr_len()``
+- Removing leading components with ``offset_addr()``
+
+.. literalinclude:: ../examples/resolver_utils/resolver_utils_example.py
+   :language: python
+   :caption: examples/resolver_utils/resolver_utils_example.py
+
 Running the Examples
 --------------------
 
@@ -144,5 +159,8 @@ All examples can be run directly with Python:
 
     # Tag-only protocol examples
     python examples/tag_only/tag_only_examples.py
+
+    # Resolver utility examples
+    python examples/resolver_utils/resolver_utils_example.py
 
 Note: Some examples require network connectivity and may take a few seconds to complete due to DNS resolution.
