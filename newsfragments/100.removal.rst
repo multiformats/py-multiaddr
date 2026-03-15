@@ -1,0 +1,2 @@
+Removed the module-level ``to_bytes`` and ``to_string`` helpers from ``multiaddr.codecs.domain``.
+Domain codec behavior remains available through ``multiaddr.codecs.domain.Codec``.

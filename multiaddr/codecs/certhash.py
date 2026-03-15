@@ -52,11 +52,21 @@ class Codec(CodecBase):
         Raises:
             ValueError: If the string is not valid multibase or not a multihash.
         """
+        if not string.startswith("u"):
+            raise ValueError("certhash must use base64url multibase prefix 'u'")
+
         try:
             # Decode the multibase string to get the raw multihash bytes.
-            decoded_bytes = multibase.decode(string)
+            decoded = multibase.decode(string)
         except Exception as e:
             raise ValueError(f"Failed to decode multibase string: {string}") from e
+
+        # Some multibase implementations expose decode metadata as a tuple.
+        # Normalize to raw bytes for consistent validation and return type.
+        decoded_bytes = decoded[1] if isinstance(decoded, tuple) else decoded
+        if not isinstance(decoded_bytes, (bytes, bytearray)):
+            raise ValueError("Failed to decode multibase string to bytes")
+        decoded_bytes = bytes(decoded_bytes)
 
         # Validate that the decoded bytes are a valid multihash.
         self.validate(decoded_bytes)
