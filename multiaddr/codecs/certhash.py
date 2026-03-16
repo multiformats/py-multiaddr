@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, cast
 
 import multibase
 import multihash
@@ -54,7 +54,7 @@ class Codec(CodecBase):
         """
         try:
             # Decode the multibase string to get the raw multihash bytes.
-            decoded_bytes = multibase.decode(string)
+            decoded_bytes = cast(bytes, multibase.decode(string))
         except Exception as e:
             raise ValueError(f"Failed to decode multibase string: {string}") from e
 
