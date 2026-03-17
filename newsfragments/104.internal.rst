@@ -1,3 +1,0 @@
-Updated the tox GitHub Actions workflow so lint runs only once on Linux with
-Python 3.10, while core tests continue to run across all configured Python
-versions.

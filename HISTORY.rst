@@ -3,6 +3,32 @@ History
 
 .. towncrier release notes start
 
+py-multiaddr v0.2.0 (2026-03-17)
+--------------------------------
+
+Features
+~~~~~~~~
+
+- Add resolver utility functions ported from go-multiaddr-dns: ``matches()``, ``resolve_all()``, ``is_fqdn()``, ``fqdn()``, ``addr_len()``, and ``offset_addr()``. These utilities support DNS-based multiaddr resolution workflows including iterative resolution and FQDN handling. (`#101 <https://github.com/multiformats/py-multiaddr/issues/101>`__)
+
+
+Internal Changes - for py-multiaddr Contributors
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Updated the tox GitHub Actions workflow so lint runs only once on Linux with
+  Python 3.10, while core tests continue to run across all configured Python
+  versions. (`#104 <https://github.com/multiformats/py-multiaddr/issues/104>`__)
+- Aligned local tox defaults with CI by running lint only in ``py310-lint``,
+  while keeping core test environments for all configured Python versions. (`#106 <https://github.com/multiformats/py-multiaddr/issues/106>`__)
+
+
+Removals
+~~~~~~~~
+
+- Removed the module-level ``to_bytes`` and ``to_string`` helpers from ``multiaddr.codecs.domain``.
+  Domain codec behavior remains available through ``multiaddr.codecs.domain.Codec``. (`#100 <https://github.com/multiformats/py-multiaddr/issues/100>`__)
+
+
 py-multiaddr v0.1.1 (2025-12-07)
 --------------------------------
 

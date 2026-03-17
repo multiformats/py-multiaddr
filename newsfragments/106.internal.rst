@@ -1,2 +1,0 @@
-Aligned local tox defaults with CI by running lint only in ``py310-lint``,
-while keeping core test environments for all configured Python versions.

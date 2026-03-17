@@ -1,1 +1,0 @@
-Add resolver utility functions ported from go-multiaddr-dns: ``matches()``, ``resolve_all()``, ``is_fqdn()``, ``fqdn()``, ``addr_len()``, and ``offset_addr()``. These utilities support DNS-based multiaddr resolution workflows including iterative resolution and FQDN handling.
