@@ -37,16 +37,3 @@ class Codec(CodecBase):
             return value
         except (UnicodeDecodeError, idna.IDNAError) as e:
             raise BinaryParseError(f"Invalid domain name encoding: {e!s}", buf, proto.name, e)
-
-
-def to_bytes(proto: Any, string: str) -> bytes:
-    # Validate using IDNA, but store as UTF-8
-    idna.encode(string, uts46=True)
-    return string.encode("utf-8")
-
-
-def to_string(proto: Any, buf: bytes) -> str:
-    string = buf.decode("utf-8")
-    # Validate using IDNA
-    idna.encode(string, uts46=True)
-    return string
