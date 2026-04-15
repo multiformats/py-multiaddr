@@ -83,6 +83,9 @@ from multiaddr.protocols import (
         "/dns4",
         "/dns6",
         "/cancer",
+        "/wg",
+        "/wg/not-valid-base64",
+        "/ip4/1.2.3.4/udp/51820/wg",
     ],
 )
 def test_invalid(addr_str):
@@ -139,6 +142,8 @@ def test_invalid(addr_str):
         "/ip4/127.0.0.1/tcp/9090/http/p2p-webrtc-direct",
         "/ip4/127.0.0.1/tcp/127/webrtc-direct",
         "/ip4/127.0.0.1/tcp/127/webrtc",
+        "/ip4/1.2.3.4/udp/51820/wg/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+        "/ip6/::1/udp/51820/wg/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
         "/certhash/uEiDDq4_xNyDorZBH3TlGazyJdOWSwvo4PUo5YHFMrvDE8g"
         "/ip4/127.0.0.1/udp/9090/webrtc-direct/certhash/uEiDDq4_xNyDorZBH3TlGazyJdOWSwvo4PUo5YHFMrvDE8g",
         "/ip4/127.0.0.1/udp/1234/quic-v1/webtransport/certhash/u1QEQOFj2IjCsPJFfMAxmQxLGPw",

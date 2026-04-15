@@ -7,7 +7,7 @@ import pytest
 import varint
 
 from multiaddr import Multiaddr, exceptions, protocols
-from multiaddr.codecs import certhash, garlic32, garlic64, http_path, ipcidr, memory
+from multiaddr.codecs import certhash, garlic32, garlic64, http_path, ipcidr, memory, wg
 from multiaddr.exceptions import BinaryParseError, StringParseError
 
 
@@ -625,3 +625,84 @@ def test_certhash_validate_function():
     # Invalid bytes should raise a ValueError
     with pytest.raises(ValueError):
         codec.validate(INVALID_BYTES)
+
+
+# --- WireGuard (wg) Tests ---
+# A valid 32-byte Curve25519 public key (random)
+VALID_WG_KEY_BYTES = os.urandom(32)
+VALID_WG_KEY_STRING = base64.b64encode(VALID_WG_KEY_BYTES).decode("ascii")
+
+# A well-known test key (all zeros)
+ZERO_WG_KEY_BYTES = b"\x00" * 32
+ZERO_WG_KEY_STRING = base64.b64encode(ZERO_WG_KEY_BYTES).decode("ascii")
+
+
+def test_wg_valid_roundtrip():
+    codec = wg.Codec()
+
+    b = codec.to_bytes(None, VALID_WG_KEY_STRING)
+    assert isinstance(b, bytes)
+    assert len(b) == 32
+    assert b == VALID_WG_KEY_BYTES
+
+    s_out = codec.to_string(None, b)
+    assert s_out == VALID_WG_KEY_STRING
+
+
+def test_wg_zero_key_roundtrip():
+    codec = wg.Codec()
+
+    b = codec.to_bytes(None, ZERO_WG_KEY_STRING)
+    assert b == ZERO_WG_KEY_BYTES
+    assert codec.to_string(None, b) == ZERO_WG_KEY_STRING
+
+
+def test_wg_invalid_base64_raises():
+    codec = wg.Codec()
+    with pytest.raises(ValueError):
+        codec.to_bytes(None, "not-valid-base64!!!")
+
+
+def test_wg_wrong_length_string_raises():
+    codec = wg.Codec()
+    # 16 bytes encoded as base64 (too short)
+    short_key = base64.b64encode(os.urandom(16)).decode("ascii")
+    with pytest.raises(ValueError):
+        codec.to_bytes(None, short_key)
+
+    # 64 bytes encoded as base64 (too long)
+    long_key = base64.b64encode(os.urandom(64)).decode("ascii")
+    with pytest.raises(ValueError):
+        codec.to_bytes(None, long_key)
+
+
+def test_wg_wrong_length_bytes_raises():
+    codec = wg.Codec()
+    with pytest.raises(BinaryParseError):
+        codec.to_string(None, os.urandom(16))
+    with pytest.raises(BinaryParseError):
+        codec.to_string(None, os.urandom(64))
+
+
+def test_wg_validate():
+    codec = wg.Codec()
+    codec.validate(VALID_WG_KEY_BYTES)
+
+    with pytest.raises(ValueError):
+        codec.validate(os.urandom(31))
+    with pytest.raises(ValueError):
+        codec.validate(os.urandom(33))
+
+
+def test_wg_protocol_lookup():
+    proto = protocols.protocol_with_name("wg")
+    assert proto.name == "wg"
+    assert proto.code == protocols.P_WG
+    assert proto.codec == "wg"
+    assert proto.size == 256
+
+
+def test_wg_integration():
+    ma = Multiaddr(f"/ip4/1.2.3.4/udp/51820/wg/{VALID_WG_KEY_STRING}")
+    assert str(ma) == f"/ip4/1.2.3.4/udp/51820/wg/{VALID_WG_KEY_STRING}"
+    assert ma.value_for_protocol(protocols.P_WG) == VALID_WG_KEY_STRING
