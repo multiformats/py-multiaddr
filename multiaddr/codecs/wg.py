@@ -1,8 +1,20 @@
 """
 WireGuard protocol codec.
 
-Encode/decode a 32-byte Curve25519 public key as standard
-base64 (the canonical format used by `wg(8)` tooling).
+Encode/decode a 32-byte Curve25519 public key as URL-safe
+base64 (RFC 4648 section 5, with padding).
+
+`wg(8)` tooling renders keys as *standard* base64 whose
+alphabet includes '/', a char which collides with the
+multiaddr protocol delimiter and thus can't appear in a
+multiaddr string segment. The URL-safe alphabet differs
+only by two chars ('+' -> '-', '/' -> '_') so converting a
+`wg(8)` key is a simple transliteration:
+
+    tr '+/' '-_' <<< "$WG_PUBKEY"
+
+The same alternate-alphabet approach is used by the
+`garlic64` codec for i2p addrs.
 
 The protocol code `0x01C7` is a draft allocation not yet
 present in the upstream multicodec table:
@@ -31,33 +43,35 @@ class Codec(CodecBase):
     IS_PATH = IS_PATH
 
     def to_bytes(self, proto: Any, string: str) -> bytes:
-        try:
-            raw = base64.b64decode(string, validate=True)
-        except Exception as exc:
+        # explicitly reject the standard-base64 alphabet:
+        # '/' collides with the multiaddr delimiter, so keys
+        # copied from `wg(8)` output must be transliterated
+        # to the URL-safe alphabet first.
+        if "+" in string or "/" in string:
             raise ValueError(
-                f"invalid base64 WireGuard public key: {exc}"
-            ) from exc
+                "WireGuard public key must be URL-safe base64 "
+                "(RFC 4648 section 5): replace '+' with '-' "
+                "and '/' with '_'"
+            )
+
+        try:
+            raw = base64.b64decode(string, altchars=b"-_", validate=True)
+        except Exception as exc:
+            raise ValueError(f"invalid base64 WireGuard public key: {exc}") from exc
 
         if len(raw) != WG_KEY_LENGTH:
-            raise ValueError(
-                f"WireGuard public key must be {WG_KEY_LENGTH} bytes, "
-                f"got {len(raw)}"
-            )
+            raise ValueError(f"WireGuard public key must be {WG_KEY_LENGTH} bytes, got {len(raw)}")
         return raw
 
     def to_string(self, proto: Any, buf: bytes) -> str:
         if len(buf) != WG_KEY_LENGTH:
             raise BinaryParseError(
-                f"WireGuard public key must be {WG_KEY_LENGTH} bytes, "
-                f"got {len(buf)}",
+                f"WireGuard public key must be {WG_KEY_LENGTH} bytes, got {len(buf)}",
                 buf,
                 "wg",
             )
-        return base64.b64encode(buf).decode("ascii")
+        return base64.urlsafe_b64encode(buf).decode("ascii")
 
     def validate(self, b: bytes) -> None:
         if len(b) != WG_KEY_LENGTH:
-            raise ValueError(
-                f"WireGuard public key must be {WG_KEY_LENGTH} bytes, "
-                f"got {len(b)}"
-            )
+            raise ValueError(f"WireGuard public key must be {WG_KEY_LENGTH} bytes, got {len(b)}")

@@ -628,13 +628,20 @@ def test_certhash_validate_function():
 
 
 # --- WireGuard (wg) Tests ---
-# A valid 32-byte Curve25519 public key (random)
-VALID_WG_KEY_BYTES = os.urandom(32)
-VALID_WG_KEY_STRING = base64.b64encode(VALID_WG_KEY_BYTES).decode("ascii")
+# Deterministic 32-byte keys: random keys made these tests
+# flaky since a standard-base64 encoding containing '/'
+# can't survive multiaddr's '/'-delimited string form.
+VALID_WG_KEY_BYTES = bytes(range(32))
+VALID_WG_KEY_STRING = base64.urlsafe_b64encode(VALID_WG_KEY_BYTES).decode("ascii")
 
 # A well-known test key (all zeros)
 ZERO_WG_KEY_BYTES = b"\x00" * 32
-ZERO_WG_KEY_STRING = base64.b64encode(ZERO_WG_KEY_BYTES).decode("ascii")
+ZERO_WG_KEY_STRING = base64.urlsafe_b64encode(ZERO_WG_KEY_BYTES).decode("ascii")
+
+# All-ones key: its standard-base64 form is 42 '/' chars, so
+# it exercises the URL-safe '_' alphabet end-to-end.
+HIGH_WG_KEY_BYTES = b"\xff" * 32
+HIGH_WG_KEY_STRING = base64.urlsafe_b64encode(HIGH_WG_KEY_BYTES).decode("ascii")
 
 
 def test_wg_valid_roundtrip():
@@ -657,21 +664,50 @@ def test_wg_zero_key_roundtrip():
     assert codec.to_string(None, b) == ZERO_WG_KEY_STRING
 
 
+def test_wg_urlsafe_key_roundtrip():
+    codec = wg.Codec()
+
+    # the standard-base64 form of this key contains '/'
+    std_b64 = base64.b64encode(HIGH_WG_KEY_BYTES).decode("ascii")
+    assert "/" in std_b64
+    assert "_" in HIGH_WG_KEY_STRING
+
+    b = codec.to_bytes(None, HIGH_WG_KEY_STRING)
+    assert b == HIGH_WG_KEY_BYTES
+    assert codec.to_string(None, b) == HIGH_WG_KEY_STRING
+
+
 def test_wg_invalid_base64_raises():
     codec = wg.Codec()
     with pytest.raises(ValueError):
         codec.to_bytes(None, "not-valid-base64!!!")
 
 
+def test_wg_std_base64_alphabet_raises():
+    codec = wg.Codec()
+
+    # std-base64 of the all-ones key is mostly '/' chars
+    std_b64 = base64.b64encode(HIGH_WG_KEY_BYTES).decode("ascii")
+    with pytest.raises(ValueError):
+        codec.to_bytes(None, std_b64)
+
+    # '+' is likewise reserved to the std alphabet
+    with pytest.raises(ValueError):
+        codec.to_bytes(
+            None,
+            "AAAAAAAAAA+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+        )
+
+
 def test_wg_wrong_length_string_raises():
     codec = wg.Codec()
     # 16 bytes encoded as base64 (too short)
-    short_key = base64.b64encode(os.urandom(16)).decode("ascii")
+    short_key = base64.urlsafe_b64encode(b"\x01" * 16).decode("ascii")
     with pytest.raises(ValueError):
         codec.to_bytes(None, short_key)
 
     # 64 bytes encoded as base64 (too long)
-    long_key = base64.b64encode(os.urandom(64)).decode("ascii")
+    long_key = base64.urlsafe_b64encode(b"\x01" * 64).decode("ascii")
     with pytest.raises(ValueError):
         codec.to_bytes(None, long_key)
 
@@ -679,9 +715,9 @@ def test_wg_wrong_length_string_raises():
 def test_wg_wrong_length_bytes_raises():
     codec = wg.Codec()
     with pytest.raises(BinaryParseError):
-        codec.to_string(None, os.urandom(16))
+        codec.to_string(None, b"\x01" * 16)
     with pytest.raises(BinaryParseError):
-        codec.to_string(None, os.urandom(64))
+        codec.to_string(None, b"\x01" * 64)
 
 
 def test_wg_validate():
@@ -689,9 +725,9 @@ def test_wg_validate():
     codec.validate(VALID_WG_KEY_BYTES)
 
     with pytest.raises(ValueError):
-        codec.validate(os.urandom(31))
+        codec.validate(b"\x01" * 31)
     with pytest.raises(ValueError):
-        codec.validate(os.urandom(33))
+        codec.validate(b"\x01" * 33)
 
 
 def test_wg_protocol_lookup():
@@ -706,3 +742,11 @@ def test_wg_integration():
     ma = Multiaddr(f"/ip4/1.2.3.4/udp/51820/wg/{VALID_WG_KEY_STRING}")
     assert str(ma) == f"/ip4/1.2.3.4/udp/51820/wg/{VALID_WG_KEY_STRING}"
     assert ma.value_for_protocol(protocols.P_WG) == VALID_WG_KEY_STRING
+
+
+def test_wg_integration_urlsafe_key():
+    # a key whose standard-base64 form would contain '/' and
+    # thus break '/'-delimited multiaddr string parsing
+    ma = Multiaddr(f"/ip6/::1/udp/51820/wg/{HIGH_WG_KEY_STRING}")
+    assert str(ma) == f"/ip6/::1/udp/51820/wg/{HIGH_WG_KEY_STRING}"
+    assert ma.value_for_protocol(protocols.P_WG) == HIGH_WG_KEY_STRING
