@@ -1,0 +1,1 @@
+Fixed an issue where decapsulate produced incorrect results for repeated protocols and substring collisions.

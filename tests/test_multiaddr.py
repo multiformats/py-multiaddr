@@ -619,6 +619,21 @@ def test_decapsulate():
     u = Multiaddr("/udp/1234")
     assert a.decapsulate(u) == Multiaddr("/ip4/127.0.0.1")
 
+    # Issue #109 Case 1 — Repeated protocol
+    ma1 = Multiaddr("/ip4/1.2.3.4/tcp/80/ip4/5.6.7.8/tcp/443")
+    assert ma1.decapsulate("/ip4/5.6.7.8") == Multiaddr("/ip4/1.2.3.4/tcp/80")
+
+    # Issue #109 Case 2 — Substring collision
+    ma2 = Multiaddr("/dns4/example.com/tcp/80")
+    import pytest
+
+    with pytest.raises(ValueError, match="does not contain subaddress"):
+        ma2.decapsulate("/tcp/8")
+
+    # Issue #109 Case 3 — Value contains protocol name
+    ma3 = Multiaddr("/dns4/tcp.example.com/tcp/80")
+    assert ma3.decapsulate("/tcp/80") == Multiaddr("/dns4/tcp.example.com")
+
 
 def test__repr():
     a = Multiaddr("/ip4/127.0.0.1/udp/1234")
