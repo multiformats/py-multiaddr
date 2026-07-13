@@ -1,0 +1,1 @@
+Add validation to Multiaddr initialization from bytes to reject invalid sequences immediately

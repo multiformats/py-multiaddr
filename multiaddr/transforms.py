@@ -172,4 +172,11 @@ def bytes_iter(buf: bytes) -> Generator[tuple[int, Protocol, CodecBase, bytes], 
             ) from exc
 
         size = size_for_addr(codec, buf_io)
-        yield offset, proto, codec, buf_io.read(size)
+        part = buf_io.read(size)
+        if len(part) != size:
+            raise exceptions.BinaryParseError(
+                f"unexpected end of data for protocol {proto.name if proto else code}",
+                buf,
+                proto.name if proto else code,
+            )
+        yield offset, proto, codec, part
