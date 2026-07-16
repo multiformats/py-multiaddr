@@ -46,6 +46,9 @@ dependencies = [
 Homepage = "https://github.com/multiformats/py-multiaddr"
 Download = "https://github.com/multiformats/py-multiaddr/tarball/0.2.0"
 
+[project.scripts]
+multiaddr = "multiaddr.cli:main"
+
 [project.optional-dependencies]
 dev = [
     "Sphinx>=5.0.0",

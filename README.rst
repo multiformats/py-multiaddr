@@ -40,6 +40,36 @@ Requirements
 Usage
 =====
 
+CLI Tool
+--------
+
+py-multiaddr provides a command line interface to inspect multiaddrs and decode them into structured JSON.
+
+.. code-block:: bash
+
+    $ multiaddr /ip4/1.2.3.4/tcp/80
+    {
+      "string": "/ip4/1.2.3.4/tcp/80",
+      "packed": "0x0401020304060050",
+      "packedSize": 8,
+      "components": [
+        {
+          "protocol": "ip4",
+          "code": 4,
+          "value": "1.2.3.4",
+          "rawValue": "0x01020304"
+        },
+        {
+          "protocol": "tcp",
+          "code": 6,
+          "value": "80",
+          "rawValue": "0x0050"
+        }
+      ]
+    }
+
+You can also pass a hex-encoded multiaddr prefixed with `0x`, e.g. `multiaddr 0x0401020304060050`. Use the `-c` or `--compact` flag to output on a single line.
+
 Simple
 ------
 
