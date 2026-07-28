@@ -7,7 +7,7 @@ import pytest
 import varint
 
 from multiaddr import Multiaddr, exceptions, protocols
-from multiaddr.codecs import certhash, garlic32, garlic64, http_path, ipcidr, memory
+from multiaddr.codecs import certhash, garlic32, garlic64, http_path, ipcidr, memory, wg
 from multiaddr.exceptions import BinaryParseError, StringParseError
 
 
@@ -625,3 +625,99 @@ def test_certhash_validate_function():
     # Invalid bytes should raise a ValueError
     with pytest.raises(ValueError):
         codec.validate(INVALID_BYTES)
+
+
+# --- WireGuard (wg) Tests ---
+# Fixed key whose standard base64 contains '/' (unsafe in multiaddr strings)
+SLASH_WG_KEY_STD_B64 = "rCzgw/sszhsg+SpR8V5IPmVnYPg2PliWW739/SWemwY="
+SLASH_WG_KEY_BYTES = base64.b64decode(SLASH_WG_KEY_STD_B64)
+SLASH_WG_KEY_STRING = multibase.encode("base64url", SLASH_WG_KEY_BYTES).decode("utf-8")
+
+# A well-known test key (all zeros)
+ZERO_WG_KEY_BYTES = b"\x00" * 32
+ZERO_WG_KEY_STRING = multibase.encode("base64url", ZERO_WG_KEY_BYTES).decode("utf-8")
+
+
+def test_wg_valid_roundtrip():
+    codec = wg.Codec()
+
+    b = codec.to_bytes(None, SLASH_WG_KEY_STRING)
+    assert isinstance(b, bytes)
+    assert len(b) == 32
+    assert b == SLASH_WG_KEY_BYTES
+
+    s_out = codec.to_string(None, b)
+    assert s_out == SLASH_WG_KEY_STRING
+
+
+def test_wg_slash_key_multibase_roundtrip():
+    codec = wg.Codec()
+    assert "/" not in SLASH_WG_KEY_STRING
+    assert "/" in SLASH_WG_KEY_STD_B64
+
+    b = codec.to_bytes(None, SLASH_WG_KEY_STRING)
+    assert b == SLASH_WG_KEY_BYTES
+    assert codec.to_string(None, b) == SLASH_WG_KEY_STRING
+
+
+def test_wg_zero_key_roundtrip():
+    codec = wg.Codec()
+
+    b = codec.to_bytes(None, ZERO_WG_KEY_STRING)
+    assert b == ZERO_WG_KEY_BYTES
+    assert codec.to_string(None, b) == ZERO_WG_KEY_STRING
+
+
+def test_wg_standard_base64_without_u_rejected():
+    codec = wg.Codec()
+    with pytest.raises(ValueError, match="multibase prefix 'u'"):
+        codec.to_bytes(None, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+
+
+def test_wg_invalid_multibase_raises():
+    codec = wg.Codec()
+    with pytest.raises(ValueError):
+        codec.to_bytes(None, "not-valid-multibase!!!")
+
+
+def test_wg_wrong_length_string_raises():
+    codec = wg.Codec()
+    short_key = multibase.encode("base64url", os.urandom(16)).decode("utf-8")
+    with pytest.raises(ValueError):
+        codec.to_bytes(None, short_key)
+
+    long_key = multibase.encode("base64url", os.urandom(64)).decode("utf-8")
+    with pytest.raises(ValueError):
+        codec.to_bytes(None, long_key)
+
+
+def test_wg_wrong_length_bytes_raises():
+    codec = wg.Codec()
+    with pytest.raises(BinaryParseError):
+        codec.to_string(None, os.urandom(16))
+    with pytest.raises(BinaryParseError):
+        codec.to_string(None, os.urandom(64))
+
+
+def test_wg_validate():
+    codec = wg.Codec()
+    codec.validate(SLASH_WG_KEY_BYTES)
+
+    with pytest.raises(ValueError):
+        codec.validate(os.urandom(31))
+    with pytest.raises(ValueError):
+        codec.validate(os.urandom(33))
+
+
+def test_wg_protocol_lookup():
+    proto = protocols.protocol_with_name("wg")
+    assert proto.name == "wg"
+    assert proto.code == protocols.P_WG
+    assert proto.codec == "wg"
+    assert proto.size == 256
+
+
+def test_wg_integration():
+    ma = Multiaddr(f"/ip4/1.2.3.4/udp/51820/wg/{SLASH_WG_KEY_STRING}")
+    assert str(ma) == f"/ip4/1.2.3.4/udp/51820/wg/{SLASH_WG_KEY_STRING}"
+    assert ma.value_for_protocol(protocols.P_WG) == SLASH_WG_KEY_STRING
