@@ -1,0 +1,4 @@
+Add draft WireGuard (``wg``) multiaddr protocol support. Public keys are
+encoded as 32-byte Curve25519 values using multibase base64url (``u`` prefix)
+in textual multiaddrs. Protocol code ``0x01C7`` is provisional until
+registered in the upstream multicodec table.

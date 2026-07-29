@@ -83,6 +83,7 @@ P_NOISE = 0x01C6
 P_WEBTRANSPORT = 0x01D1
 P_WEBRTC_DIRECT = 0x118
 P_WEBRTC = 0x119
+P_WG = 0x01C7
 P_MEMORY = 0x309
 P_CERTHASH = 0x1D2
 
@@ -157,6 +158,7 @@ PROTOCOLS = [
     Protocol(P_DNSADDR, "dnsaddr", "domain"),
     Protocol(P_SNI, "sni", "domain"),
     Protocol(P_NOISE, "noise", None),
+    Protocol(P_WG, "wg", "wg"),
     Protocol(P_SCTP, "sctp", "uint16be"),
     Protocol(P_UDT, "udt", None),
     Protocol(P_UTP, "utp", None),
