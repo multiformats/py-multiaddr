@@ -1,6 +1,8 @@
 import multiaddr
 
 EXPECTED_EXPORTS = {
+    "Action",
+    "Filters",
     "PROTOCOLS",
     "P_DNS",
     "P_DNS4",
