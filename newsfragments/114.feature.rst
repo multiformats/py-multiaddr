@@ -1,0 +1,1 @@
+Add ``dial_args()`` to convert thin-waist and unix multiaddrs to socket-ready strings.

@@ -235,6 +235,38 @@ def interface_multiaddrs() -> list[Multiaddr]:
     return result
 
 
+def dial_args(ma: Multiaddr) -> tuple[str, str]:
+    """Convert a multiaddr to ``(network, address)`` for ``socket.connect()``.
+
+    Examples:
+        >>> dial_args(Multiaddr("/ip4/1.2.3.4/tcp/80"))
+        ('tcp4', '1.2.3.4:80')
+        >>> dial_args(Multiaddr("/ip6/::1/tcp/80"))
+        ('tcp6', '[::1]:80')
+        >>> dial_args(Multiaddr("/unix/var/run/docker.sock"))
+        ('unix', '/var/run/docker.sock')
+    """
+    opts = get_multiaddr_options(ma)
+    if opts is None:
+        protos = list(ma.protocols())
+        if protos and protos[0].name == "unix":
+            path = ma.value_for_protocol("unix")
+            if path is None:
+                raise ValueError(f"{ma} is missing a unix path")
+            return ("unix", path if path.startswith("/") else f"/{path}")
+        raise ValueError(f"{ma} is not a 'thin waist' address")
+
+    family_suffix = "4" if opts["family"] == 4 else "6"
+    network = f"{opts['transport']}{family_suffix}"
+
+    if opts["family"] == 6:
+        address = f"[{opts['host']}]:{opts['port']}"
+    else:
+        address = f"{opts['host']}:{opts['port']}"
+
+    return (network, address)
+
+
 def from_net_addr(
     addr: tuple[Any, ...],
     *,

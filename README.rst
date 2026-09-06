@@ -243,6 +243,26 @@ Accept/deny IP ranges for multiaddrs, similar to go-multiaddr ``Filters``:
 
 See ``examples/filters/filters_example.py`` for a printable demo.
 
+Socket dial arguments
+---------------------
+
+Convert thin-waist and unix multiaddrs to ``(network, address)`` pairs suitable
+for ``socket.connect()``:
+
+
+.. code-block:: python
+
+    from multiaddr import Multiaddr, dial_args
+
+    print(dial_args(Multiaddr("/ip4/1.2.3.4/tcp/80")))
+    # ('tcp4', '1.2.3.4:80')
+    print(dial_args(Multiaddr("/ip6/::1/tcp/80")))
+    # ('tcp6', '[::1]:80')
+    print(dial_args(Multiaddr("/unix/var/run/docker.sock")))
+    # ('unix', '/var/run/docker.sock')
+
+See ``examples/dial_args/dial_args_example.py`` for a printable demo.
+
 Socket address conversion
 -------------------------
 
@@ -266,7 +286,6 @@ See ``examples/net_addr/net_addr_example.py`` for a printable demo.
 Thin Waist Address Validation
 -----------------------------
 
-Multiaddr provides thin waist address validation functionality to process multiaddrs and expand wildcard addresses to all available network interfaces. This is particularly useful for server configuration, network discovery, and dynamic port management.
 
 
 .. code-block:: python

@@ -31,6 +31,7 @@ EXPECTED_EXPORTS = {
     "RecursionLimitError",
     "ResolutionError",
     "StringParseError",
+    "dial_args",
     "from_net_addr",
     "get_multiaddr_options",
     "get_network_addrs",
