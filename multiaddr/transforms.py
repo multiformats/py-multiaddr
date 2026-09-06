@@ -1,5 +1,4 @@
 import io
-import logging
 from collections.abc import Generator
 from io import BytesIO
 
@@ -9,56 +8,30 @@ from . import exceptions
 from .codecs import CodecBase, codec_by_name
 from .protocols import Protocol, protocol_with_code, protocol_with_name
 
-logger = logging.getLogger(__name__)
-
 
 def string_to_bytes(string: str) -> bytes:
     bs: list[bytes] = []
     for proto, codec, value in string_iter(string):
-        logger.debug(
-            f"[DEBUG string_to_bytes] LOOP: proto={proto.name}, codec={codec}, value={value}"
-        )
-        logger.debug(
-            f"[DEBUG string_to_bytes] Processing: proto={proto.name}, "
-            f"codec.SIZE={getattr(codec, 'SIZE', None) if codec else None}, value={value}"
-        )
-        logger.debug(f"[DEBUG string_to_bytes] Protocol code: {proto.code}")
         encoded_code = varint.encode(proto.code)
-        logger.debug(f"[DEBUG string_to_bytes] Encoded protocol code: {encoded_code}")
         bs.append(encoded_code)
 
         # Special case: protocols with codec=None or SIZE=0 are flag protocols
         # (no value, no length prefix, no buffer)
         if codec is None or getattr(codec, "SIZE", None) == 0:
-            logger.debug(
-                f"[DEBUG string_to_bytes] Protocol {proto.name} has no data, "
-                "skipping value encoding"
-            )
             continue
 
         if value is None:
             raise ValueError("Value cannot be None")
         try:
-            logger.debug(f"[DEBUG string_to_bytes] Raw CID value before encoding: {value}")
             buf = codec.to_bytes(proto, value)
-            logger.debug(f"[DEBUG string_to_bytes] Generated buf: proto={proto.name}, buf={buf!r}")
         except Exception as exc:
-            logger.debug(f"[DEBUG string_to_bytes] Error: {exc}")
             raise exceptions.StringParseError(str(exc), string) from exc
-        logger.debug(
-            f"[DEBUG string_to_bytes] Appending: proto={proto.name}, "
-            f"codec.SIZE={getattr(codec, 'SIZE', None)}"
-        )
         # Only add length prefix for variable-sized codecs (SIZE <= 0)
         if codec.SIZE <= 0:
             bs.append(varint.encode(len(buf)))
-            logger.debug(
-                f"[DEBUG string_to_bytes] Appending varint length: {varint.encode(len(buf))}"
-            )
         # Only append the buffer if it's not empty
         if buf:
             bs.append(buf)
-        logger.debug(f"[DEBUG string_to_bytes] Final bs: {bs}")
     return b"".join(bs)
 
 
@@ -79,9 +52,7 @@ def bytes_to_string(buf: bytes) -> str:
     while bs.tell() < len(buf):
         try:
             code = varint.decode_stream(bs)
-            logger.debug(f"[DEBUG bytes_to_string] Decoded protocol code: {code}")
             proto = protocol_with_code(code)
-            logger.debug(f"[DEBUG bytes_to_string] Protocol name: {proto.name}")
             if proto.codec is not None:
                 codec = codec_by_name(proto.codec)
                 if codec.SIZE > 0:
@@ -91,7 +62,6 @@ def bytes_to_string(buf: bytes) -> str:
                     # read the length prefix but don't pass it to the codec
                     size = varint.decode_stream(bs)
                     value = codec.to_string(proto, bs.read(size))
-                logger.debug(f"[DEBUG] bytes_to_string: proto={proto.name}, value='{value}'")
                 if codec.IS_PATH and value.startswith("/"):
                     # For path protocols, the codec already handles URL encoding
                     strings.append("/" + proto.name + value)  # type: ignore[arg-type]
@@ -152,10 +122,8 @@ def string_iter(
             else:
                 value = parts[i + 1]
                 i += 1  # Skip the next part since we used it as value
-            logger.debug(f"[DEBUG string_iter] Using next part as value: {value}")
             yield proto, codec, value
         else:
-            logger.debug(f"[DEBUG string_iter] No value found for protocol {proto.name}")
             yield proto, codec, None
         i += 1
 
