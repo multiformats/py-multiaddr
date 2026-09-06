@@ -1,0 +1,1 @@
+Add ``version.json`` and keep it in sync via bump-my-version (go-multiaddr parity).
