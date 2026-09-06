@@ -126,6 +126,16 @@ The project follows a py-libp2p-style development workflow:
 
 Use ``make pr`` to run the complete workflow.
 
+Benchmarks
+----------
+
+Performance benchmarks live in ``tests/test_benchmarks.py`` and are marked with
+``@pytest.mark.benchmark``. They are excluded from ``make test`` / default CI.
+Run them locally with::
+
+    make bench
+    # or: pytest tests -m benchmark --benchmark-only
+
 Release Notes
 -------------
 
