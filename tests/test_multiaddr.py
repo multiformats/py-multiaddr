@@ -625,14 +625,21 @@ def test_decapsulate():
 
     # Issue #109 Case 2 — Substring collision
     ma2 = Multiaddr("/dns4/example.com/tcp/80")
-    import pytest
-
     with pytest.raises(ValueError, match="does not contain subaddress"):
         ma2.decapsulate("/tcp/8")
 
     # Issue #109 Case 3 — Value contains protocol name
     ma3 = Multiaddr("/dns4/tcp.example.com/tcp/80")
     assert ma3.decapsulate("/tcp/80") == Multiaddr("/dns4/tcp.example.com")
+
+    # Empty other is a no-op (go-multiaddr parity)
+    ma4 = Multiaddr("/ip4/1.2.3.4/tcp/80")
+    assert ma4.decapsulate("") == ma4
+    assert ma4.decapsulate(Multiaddr("")) == ma4
+
+    # Last occurrence wins for a repeated trailing suffix
+    ma5 = Multiaddr("/ip4/1.1.1.1/tcp/80/ip4/2.2.2.2/tcp/80")
+    assert ma5.decapsulate("/tcp/80") == Multiaddr("/ip4/1.1.1.1/tcp/80/ip4/2.2.2.2")
 
 
 def test__repr():
