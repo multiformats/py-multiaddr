@@ -275,8 +275,7 @@ def from_net_addr(
     """Convert a socket address tuple to a Multiaddr.
 
     Args:
-        addr: A socket address tuple such as ``(host, port)`` or an IPv6
-            ``(host, port, flowinfo, scope_id)`` tuple.
+        addr: Socket address tuple ``(host, port)`` or IPv6 ``(host, port, ...)``.
         transport: ``"tcp"`` or ``"udp"`` (default ``"tcp"``).
 
     Examples:
