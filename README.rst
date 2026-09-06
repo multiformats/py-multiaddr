@@ -252,7 +252,12 @@ Multiaddr provides thin waist address validation functionality to process multia
 .. code-block:: python
 
     from multiaddr import Multiaddr
-    from multiaddr.utils import get_thin_waist_addresses, get_network_addrs
+    from multiaddr.utils import get_thin_waist_addresses, get_network_addrs, interface_multiaddrs
+
+    # List local interfaces as Multiaddr objects
+    for ma in interface_multiaddrs():
+        print(ma)
+        # Multiaddr('/ip4/192.168.1.10'), ...
 
     # Network interface discovery
     ipv4_addrs = get_network_addrs(4)
