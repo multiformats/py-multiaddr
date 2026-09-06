@@ -117,9 +117,6 @@ This example shows:
    :language: python
    :caption: examples/tag_only/tag_only_examples.py
 
-Resolver Utility Examples
---------------------------
-
 WireGuard (``wg``)
 ------------------
 
@@ -133,6 +130,24 @@ This example shows:
 .. literalinclude:: ../examples/wg/wg_examples.py
    :language: python
    :caption: examples/wg/wg_examples.py
+
+IP Filters
+----------
+
+The `examples/filters/` directory demonstrates accept/deny IP filtering for multiaddrs.
+
+This example shows:
+
+* Creating a ``Filters`` set with a default action
+* Adding deny rules for private ranges
+* Checking whether addresses are blocked
+
+.. literalinclude:: ../examples/filters/filters_example.py
+   :language: python
+   :caption: examples/filters/filters_example.py
+
+Resolver Utility Examples
+--------------------------
 
 The `examples/resolver_utils/` directory demonstrates the utility functions ported from go-multiaddr-dns for working with DNS-based multiaddr resolution.
 
@@ -179,5 +194,8 @@ All examples can be run directly with Python:
 
     # WireGuard examples
     python examples/wg/wg_examples.py
+
+    # IP Filters examples
+    python examples/filters/filters_example.py
 
 Note: Some examples require network connectivity and may take a few seconds to complete due to DNS resolution.
