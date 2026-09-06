@@ -39,7 +39,7 @@ from typing import Any
 import varint
 
 from . import exceptions
-from .codecs import codec_by_name
+from .codecs import CodecBase, codec_by_name
 
 __all__ = ("PROTOCOLS", "REGISTRY", "Protocol")
 
@@ -90,6 +90,7 @@ P_CERTHASH = 0x1D2
 
 class Protocol:
     __slots__ = [
+        "_codec_obj",  # cached CodecBase | None
         "code",  # int
         "codec",  # string
         "name",  # string
@@ -106,14 +107,20 @@ class Protocol:
         self.code = code
         self.name = name
         self.codec = codec
+        self._codec_obj: CodecBase | None = None
+
+    def _get_codec(self) -> CodecBase:
+        if self._codec_obj is None:
+            self._codec_obj = codec_by_name(self.codec)
+        return self._codec_obj
 
     @property
     def size(self) -> int:
-        return codec_by_name(self.codec).SIZE
+        return self._get_codec().SIZE
 
     @property
     def path(self) -> bool:
-        return codec_by_name(self.codec).IS_PATH
+        return self._get_codec().IS_PATH
 
     @property
     def vcode(self) -> bytes:
