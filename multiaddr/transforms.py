@@ -146,7 +146,7 @@ def string_iter(
                     f"missing value for protocol: {proto_name}", string
                 )
 
-            if getattr(codec, "IS_PATH", False):
+            if codec.IS_PATH:
                 value = "/".join(parts[i + 1 :])
                 i = len(parts) - 1
             else:
