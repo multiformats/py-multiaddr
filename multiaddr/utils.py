@@ -219,3 +219,50 @@ def get_thin_waist_addresses(
         # Return the specific address
         addr_str = f"/{ip_proto}/{options['host']}/{options['transport']}/{target_port}"
         return [Multiaddr(addr_str)]
+
+
+def from_net_addr(
+    addr: tuple[Any, ...],
+    *,
+    transport: str = "tcp",
+) -> Multiaddr:
+    """Convert a socket address tuple to a Multiaddr.
+
+    Args:
+        addr: A socket address tuple such as ``(host, port)`` or an IPv6
+            ``(host, port, flowinfo, scope_id)`` tuple.
+        transport: ``"tcp"`` or ``"udp"`` (default ``"tcp"``).
+
+    Examples:
+        >>> from_net_addr(("1.2.3.4", 80))
+        Multiaddr('/ip4/1.2.3.4/tcp/80')
+        >>> from_net_addr(("::1", 53), transport="udp")
+        Multiaddr('/ip6/::1/udp/53')
+    """
+    if transport not in ("tcp", "udp"):
+        raise ValueError(f"unsupported transport: {transport!r}")
+    if not addr or len(addr) < 2:
+        raise ValueError("addr must be a (host, port[, ...]) tuple")
+
+    host, port = addr[0], addr[1]
+    if not isinstance(host, str):
+        raise TypeError("host must be a string")
+    if not isinstance(port, int):
+        raise TypeError("port must be an integer")
+
+    ip = ipaddress.ip_address(host)
+    ip_proto = "ip4" if isinstance(ip, ipaddress.IPv4Address) else "ip6"
+    return Multiaddr(f"/{ip_proto}/{host}/{transport}/{port}")
+
+
+def to_net_addr(ma: Multiaddr) -> tuple[str, int]:
+    """Convert a thin-waist Multiaddr to a ``(host, port)`` socket address tuple.
+
+    Examples:
+        >>> to_net_addr(Multiaddr("/ip4/1.2.3.4/tcp/80"))
+        ('1.2.3.4', 80)
+    """
+    opts = get_multiaddr_options(ma)
+    if opts is None:
+        raise ValueError(f"{ma} is not a thin waist address")
+    return (opts["host"], opts["port"])

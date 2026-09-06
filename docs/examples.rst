@@ -120,6 +120,15 @@ This example shows:
 Resolver Utility Examples
 --------------------------
 
+Socket address conversion
+-------------------------
+
+The `examples/net_addr/` directory demonstrates ``from_net_addr`` / ``to_net_addr``.
+
+.. literalinclude:: ../examples/net_addr/net_addr_example.py
+   :language: python
+   :caption: examples/net_addr/net_addr_example.py
+
 The `examples/resolver_utils/` directory demonstrates the utility functions ported from go-multiaddr-dns for working with DNS-based multiaddr resolution.
 
 This example shows:
@@ -162,5 +171,8 @@ All examples can be run directly with Python:
 
     # Resolver utility examples
     python examples/resolver_utils/resolver_utils_example.py
+
+    # net_addr examples
+    python examples/net_addr/net_addr_example.py
 
 Note: Some examples require network connectivity and may take a few seconds to complete due to DNS resolution.

@@ -33,6 +33,7 @@ from .utils import (
     IP6_UNSPECIFIED,
     PRIVATE4,
     PRIVATE6,
+    from_net_addr,
     get_multiaddr_options,
     get_network_addrs,
     get_thin_waist_addresses,
@@ -45,6 +46,7 @@ from .utils import (
     is_public_addr,
     is_thin_waist,
     is_wildcard,
+    to_net_addr,
 )
 
 __author__ = "Steven Buss"
@@ -80,6 +82,7 @@ __all__ = [
     "RecursionLimitError",
     "ResolutionError",
     "StringParseError",
+    "from_net_addr",
     "get_multiaddr_options",
     "get_network_addrs",
     "get_thin_waist_addresses",
@@ -94,4 +97,5 @@ __all__ = [
     "is_wildcard",
     "protocol_with_code",
     "protocol_with_name",
+    "to_net_addr",
 ]

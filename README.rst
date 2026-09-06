@@ -226,6 +226,26 @@ Multiaddr supports DNS-based address resolution using the DNSADDR protocol. This
 
 For comprehensive examples including bootstrap node resolution, protocol comparison, and py-libp2p integration, see the `DNS examples <https://github.com/multiformats/py-multiaddr/tree/master/examples/dns>`_ in the examples directory.
 
+Socket address conversion
+-------------------------
+
+Convert between Python socket address tuples and multiaddrs:
+
+
+.. code-block:: python
+
+    from multiaddr import from_net_addr, to_net_addr
+
+    ma = from_net_addr(("1.2.3.4", 80))
+    print(ma)
+    # /ip4/1.2.3.4/tcp/80
+    print(to_net_addr(ma))
+    # ('1.2.3.4', 80)
+    print(from_net_addr(("::1", 53), transport="udp"))
+    # /ip6/::1/udp/53
+
+See ``examples/net_addr/net_addr_example.py`` for a printable demo.
+
 Thin Waist Address Validation
 -----------------------------
 
