@@ -273,3 +273,25 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
+
+
+def _skip_package_reexports(app, what, name, obj, skip, options):
+    """Document re-exported package symbols only in their defining modules.
+
+    ``multiaddr.__all__`` causes autodoc to index imports under both the package
+    root and the defining submodule, which creates ambiguous Sphinx
+    cross-references (e.g. ``Multiaddr``).
+    """
+    current_module = app.env.temp_data.get("autodoc:module")
+    defining_module = getattr(obj, "__module__", None)
+    if (
+        current_module == "multiaddr"
+        and defining_module is not None
+        and defining_module != "multiaddr"
+    ):
+        return True
+    return skip
+
+
+def setup(app):
+    app.connect("autodoc-skip-member", _skip_package_reexports)
