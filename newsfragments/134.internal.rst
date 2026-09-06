@@ -1,0 +1,1 @@
+Fixed Windows CI so each tox matrix job runs only its intended environment instead of the full envlist.

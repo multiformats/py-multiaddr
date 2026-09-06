@@ -57,12 +57,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
+          python_version="${{ matrix.python-version }}"
+          toxenv="${{ matrix.toxenv }}"
+          echo "TOXENV=py${python_version}-${toxenv}" | tr -d '.' | tee -a "$GITHUB_ENV"
           python -m pip install --upgrade pip
           python -m pip install "tox>=4.10"
       - name: Test with tox
         shell: bash
         run: |
-          python_version="${{ matrix.python-version }}"
-          toxenv="${{ matrix.toxenv }}"
-          echo "TOXENV=py${python_version}-${toxenv}" | tr -d '.' | tee -a "$GITHUB_ENV"
           python -m tox run -r
