@@ -5,7 +5,7 @@ from typing import Any
 import psutil
 
 from .multiaddr import Multiaddr
-from .protocols import P_IP4, P_IP6, P_TCP, P_UDP
+from .protocols import P_IP4, P_IP6, P_TCP, P_UDP, Protocol
 
 IP4_LOOPBACK = Multiaddr("/ip4/127.0.0.1")
 IP6_LOOPBACK = Multiaddr("/ip6/::1")
@@ -35,12 +35,12 @@ PRIVATE6 = [
 
 
 def _get_ip(ma: Multiaddr) -> ipaddress.IPv4Address | ipaddress.IPv6Address | None:
-    protos = ma.protocols()
+    protos: list[Protocol] = list(ma.protocols())
     if not protos:
         return None
     first = protos[0]
-    if getattr(first, "code", None) in (P_IP4, P_IP6):
-        val = ma.value_for_protocol(getattr(first, "code", None))
+    if first.code in (P_IP4, P_IP6):
+        val = ma.value_for_protocol(first.code)
         if val:
             try:
                 return ipaddress.ip_address(val)
@@ -51,14 +51,14 @@ def _get_ip(ma: Multiaddr) -> ipaddress.IPv4Address | ipaddress.IPv6Address | No
 
 def is_thin_waist(ma: Multiaddr) -> bool:
     """Check if a multiaddr is a thin waist address (ip4/ip6 optionally followed by tcp/udp)."""
-    protos = ma.protocols()
+    protos: list[Protocol] = list(ma.protocols())
     if not protos:
         return False
-    if getattr(protos[0], "code", None) not in (P_IP4, P_IP6):
+    if protos[0].code not in (P_IP4, P_IP6):
         return False
     if len(protos) == 1:
         return True
-    if len(protos) == 2 and getattr(protos[1], "code", None) in (P_TCP, P_UDP):
+    if len(protos) == 2 and protos[1].code in (P_TCP, P_UDP):
         return True
     return False
 
@@ -78,7 +78,7 @@ def is_ip_unspecified(ma: Multiaddr) -> bool:
 def is_ip6_link_local(ma: Multiaddr) -> bool:
     """Check if a multiaddr is an IPv6 link-local address."""
     ip = _get_ip(ma)
-    return ip.version == 6 and ip.is_link_local if ip else False
+    return bool(ip and ip.version == 6 and ip.is_link_local)
 
 
 def is_private_addr(ma: Multiaddr) -> bool:

@@ -1,5 +1,4 @@
-from multiaddr import Multiaddr
-from multiaddr import utils
+from multiaddr import Multiaddr, utils
 
 
 def test_is_thin_waist():
