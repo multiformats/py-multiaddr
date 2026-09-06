@@ -120,6 +120,21 @@ This example shows:
 Resolver Utility Examples
 --------------------------
 
+IP Filters
+----------
+
+The `examples/filters/` directory demonstrates accept/deny IP filtering for multiaddrs.
+
+This example shows:
+
+* Creating a ``Filters`` set with a default action
+* Adding deny rules for private ranges
+* Checking whether addresses are blocked
+
+.. literalinclude:: ../examples/filters/filters_example.py
+   :language: python
+   :caption: examples/filters/filters_example.py
+
 The `examples/resolver_utils/` directory demonstrates the utility functions ported from go-multiaddr-dns for working with DNS-based multiaddr resolution.
 
 This example shows:
@@ -162,5 +177,8 @@ All examples can be run directly with Python:
 
     # Resolver utility examples
     python examples/resolver_utils/resolver_utils_example.py
+
+    # IP Filters examples
+    python examples/filters/filters_example.py
 
 Note: Some examples require network connectivity and may take a few seconds to complete due to DNS resolution.

@@ -9,6 +9,7 @@ from .exceptions import (
     ResolutionError,
     StringParseError,
 )
+from .filters import Action, Filters
 from .multiaddr import Multiaddr
 from .protocols import (
     P_DNS,
@@ -69,7 +70,9 @@ __all__ = [
     "P_TCP",
     "P_UDP",
     "REGISTRY",
+    "Action",
     "BinaryParseError",
+    "Filters",
     "Multiaddr",
     "ParseError",
     "Protocol",
