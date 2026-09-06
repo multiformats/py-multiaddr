@@ -718,7 +718,7 @@ def test_wg_invalid_u_bang_raises():
 def test_wg_u_prefix_with_plus_hints_wg8_conversion():
     codec = wg.Codec()
     # Multibase-looking string that still contains std-base64 '+'
-    with pytest.raises(ValueError, match=r"wg\(8\)|multibase\.encode"):
+    with pytest.raises(ValueError, match="wg\\(8\\)|multibase.encode"):
         codec.to_bytes(None, "uAAAA+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
 
 

@@ -29,14 +29,6 @@ multiaddr.exceptions module
    :show-inheritance:
    :undoc-members:
 
-multiaddr.filters module
-------------------------
-
-.. automodule:: multiaddr.filters
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
 multiaddr.multiaddr module
 --------------------------
 
