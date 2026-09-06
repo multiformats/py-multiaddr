@@ -27,10 +27,23 @@ from .protocols import (
     protocol_with_name,
 )
 from .utils import (
+    IP4_LOOPBACK,
+    IP4_UNSPECIFIED,
+    IP6_LOOPBACK,
+    IP6_UNSPECIFIED,
+    PRIVATE4,
+    PRIVATE6,
     get_multiaddr_options,
     get_network_addrs,
     get_thin_waist_addresses,
+    is_ip6_link_local,
+    is_ip_loopback,
+    is_ip_unspecified,
     is_link_local_ip,
+    is_nat64_ipv4_converted_ipv6_addr,
+    is_private_addr,
+    is_public_addr,
+    is_thin_waist,
     is_wildcard,
 )
 
@@ -39,6 +52,12 @@ __email__ = "steven.buss@gmail.com"
 __version__ = "0.2.0"
 
 __all__ = [
+    "IP4_LOOPBACK",
+    "IP4_UNSPECIFIED",
+    "IP6_LOOPBACK",
+    "IP6_UNSPECIFIED",
+    "PRIVATE4",
+    "PRIVATE6",
     "PROTOCOLS",
     "P_DNS",
     "P_DNS4",
@@ -64,7 +83,14 @@ __all__ = [
     "get_multiaddr_options",
     "get_network_addrs",
     "get_thin_waist_addresses",
+    "is_ip6_link_local",
+    "is_ip_loopback",
+    "is_ip_unspecified",
     "is_link_local_ip",
+    "is_nat64_ipv4_converted_ipv6_addr",
+    "is_private_addr",
+    "is_public_addr",
+    "is_thin_waist",
     "is_wildcard",
     "protocol_with_code",
     "protocol_with_name",

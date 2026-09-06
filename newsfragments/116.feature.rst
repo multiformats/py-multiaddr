@@ -1,0 +1,1 @@
+Add IP classification helpers on ``Multiaddr`` objects (``is_ip_loopback``, ``is_public_addr``, ``is_private_addr``, and related predicates).

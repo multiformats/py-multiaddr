@@ -1,9 +1,111 @@
+import ipaddress
 import socket
 from typing import Any
 
 import psutil
 
 from .multiaddr import Multiaddr
+from .protocols import P_IP4, P_IP6, P_TCP, P_UDP, Protocol
+
+IP4_LOOPBACK = Multiaddr("/ip4/127.0.0.1")
+IP6_LOOPBACK = Multiaddr("/ip6/::1")
+IP4_UNSPECIFIED = Multiaddr("/ip4/0.0.0.0")
+IP6_UNSPECIFIED = Multiaddr("/ip6/::")
+
+PRIVATE4 = [
+    ipaddress.ip_network(cidr)
+    for cidr in [
+        "127.0.0.0/8",
+        "10.0.0.0/8",
+        "100.64.0.0/10",
+        "172.16.0.0/12",
+        "192.168.0.0/16",
+        "169.254.0.0/16",
+    ]
+]
+
+PRIVATE6 = [
+    ipaddress.ip_network(cidr)
+    for cidr in [
+        "::1/128",
+        "fc00::/7",
+        "fe80::/10",
+    ]
+]
+
+
+def _get_ip(ma: Multiaddr) -> ipaddress.IPv4Address | ipaddress.IPv6Address | None:
+    protos: list[Protocol] = list(ma.protocols())
+    if not protos:
+        return None
+    first = protos[0]
+    if first.code in (P_IP4, P_IP6):
+        val = ma.value_for_protocol(first.code)
+        if val:
+            try:
+                return ipaddress.ip_address(val)
+            except ValueError:
+                pass
+    return None
+
+
+def is_thin_waist(ma: Multiaddr) -> bool:
+    """Check if a multiaddr is a thin waist address (ip4/ip6 optionally followed by tcp/udp)."""
+    protos: list[Protocol] = list(ma.protocols())
+    if not protos:
+        return False
+    if protos[0].code not in (P_IP4, P_IP6):
+        return False
+    if len(protos) == 1:
+        return True
+    if len(protos) == 2 and protos[1].code in (P_TCP, P_UDP):
+        return True
+    return False
+
+
+def is_ip_loopback(ma: Multiaddr) -> bool:
+    """Check if a multiaddr is a loopback IP address."""
+    ip = _get_ip(ma)
+    return ip.is_loopback if ip else False
+
+
+def is_ip_unspecified(ma: Multiaddr) -> bool:
+    """Check if a multiaddr is an unspecified IP address."""
+    ip = _get_ip(ma)
+    return ip.is_unspecified if ip else False
+
+
+def is_ip6_link_local(ma: Multiaddr) -> bool:
+    """Check if a multiaddr is an IPv6 link-local address."""
+    ip = _get_ip(ma)
+    return bool(ip and ip.version == 6 and ip.is_link_local)
+
+
+def is_private_addr(ma: Multiaddr) -> bool:
+    """Check if a multiaddr is a private IP address."""
+    ip = _get_ip(ma)
+    if not ip:
+        return False
+    if ip.version == 4:
+        return any(ip in net for net in PRIVATE4)
+    else:
+        return any(ip in net for net in PRIVATE6)
+
+
+def is_public_addr(ma: Multiaddr) -> bool:
+    """Check if a multiaddr is a public IP address."""
+    ip = _get_ip(ma)
+    if not ip:
+        return False
+    return not is_ip_unspecified(ma) and not is_private_addr(ma)
+
+
+def is_nat64_ipv4_converted_ipv6_addr(ma: Multiaddr) -> bool:
+    """Check if a multiaddr is a NAT64 converted IPv6 address."""
+    ip = _get_ip(ma)
+    if not ip or ip.version != 6:
+        return False
+    return ip in ipaddress.ip_network("64:ff9b::/96")
 
 
 def is_wildcard(ip: str) -> bool:
