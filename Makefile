@@ -22,6 +22,7 @@ help:
 	@echo "lint - run pre-commit hooks on all files"
 	@echo "typecheck - run mypy and pyrefly type checking"
 	@echo "test - run tests quickly with the default Python"
+	@echo "bench - run pytest-benchmark suite only"
 	@echo "coverage - run tests with coverage report"
 	@echo "docs-ci - generate docs for CI"
 	@echo "docs - generate docs and open in browser"
@@ -66,7 +67,10 @@ typecheck:
 	pre-commit run mypy-local --all-files && pre-commit run pyrefly-local --all-files
 
 test:
-	python -m pytest tests
+	python -m pytest tests -m "not benchmark"
+
+bench:
+	python -m pytest tests -m benchmark --benchmark-only
 
 coverage:
 	coverage run --source multiaddr -m pytest tests
