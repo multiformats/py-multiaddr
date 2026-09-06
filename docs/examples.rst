@@ -131,6 +131,21 @@ This example shows:
    :language: python
    :caption: examples/wg/wg_examples.py
 
+IP Filters
+----------
+
+The `examples/filters/` directory demonstrates accept/deny IP filtering for multiaddrs.
+
+This example shows:
+
+* Creating a ``Filters`` set with a default action
+* Adding deny rules for private ranges
+* Checking whether addresses are blocked
+
+.. literalinclude:: ../examples/filters/filters_example.py
+   :language: python
+   :caption: examples/filters/filters_example.py
+
 Socket dial arguments
 ---------------------
 
@@ -189,6 +204,9 @@ All examples can be run directly with Python:
 
     # WireGuard examples
     python examples/wg/wg_examples.py
+
+    # IP Filters examples
+    python examples/filters/filters_example.py
 
     # dial_args examples
     python examples/dial_args/dial_args_example.py

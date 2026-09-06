@@ -226,6 +226,23 @@ Multiaddr supports DNS-based address resolution using the DNSADDR protocol. This
 
 For comprehensive examples including bootstrap node resolution, protocol comparison, and py-libp2p integration, see the `DNS examples <https://github.com/multiformats/py-multiaddr/tree/master/examples/dns>`_ in the examples directory.
 
+IP Filtering
+------------
+
+Accept/deny IP ranges for multiaddrs, similar to go-multiaddr ``Filters``:
+
+
+.. code-block:: python
+
+    from multiaddr import Action, Filters, Multiaddr
+
+    filters = Filters()
+    filters.add_filter("10.0.0.0/8", Action.DENY)
+    assert filters.addr_blocked(Multiaddr("/ip4/10.1.2.3/tcp/80"))
+    assert not filters.addr_blocked(Multiaddr("/ip4/8.8.8.8/tcp/53"))
+
+See ``examples/filters/filters_example.py`` for a printable demo.
+
 Socket dial arguments
 ---------------------
 
