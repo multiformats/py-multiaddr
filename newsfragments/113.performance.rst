@@ -1,0 +1,1 @@
+Cache the codec object on ``Protocol`` so ``size`` and ``path`` avoid repeated lookups.
