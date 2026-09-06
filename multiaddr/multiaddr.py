@@ -540,6 +540,8 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
                 if codec.SIZE < 0:
                     consumed += len(varint.encode(len(part_value)))
                 consumed += len(part_value)
+        except exceptions.BinaryParseError:
+            raise
         except Exception as e:
             raise exceptions.BinaryParseError(f"invalid multiaddr bytes: {e}", addr, 0) from e
 
