@@ -146,6 +146,16 @@ This example shows:
    :language: python
    :caption: examples/filters/filters_example.py
 
+Socket dial arguments
+---------------------
+
+The `examples/dial_args/` directory demonstrates converting multiaddrs to
+socket-ready ``(network, address)`` pairs.
+
+.. literalinclude:: ../examples/dial_args/dial_args_example.py
+   :language: python
+   :caption: examples/dial_args/dial_args_example.py
+
 Resolver Utility Examples
 --------------------------
 
@@ -197,5 +207,8 @@ All examples can be run directly with Python:
 
     # IP Filters examples
     python examples/filters/filters_example.py
+
+    # dial_args examples
+    python examples/dial_args/dial_args_example.py
 
 Note: Some examples require network connectivity and may take a few seconds to complete due to DNS resolution.
