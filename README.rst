@@ -68,7 +68,9 @@ py-multiaddr provides a command line interface to inspect multiaddrs and decode 
       ]
     }
 
-You can also pass a hex-encoded multiaddr prefixed with `0x`, e.g. `multiaddr 0x0401020304060050`. Use the `-c` or `--compact` flag to output on a single line.
+You can also pass a hex-encoded multiaddr prefixed with ``0x``, e.g.
+``multiaddr 0x0401020304060050``. Use the ``-c`` or ``--compact`` flag to
+output on a single line.
 
 Simple
 ------

@@ -12,9 +12,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Inspect multiaddrs")
     parser.add_argument("addr", help="Multiaddr string or hex bytes (0x...)")
     parser.add_argument("-c", "--compact", action="store_true", help="Output compact JSON")
-    parser.add_argument(
-        "--version", action="version", version=f"%(prog)s {__version__}"
-    )
+    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
 
     args = parser.parse_args()
 
