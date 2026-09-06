@@ -60,6 +60,7 @@ dev = [
     "pyrefly",
     "pyright",
     "pytest",
+    "pytest-benchmark",
     "pytest-cov",
     "pytest-runner",
     "pytest-trio>=0.5.2",
@@ -84,6 +85,9 @@ include = ["multiaddr*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+    "benchmark: performance benchmarks (excluded from default test runs)",
+]
 
 [tool.towncrier]
 # Read https://github.com/multiformats/py-multiaddr/blob/master/newsfragments/README.md for instructions
