@@ -594,7 +594,19 @@ def test_bad_initialization_too_many_params():
 
 def test_bad_initialization_wrong_type():
     with pytest.raises(TypeError):
-        Multiaddr(42)  # type: ignore
+        Multiaddr(1)  # type: ignore
+
+
+def test_invalid_bytes():
+    # These all should fail immediately when initializing from bytes:
+    with pytest.raises(BinaryParseError):
+        Multiaddr(b"\xff\xff\xff")  # Invalid varint
+    with pytest.raises(BinaryParseError):
+        Multiaddr(b"\x99\x01\x00")  # Unknown protocol code 0x99
+    with pytest.raises(BinaryParseError):
+        Multiaddr(b"\x04\x04\x01\x02")  # ip4 with only 3 bytes of address (needs 4)
+    with pytest.raises(BinaryParseError):
+        Multiaddr(Multiaddr("/ip4/127.0.0.1")._bytes + b"\xff")  # trailing bytes
 
 
 def test_value_for_protocol_argument_wrong_type():
@@ -618,6 +630,28 @@ def test_decapsulate():
     a = Multiaddr("/ip4/127.0.0.1/udp/1234")
     u = Multiaddr("/udp/1234")
     assert a.decapsulate(u) == Multiaddr("/ip4/127.0.0.1")
+
+    # Issue #109 Case 1 — Repeated protocol
+    ma1 = Multiaddr("/ip4/1.2.3.4/tcp/80/ip4/5.6.7.8/tcp/443")
+    assert ma1.decapsulate("/ip4/5.6.7.8") == Multiaddr("/ip4/1.2.3.4/tcp/80")
+
+    # Issue #109 Case 2 — Substring collision
+    ma2 = Multiaddr("/dns4/example.com/tcp/80")
+    with pytest.raises(ValueError, match="does not contain subaddress"):
+        ma2.decapsulate("/tcp/8")
+
+    # Issue #109 Case 3 — Value contains protocol name
+    ma3 = Multiaddr("/dns4/tcp.example.com/tcp/80")
+    assert ma3.decapsulate("/tcp/80") == Multiaddr("/dns4/tcp.example.com")
+
+    # Empty other is a no-op (go-multiaddr parity)
+    ma4 = Multiaddr("/ip4/1.2.3.4/tcp/80")
+    assert ma4.decapsulate("") == ma4
+    assert ma4.decapsulate(Multiaddr("")) == ma4
+
+    # Last occurrence wins for a repeated trailing suffix
+    ma5 = Multiaddr("/ip4/1.1.1.1/tcp/80/ip4/2.2.2.2/tcp/80")
+    assert ma5.decapsulate("/tcp/80") == Multiaddr("/ip4/1.1.1.1/tcp/80/ip4/2.2.2.2")
 
 
 def test__repr():

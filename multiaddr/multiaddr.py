@@ -238,14 +238,38 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
         """Remove a Multiaddr wrapping.
 
         For example:
-            /ip4/1.2.3.4/tcp/80 decapsulate /ip4/1.2.3.4 = /tcp/80
+            /ip4/1.2.3.4/tcp/80 decapsulate /tcp/80 = /ip4/1.2.3.4
         """
-        addr_str = str(addr)
-        s = str(self)
-        i = s.rindex(addr_str)
-        if i < 0:
-            raise ValueError(f"Address {s} does not contain subaddress: {addr_str}")
-        return Multiaddr(s[:i])
+        other = Multiaddr(addr) if not isinstance(addr, Multiaddr) else addr
+        other_components = list(bytes_iter(other.to_bytes()))
+        if not other_components:
+            return self
+
+        self_components = list(bytes_iter(self._bytes))
+
+        cut_offset = -1
+        for i in range(len(self_components)):
+            match = True
+            for j, (_, proto, _, value) in enumerate(other_components):
+                if i + j >= len(self_components):
+                    match = False
+                    break
+                _, s_proto, _, s_value = self_components[i + j]
+                if s_proto != proto or s_value != value:
+                    match = False
+                    break
+
+            if match:
+                # Byte offset at the start of the matched suffix (slice cut point).
+                cut_offset = self_components[i][0]
+
+        if cut_offset < 0:
+            raise ValueError(f"Address {self} does not contain subaddress: {addr}")
+
+        if cut_offset == 0:
+            return Multiaddr("")
+
+        return Multiaddr(self._bytes[:cut_offset])
 
     def decapsulate_code(self, code: int) -> "Multiaddr":
         """
@@ -507,6 +531,26 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
             # Allow empty multiaddrs (like JavaScript implementation)
             self._bytes = b""
             return
+
+        # Validate by iterating all components
+        consumed = 0
+        try:
+            for offset, proto, codec, part_value in bytes_iter(addr):
+                consumed = offset + len(proto.vcode)
+                if codec.SIZE < 0:
+                    consumed += len(varint.encode(len(part_value)))
+                consumed += len(part_value)
+        except exceptions.BinaryParseError:
+            raise
+        except Exception as e:
+            raise exceptions.BinaryParseError(f"invalid multiaddr bytes: {e}", addr, 0) from e
+
+        if consumed != len(addr):
+            raise exceptions.BinaryParseError(
+                f"unexpected extra data: {len(addr) - consumed} bytes leftover",
+                addr,
+                0,
+            )
 
         self._bytes = addr
 
