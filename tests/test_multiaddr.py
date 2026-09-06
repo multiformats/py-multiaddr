@@ -594,7 +594,19 @@ def test_bad_initialization_too_many_params():
 
 def test_bad_initialization_wrong_type():
     with pytest.raises(TypeError):
-        Multiaddr(42)  # type: ignore
+        Multiaddr(1)  # type: ignore
+
+
+def test_invalid_bytes():
+    # These all should fail immediately when initializing from bytes:
+    with pytest.raises(BinaryParseError):
+        Multiaddr(b"\xff\xff\xff")  # Invalid varint
+    with pytest.raises(BinaryParseError):
+        Multiaddr(b"\x99\x01\x00")  # Unknown protocol code 0x99
+    with pytest.raises(BinaryParseError):
+        Multiaddr(b"\x04\x04\x01\x02")  # ip4 with only 3 bytes of address (needs 4)
+    with pytest.raises(BinaryParseError):
+        Multiaddr(Multiaddr("/ip4/127.0.0.1")._bytes + b"\xff")  # trailing bytes
 
 
 def test_value_for_protocol_argument_wrong_type():

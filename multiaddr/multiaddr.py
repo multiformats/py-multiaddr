@@ -532,6 +532,26 @@ class Multiaddr(collections.abc.Mapping[Any, Any]):
             self._bytes = b""
             return
 
+        # Validate by iterating all components
+        consumed = 0
+        try:
+            for offset, proto, codec, part_value in bytes_iter(addr):
+                consumed = offset + len(proto.vcode)
+                if codec.SIZE < 0:
+                    consumed += len(varint.encode(len(part_value)))
+                consumed += len(part_value)
+        except exceptions.BinaryParseError:
+            raise
+        except Exception as e:
+            raise exceptions.BinaryParseError(f"invalid multiaddr bytes: {e}", addr, 0) from e
+
+        if consumed != len(addr):
+            raise exceptions.BinaryParseError(
+                f"unexpected extra data: {len(addr) - consumed} bytes leftover",
+                addr,
+                0,
+            )
+
         self._bytes = addr
 
     def get_peer_id(self) -> str | None:
