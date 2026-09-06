@@ -131,6 +131,21 @@ This example shows:
    :language: python
    :caption: examples/wg/wg_examples.py
 
+IP Filters
+----------
+
+The `examples/filters/` directory demonstrates accept/deny IP filtering for multiaddrs.
+
+This example shows:
+
+* Creating a ``Filters`` set with a default action
+* Adding deny rules for private ranges
+* Checking whether addresses are blocked
+
+.. literalinclude:: ../examples/filters/filters_example.py
+   :language: python
+   :caption: examples/filters/filters_example.py
+
 Socket address conversion
 -------------------------
 
@@ -189,7 +204,7 @@ All examples can be run directly with Python:
     # WireGuard examples
     python examples/wg/wg_examples.py
 
-    # net_addr examples
-    python examples/net_addr/net_addr_example.py
+    # IP Filters examples
+    python examples/filters/filters_example.py
 
 Note: Some examples require network connectivity and may take a few seconds to complete due to DNS resolution.
