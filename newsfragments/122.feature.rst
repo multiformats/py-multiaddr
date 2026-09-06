@@ -1,0 +1,1 @@
+Add ``interface_multiaddrs()`` to return local interface addresses as Multiaddr objects.

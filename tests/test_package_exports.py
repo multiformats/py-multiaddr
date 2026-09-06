@@ -35,6 +35,7 @@ EXPECTED_EXPORTS = {
     "get_network_addrs",
     "get_thin_waist_addresses",
     "dial_args",
+    "interface_multiaddrs",
     "is_ip6_link_local",
     "is_ip_loopback",
     "is_ip_unspecified",
