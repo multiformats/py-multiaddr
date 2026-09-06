@@ -682,21 +682,21 @@ def test_wg_invalid_multibase_raises():
 
 def test_wg_wrong_length_string_raises():
     codec = wg.Codec()
-    short_key = multibase.encode("base64url", os.urandom(16)).decode("utf-8")
+    short_key = multibase.encode("base64url", b"\x01" * 16).decode("ascii")
     with pytest.raises(ValueError):
         codec.to_bytes(None, short_key)
 
-    long_key = multibase.encode("base64url", os.urandom(64)).decode("utf-8")
+    long_key = multibase.encode("base64url", b"\x02" * 64).decode("ascii")
     with pytest.raises(ValueError):
         codec.to_bytes(None, long_key)
 
 
 def test_wg_wrong_length_bytes_raises():
     codec = wg.Codec()
-    with pytest.raises(BinaryParseError):
-        codec.to_string(None, os.urandom(16))
-    with pytest.raises(BinaryParseError):
-        codec.to_string(None, os.urandom(64))
+    with pytest.raises(ValueError):
+        codec.to_string(None, b"\x03" * 16)
+    with pytest.raises(ValueError):
+        codec.to_string(None, b"\x04" * 64)
 
 
 def test_wg_validate():
@@ -704,9 +704,27 @@ def test_wg_validate():
     codec.validate(SLASH_WG_KEY_BYTES)
 
     with pytest.raises(ValueError):
-        codec.validate(os.urandom(31))
+        codec.validate(b"\x05" * 31)
     with pytest.raises(ValueError):
-        codec.validate(os.urandom(33))
+        codec.validate(b"\x06" * 33)
+
+
+def test_wg_invalid_u_bang_raises():
+    codec = wg.Codec()
+    with pytest.raises(ValueError):
+        codec.to_bytes(None, "u!!!")
+
+
+def test_wg_u_prefix_with_plus_hints_wg8_conversion():
+    codec = wg.Codec()
+    # Multibase-looking string that still contains std-base64 '+'
+    with pytest.raises(ValueError, match="wg\\(8\\)|multibase.encode"):
+        codec.to_bytes(None, "uAAAA+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+
+
+def test_wg_multiaddr_rejects_plus_in_segment():
+    with pytest.raises(Exception):
+        Multiaddr("/ip4/1.2.3.4/udp/51820/wg/uAAAA+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
 
 
 def test_wg_protocol_lookup():
