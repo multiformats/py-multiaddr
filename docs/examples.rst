@@ -120,6 +120,16 @@ This example shows:
 Resolver Utility Examples
 --------------------------
 
+Socket dial arguments
+---------------------
+
+The `examples/dial_args/` directory demonstrates converting multiaddrs to
+socket-ready ``(network, address)`` pairs.
+
+.. literalinclude:: ../examples/dial_args/dial_args_example.py
+   :language: python
+   :caption: examples/dial_args/dial_args_example.py
+
 The `examples/resolver_utils/` directory demonstrates the utility functions ported from go-multiaddr-dns for working with DNS-based multiaddr resolution.
 
 This example shows:
@@ -162,5 +172,8 @@ All examples can be run directly with Python:
 
     # Resolver utility examples
     python examples/resolver_utils/resolver_utils_example.py
+
+    # dial_args examples
+    python examples/dial_args/dial_args_example.py
 
 Note: Some examples require network connectivity and may take a few seconds to complete due to DNS resolution.
