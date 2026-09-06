@@ -1,0 +1,1 @@
+Fix ruff RUF043 in wg tests and Sphinx docstring warning so ``make pr`` / ``make docs`` pass.
