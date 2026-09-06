@@ -1,0 +1,1 @@
+Add a command-line interface to decode multiaddrs into structured JSON.

@@ -13,6 +13,14 @@ Subpackages
 Submodules
 ----------
 
+multiaddr.cli module
+--------------------
+
+.. automodule:: multiaddr.cli
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 multiaddr.exceptions module
 ---------------------------
 
