@@ -52,6 +52,12 @@ __email__ = "steven.buss@gmail.com"
 __version__ = "0.2.0"
 
 __all__ = [
+    "IP4_LOOPBACK",
+    "IP4_UNSPECIFIED",
+    "IP6_LOOPBACK",
+    "IP6_UNSPECIFIED",
+    "PRIVATE4",
+    "PRIVATE6",
     "PROTOCOLS",
     "P_DNS",
     "P_DNS4",
@@ -63,12 +69,6 @@ __all__ = [
     "P_TCP",
     "P_UDP",
     "REGISTRY",
-    "IP4_LOOPBACK",
-    "IP4_UNSPECIFIED",
-    "IP6_LOOPBACK",
-    "IP6_UNSPECIFIED",
-    "PRIVATE4",
-    "PRIVATE6",
     "BinaryParseError",
     "Multiaddr",
     "ParseError",

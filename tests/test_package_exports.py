@@ -12,6 +12,12 @@ EXPECTED_EXPORTS = {
     "P_TCP",
     "P_UDP",
     "REGISTRY",
+    "IP4_LOOPBACK",
+    "IP4_UNSPECIFIED",
+    "IP6_LOOPBACK",
+    "IP6_UNSPECIFIED",
+    "PRIVATE4",
+    "PRIVATE6",
     "BinaryParseError",
     "Multiaddr",
     "ParseError",
@@ -26,7 +32,14 @@ EXPECTED_EXPORTS = {
     "get_multiaddr_options",
     "get_network_addrs",
     "get_thin_waist_addresses",
+    "is_ip6_link_local",
+    "is_ip_loopback",
+    "is_ip_unspecified",
     "is_link_local_ip",
+    "is_nat64_ipv4_converted_ipv6_addr",
+    "is_private_addr",
+    "is_public_addr",
+    "is_thin_waist",
     "is_wildcard",
     "protocol_with_code",
     "protocol_with_name",
@@ -46,6 +59,8 @@ def test_top_level_imports():
         Protocol,
         StringParseError,
         get_thin_waist_addresses,
+        is_ip_loopback,
+        is_private_addr,
         protocol_with_name,
     )
 
@@ -54,3 +69,5 @@ def test_top_level_imports():
     assert get_thin_waist_addresses is not None
     assert REGISTRY is not None
     assert issubclass(StringParseError, Exception)
+    assert is_ip_loopback(Multiaddr("/ip4/127.0.0.1"))
+    assert is_private_addr(Multiaddr("/ip4/192.168.1.1"))
