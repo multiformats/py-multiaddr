@@ -156,6 +156,15 @@ socket-ready ``(network, address)`` pairs.
    :language: python
    :caption: examples/dial_args/dial_args_example.py
 
+Socket address conversion
+-------------------------
+
+The `examples/net_addr/` directory demonstrates ``from_net_addr`` / ``to_net_addr``.
+
+.. literalinclude:: ../examples/net_addr/net_addr_example.py
+   :language: python
+   :caption: examples/net_addr/net_addr_example.py
+
 Resolver Utility Examples
 --------------------------
 
