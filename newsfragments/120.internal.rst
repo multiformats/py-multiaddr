@@ -1,0 +1,1 @@
+Add an opt-in pytest-benchmark suite for core multiaddr hot paths (``make bench``).
