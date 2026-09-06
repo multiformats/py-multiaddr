@@ -117,8 +117,19 @@ This example shows:
    :language: python
    :caption: examples/tag_only/tag_only_examples.py
 
-Resolver Utility Examples
---------------------------
+WireGuard (``wg``)
+------------------
+
+The `examples/wg/` directory demonstrates WireGuard public-key encoding and conversion hints.
+
+This example shows:
+
+* Building a valid ``/wg/`` multiaddr with multibase base64url
+* Clearer errors when a pasted ``wg(8)`` standard-base64 key is rejected
+
+.. literalinclude:: ../examples/wg/wg_examples.py
+   :language: python
+   :caption: examples/wg/wg_examples.py
 
 Socket address conversion
 -------------------------
@@ -128,6 +139,9 @@ The `examples/net_addr/` directory demonstrates ``from_net_addr`` / ``to_net_add
 .. literalinclude:: ../examples/net_addr/net_addr_example.py
    :language: python
    :caption: examples/net_addr/net_addr_example.py
+
+Resolver Utility Examples
+--------------------------
 
 The `examples/resolver_utils/` directory demonstrates the utility functions ported from go-multiaddr-dns for working with DNS-based multiaddr resolution.
 
@@ -171,6 +185,9 @@ All examples can be run directly with Python:
 
     # Resolver utility examples
     python examples/resolver_utils/resolver_utils_example.py
+
+    # WireGuard examples
+    python examples/wg/wg_examples.py
 
     # net_addr examples
     python examples/net_addr/net_addr_example.py
