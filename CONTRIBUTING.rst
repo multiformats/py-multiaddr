@@ -142,6 +142,13 @@ Release Notes
 When contributing, please add a newsfragment file in the ``newsfragments/`` directory.
 See ``newsfragments/README.md`` for details on the format and types.
 
+Versioning
+----------
+
+Package version is tracked in ``pyproject.toml``, ``multiaddr/__init__.py``, and
+``version.json`` (``{"version": "vX.Y.Z"}``, matching go-multiaddr). Bumping the
+release with ``bump-my-version`` updates all three.
+
 Tips
 ----
 
