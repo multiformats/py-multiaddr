@@ -145,8 +145,13 @@ def string_iter(
                 raise exceptions.StringParseError(
                     f"missing value for protocol: {proto_name}", string
                 )
-            value = parts[i + 1]
-            i += 1  # Skip the next part since we used it as value
+
+            if codec.IS_PATH:
+                value = "/".join(parts[i + 1 :])
+                i = len(parts) - 1
+            else:
+                value = parts[i + 1]
+                i += 1  # Skip the next part since we used it as value
             logger.debug(f"[DEBUG string_iter] Using next part as value: {value}")
             yield proto, codec, value
         else:

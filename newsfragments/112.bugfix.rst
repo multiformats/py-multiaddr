@@ -1,0 +1,1 @@
+Fix `string_iter` to correctly handle unix paths and other path protocols by consuming remaining components
