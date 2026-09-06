@@ -12,7 +12,7 @@ Usage:
 import sys
 
 from multiaddr import Multiaddr
-from multiaddr.utils import get_network_addrs, get_thin_waist_addresses
+from multiaddr.utils import get_network_addrs, get_thin_waist_addresses, interface_multiaddrs
 
 
 def show_network_info():
@@ -26,6 +26,11 @@ def show_network_info():
     # Get all IPv6 addresses
     ipv6_addrs = get_network_addrs(6)
     print(f"Available IPv6 addresses: {ipv6_addrs}")
+    print()
+
+    print("=== interface_multiaddrs() ===")
+    for ma in interface_multiaddrs():
+        print(f"  {ma}")
     print()
 
 

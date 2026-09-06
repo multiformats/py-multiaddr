@@ -219,3 +219,17 @@ def get_thin_waist_addresses(
         # Return the specific address
         addr_str = f"/{ip_proto}/{options['host']}/{options['transport']}/{target_port}"
         return [Multiaddr(addr_str)]
+
+
+def interface_multiaddrs() -> list[Multiaddr]:
+    """Return local interface addresses as Multiaddr objects.
+
+    Uses :func:`get_network_addrs` for IPv4 and IPv6. Loopback and link-local
+    addresses are excluded (same filtering as ``get_network_addrs``).
+    """
+    result: list[Multiaddr] = []
+    for host in get_network_addrs(4):
+        result.append(Multiaddr(f"/ip4/{host}"))
+    for host in get_network_addrs(6):
+        result.append(Multiaddr(f"/ip6/{host}"))
+    return result
