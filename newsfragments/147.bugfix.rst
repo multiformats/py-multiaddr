@@ -1,0 +1,1 @@
+Fix ``ip6zone`` being decoded as a value-less protocol: ``protocols()``, ``items()``, ``split()`` and binary parsing now handle zone identifiers of any length (e.g. ``en0``, ``wlan0``).

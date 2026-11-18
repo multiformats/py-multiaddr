@@ -2,11 +2,11 @@ import urllib.parse
 from typing import Any
 
 from ..exceptions import BinaryParseError
-from . import CodecBase
+from . import LENGTH_PREFIXED_VAR_SIZE, CodecBase
 
 
 class Codec(CodecBase):
-    SIZE = 0  # Variable size
+    SIZE = LENGTH_PREFIXED_VAR_SIZE
     IS_PATH = False  # Default to False, will be set to True for ip6zone protocol
 
     def to_bytes(self, proto: Any, string: str) -> bytes:
