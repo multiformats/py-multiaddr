@@ -20,6 +20,7 @@ from multiaddr.protocols import (
     protocol_with_name,
     protocols_with_string,
 )
+from multiaddr.transforms import string_to_bytes
 
 
 @pytest.mark.parametrize(
@@ -1156,8 +1157,22 @@ def test_ip6zone_value_is_length_prefixed(zone: str) -> None:
     assert Multiaddr(ma.to_bytes()) == ma
     assert [p.name for p in ma.protocols()] == ["ip6zone", "ip6", "tcp"]
     assert ma.value_for_protocol("ip6zone") == zone
+    assert [(p.name, v) for p, v in ma.items()] == [
+        ("ip6zone", zone),
+        ("ip6", "fe80::1"),
+        ("tcp", "4001"),
+    ]
     assert [str(part) for part in ma.split()] == [
         f"/ip6zone/{zone}",
         "/ip6/fe80::1",
         "/tcp/4001",
     ]
+    assert string_to_bytes(str(ma)) == ma.to_bytes()
+
+
+def test_ip6zone_rejects_slash_in_binary_zone() -> None:
+    """A zone containing '/' has no parseable text form (go-multiaddr rejects it too)."""
+    ip6 = Multiaddr("/ip6/fe80::1").to_bytes()
+    ma = Multiaddr(b"\x2a\x03a/b" + ip6)
+    with pytest.raises(BinaryParseError):
+        str(ma)
