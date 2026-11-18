@@ -1,0 +1,1 @@
+Pin ``pyrefly==1.2.0`` in the ``dev`` extra so lint CI does not break when newer pyrefly releases add stricter rules.
