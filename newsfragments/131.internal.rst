@@ -1,0 +1,3 @@
+Enabled GitHub's "Always suggest updating pull request branches" setting on
+the repository, matching libp2p/py-libp2p. Contributors may see Update branch
+or Update with rebase when a pull request is behind master and merges cleanly.
