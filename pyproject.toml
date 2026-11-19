@@ -57,7 +57,7 @@ dev = [
     "coverage>=6.5.0",
     "mypy",
     "pre-commit",
-    "pyrefly",
+    "pyrefly==1.2.0",
     "pyright",
     "pytest",
     "pytest-benchmark",
