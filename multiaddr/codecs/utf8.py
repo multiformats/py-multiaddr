@@ -2,12 +2,12 @@ import urllib.parse
 from typing import Any
 
 from ..exceptions import BinaryParseError
-from . import CodecBase
+from . import LENGTH_PREFIXED_VAR_SIZE, CodecBase
 
 
 class Codec(CodecBase):
-    SIZE = 0  # Variable size
-    IS_PATH = False  # Default to False, will be set to True for ip6zone protocol
+    SIZE = LENGTH_PREFIXED_VAR_SIZE
+    IS_PATH = False
 
     def to_bytes(self, proto: Any, string: str) -> bytes:
         """Convert a UTF-8 string to its binary representation."""
@@ -19,6 +19,9 @@ class Codec(CodecBase):
             string = string.strip()
             if not string:
                 raise ValueError("Zone identifier cannot be empty after stripping whitespace")
+            if "/" in string:
+                # Matches go-multiaddr: a '/' would make the text form unparseable
+                raise ValueError("Zone identifier cannot contain '/'")
         else:
             # URL decode the string to handle special characters for other protocols
             string = urllib.parse.unquote(string)
@@ -42,6 +45,8 @@ class Codec(CodecBase):
                 value = value.strip()
                 if not value:
                     raise ValueError("Zone identifier cannot be empty after stripping whitespace")
+                if "/" in value:
+                    raise ValueError("Zone identifier cannot contain '/'")
                 return value
             # For other protocols, URL encode special characters
             return urllib.parse.quote(value, safe="%")
